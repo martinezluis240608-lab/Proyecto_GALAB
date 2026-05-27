@@ -8,6 +8,6 @@ public class Usuario
     // Validación simple (aquí conectarías la BD en el futuro)
     public bool Autenticar(string usuario, string contrasena)
     {
-        return usuario == "admin" && contrasena == "1234";
+        return usuario == "admin" && contrasena == "admin";
     }
 }

@@ -4,8 +4,11 @@ partial class LoginForm
 {
     private System.ComponentModel.IContainer components = null!;
 
-    private Panel      panelFondo;
-    private Panel      panelCard;
+    private Panel      panelIzquierdo;
+    private PictureBox picLaboratorio;
+    private Label      lblIniciarTitulo;
+    private Panel      panelDerecho;
+    private PictureBox picLogo;
     private Label      lblGalab;
     private Label      lblUsuario;
     private TextBox    txtUsuario;
@@ -13,7 +16,6 @@ partial class LoginForm
     private TextBox    txtContrasena;
     private Button     btnIniciarSesion;
     private LinkLabel  lblForgot;
-    private PictureBox picMonitor;
 
     protected override void Dispose(bool disposing)
     {
@@ -23,132 +25,179 @@ partial class LoginForm
 
     private void InitializeComponent()
     {
-        // ── Form ────────────────────────────────────────────────
         Text            = "GALAB - Iniciar Sesión";
         Size            = new Size(900, 560);
+        MinimumSize     = new Size(700, 440);
         StartPosition   = FormStartPosition.CenterScreen;
-        FormBorderStyle = FormBorderStyle.FixedSingle;
-        MaximizeBox     = false;
-        BackColor       = Color.FromArgb(173, 216, 230);
+        FormBorderStyle = FormBorderStyle.Sizable;
+        MaximizeBox     = true;
+        BackColor       = Color.White;
         Font            = new Font("Segoe UI", 10F);
 
-        // ── Fondo completo ──────────────────────────────────────
-        panelFondo = new Panel
+        lblIniciarTitulo = new Label
+        {
+            Text      = "INICIAR SESION",
+            Left      = 0, Top = 0,
+            Height    = 30,
+            Font      = new Font("Segoe UI", 9F, FontStyle.Bold),
+            ForeColor = Color.FromArgb(80, 80, 80),
+            BackColor = Color.White,
+            Padding   = new Padding(10, 6, 0, 0),
+            Anchor    = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
+        };
+
+        panelIzquierdo = new Panel
+        {
+            Left      = 0, Top = 30,
+            BackColor = Color.FromArgb(40, 40, 40),
+            Anchor    = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left
+        };
+
+        picLaboratorio = new PictureBox
         {
             Dock      = DockStyle.Fill,
-            BackColor = Color.FromArgb(173, 216, 230)
-        };
-
-        // ── Imagen monitor izquierda ────────────────────────────
-        picMonitor = new PictureBox
-        {
-            Left      = 40,
-            Top       = 120,
-            Width     = 320,
-            Height    = 260,
             SizeMode  = PictureBoxSizeMode.Zoom,
-            BackColor = Color.Transparent
+            BackColor = Color.FromArgb(40, 40, 40)
+        };
+        picLaboratorio.Paint += (s, e) =>
+        {
+            e.Graphics.Clear(Color.FromArgb(50, 50, 50));
+            using var f  = new Font("Segoe UI", 11F);
+            var msg = "[ Foto del Laboratorio ]";
+            var sz  = e.Graphics.MeasureString(msg, f);
+            e.Graphics.DrawString(msg, f, Brushes.Gray,
+                (picLaboratorio.Width  - sz.Width)  / 2,
+                (picLaboratorio.Height - sz.Height) / 2);
+        };
+        panelIzquierdo.Controls.Add(picLaboratorio);
+
+        panelDerecho = new Panel
+        {
+            Left      = 0, Top = 30,
+            BackColor = Color.FromArgb(173, 216, 230),
+            Anchor    = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right
         };
 
-        // ── Card login derecha ──────────────────────────────────
-        panelCard = new Panel
+        picLogo = new PictureBox
         {
-            Left      = 460,
-            Top       = 80,
-            Width     = 360,
-            Height    = 370,
-            BackColor = Color.White
+            SizeMode  = PictureBoxSizeMode.Zoom,
+            BackColor = Color.Transparent,
+            Anchor    = AnchorStyles.Top | AnchorStyles.None, 
+            Image = Image.fromFile
         };
-        panelCard.Paint += (s, e) =>
+        picLogo.Paint += (s, e) =>
         {
-            var r = new Rectangle(0, 0, panelCard.Width - 1, panelCard.Height - 1);
-            e.Graphics.DrawRectangle(new Pen(Color.FromArgb(200, 200, 200)), r);
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            e.Graphics.FillEllipse(new SolidBrush(Color.FromArgb(200, 220, 200)), 0, 0, picLogo.Width-1, picLogo.Height-1);
+            e.Graphics.DrawEllipse(new Pen(Color.FromArgb(100,140,100), 2), 0, 0, picLogo.Width-1, picLogo.Height-1);
+            using var f = new Font("Segoe UI", 7F);
+            e.Graphics.DrawString("LOGO", f, Brushes.DarkGreen, 28, 38);
         };
 
-        // Título GALAB en la card
         lblGalab = new Label
         {
             Text      = "GALAB",
             Font      = new Font("Segoe UI", 16F, FontStyle.Bold),
             ForeColor = Color.FromArgb(30, 30, 80),
-            Left      = 0, Top = 20,
-            Width     = 360,
-            TextAlign = ContentAlignment.MiddleCenter
+            TextAlign = ContentAlignment.MiddleCenter,
+            Anchor    = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
         };
 
-        // Usuario
-        lblUsuario = new Label
-        {
-            Text      = "USUARIO",
-            Left      = 30, Top = 80,
-            AutoSize  = true,
-            Font      = new Font("Segoe UI", 8F, FontStyle.Bold),
-            ForeColor = Color.FromArgb(80, 80, 80)
-        };
+        lblUsuario    = MkLabel("USUARIO");
+        txtUsuario    = MkTextBox("INGRESE USUARIO", false);
+        lblContrasena = MkLabel("CONTRASEÑA");
+        txtContrasena = MkTextBox("INGRESE CONTRASEÑA", true);
 
-        txtUsuario = new TextBox
-        {
-            Left         = 30, Top = 100,
-            Width        = 300, Height = 36,
-            PlaceholderText = "INGRESE USUARIO",
-            BorderStyle  = BorderStyle.FixedSingle,
-            Font         = new Font("Segoe UI", 10F)
-        };
-
-        // Contraseña
-        lblContrasena = new Label
-        {
-            Text      = "CONTRASEÑA",
-            Left      = 30, Top = 150,
-            AutoSize  = true,
-            Font      = new Font("Segoe UI", 8F, FontStyle.Bold),
-            ForeColor = Color.FromArgb(80, 80, 80)
-        };
-
-        txtContrasena = new TextBox
-        {
-            Left            = 30, Top = 170,
-            Width           = 300, Height = 36,
-            PlaceholderText = "INGRESE CONTRASEÑA",
-            PasswordChar    = '●',
-            BorderStyle     = BorderStyle.FixedSingle,
-            Font            = new Font("Segoe UI", 10F)
-        };
-
-        // Botón iniciar sesión
         btnIniciarSesion = new Button
         {
             Text      = "INICIAR SESION",
-            Left      = 30, Top = 230,
-            Width     = 300, Height = 42,
-            BackColor = Color.FromArgb(30, 30, 30),
+            Height    = 40,
+            BackColor = Color.FromArgb(20, 20, 20),
             ForeColor = Color.White,
             FlatStyle = FlatStyle.Flat,
             Font      = new Font("Segoe UI", 10F, FontStyle.Bold),
-            Cursor    = Cursors.Hand
+            Cursor    = Cursors.Hand,
+            Anchor    = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
         };
         btnIniciarSesion.FlatAppearance.BorderSize = 0;
         btnIniciarSesion.Click += btnIniciarSesion_Click;
 
-        // Forgot password
         lblForgot = new LinkLabel
         {
-            Text      = "Forgot password?",
-            Left      = 30, Top = 295,
+            Text      = "Olvidaste tu contraseña?",
             AutoSize  = true,
             Font      = new Font("Segoe UI", 9F),
-            LinkColor = Color.FromArgb(30, 30, 80)
+            LinkColor = Color.FromArgb(30, 30, 80),
+            Anchor    = AnchorStyles.Top | AnchorStyles.Left
         };
         lblForgot.LinkClicked += lblForgot_LinkClicked;
 
-        panelCard.Controls.AddRange(new Control[]
+        panelDerecho.Controls.AddRange(new Control[]
         {
-            lblGalab, lblUsuario, txtUsuario,
+            picLogo, lblGalab,
+            lblUsuario, txtUsuario,
             lblContrasena, txtContrasena,
             btnIniciarSesion, lblForgot
         });
 
-        panelFondo.Controls.AddRange(new Control[] { picMonitor, panelCard });
-        Controls.Add(panelFondo);
+        Controls.AddRange(new Control[] { lblIniciarTitulo, panelIzquierdo, panelDerecho });
+
+        // Ajuste dinámico al redimensionar
+        this.Resize += (s, e) => AjustarLayout();
+        this.Load   += (s, e) => AjustarLayout();
     }
+
+    private void AjustarLayout()
+    {
+        int w = ClientSize.Width;
+        int h = ClientSize.Height - 30;
+        int mitad = w / 2;
+
+        lblIniciarTitulo.Width = w;
+
+        panelIzquierdo.Left   = 0;
+        panelIzquierdo.Width  = mitad;
+        panelIzquierdo.Height = h;
+
+        panelDerecho.Left   = mitad;
+        panelDerecho.Width  = w - mitad;
+        panelDerecho.Height = h;
+
+        // Posicionar controles dentro del panel derecho
+        int pw = panelDerecho.Width;
+        int pad = (int)(pw * 0.13);
+        int cw  = pw - pad * 2;
+
+        picLogo.Left   = (pw - 90) / 2; picLogo.Top = 30;
+        picLogo.Width  = 90; picLogo.Height = 90;
+
+        lblGalab.Left  = 0; lblGalab.Top = 128; lblGalab.Width = pw;
+
+        lblUsuario.Left    = pad; lblUsuario.Top    = 185;
+        txtUsuario.Left    = pad; txtUsuario.Top    = 205; txtUsuario.Width = cw;
+
+        lblContrasena.Left = pad; lblContrasena.Top = 248;
+        txtContrasena.Left = pad; txtContrasena.Top = 268; txtContrasena.Width = cw;
+
+        btnIniciarSesion.Left  = pad; btnIniciarSesion.Top = 320; btnIniciarSesion.Width = cw;
+        lblForgot.Left         = pad; lblForgot.Top        = 372;
+    }
+
+    private static Label MkLabel(string text) => new Label
+    {
+        Text      = text,
+        AutoSize  = true,
+        Font      = new Font("Segoe UI", 8F, FontStyle.Bold),
+        ForeColor = Color.FromArgb(60, 60, 60)
+    };
+
+    private static TextBox MkTextBox(string placeholder, bool password) => new TextBox
+    {
+        PlaceholderText = placeholder,
+        Height          = 32,
+        PasswordChar    = password ? '●' : '\0',
+        BorderStyle     = BorderStyle.FixedSingle,
+        Font            = new Font("Segoe UI", 10F),
+        BackColor       = Color.White
+    };
 }

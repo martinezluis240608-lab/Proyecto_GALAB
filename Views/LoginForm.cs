@@ -16,7 +16,7 @@ public partial class LoginForm : Form, ILoginView
 
     public void NavegarARegistro()
     {
-        new IncidenciaForm().Show();
+        new PrincipalForm().Show();
         this.Hide();
     }
 

@@ -39,7 +39,7 @@ partial class IncidenciaForm
         Size            = new Size(900, 620);
         StartPosition   = FormStartPosition.CenterScreen;
         FormBorderStyle = FormBorderStyle.FixedSingle;
-        MaximizeBox     = false;
+        MaximizeBox     = true;
         BackColor       = Color.FromArgb(173, 216, 230);
         Font            = new Font("Segoe UI", 10F);
 
