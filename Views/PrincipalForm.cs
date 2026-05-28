@@ -18,10 +18,17 @@ public partial class PrincipalForm : Form, IPrincipalView
         _presenter = new PrincipalPresenter(this);
     }
 
-    public void NavegarAGestion()   => new IncidenciaForm().Show();
-    public void NavegarAPerfil()    => MessageBox.Show("Perfil (próximamente)", "GALAB");
-    public void MostrarAyuda()      => MessageBox.Show("Ayuda (próximamente)", "GALAB");
-    public void MostrarContacto()   => MessageBox.Show("Contacto: galab@tecnico.edu", "GALAB");
+    public void NavegarAGestion()   => new IncidenciaForm().ShowDialog();
+    public void NavegarAPerfil()    => new PerfilForm().ShowDialog();
+    public void MostrarAyuda()
+    {
+        new AyudaForm().ShowDialog();
+    }
+
+    public void MostrarContacto()
+    {
+        new ContactoForm().ShowDialog();
+    }
 
     private void btnPerfil_Click(object s, EventArgs e)    => OnPerfil?.Invoke(this, e);
     private void btnGestion_Click(object s, EventArgs e)   => OnGestionIncidencias?.Invoke(this, e);

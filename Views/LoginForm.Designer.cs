@@ -82,8 +82,7 @@ partial class LoginForm
         {
             SizeMode  = PictureBoxSizeMode.Zoom,
             BackColor = Color.Transparent,
-            Anchor    = AnchorStyles.Top | AnchorStyles.None, 
-            Image = Image.fromFile
+            Anchor    = AnchorStyles.Top | AnchorStyles.None
         };
         picLogo.Paint += (s, e) =>
         {
