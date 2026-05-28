@@ -91,8 +91,9 @@ partial class LoginForm
         picLogo = new PictureBox
         {
             SizeMode = PictureBoxSizeMode.Zoom,
-            BackColor = Color.Transparent,
+
             Anchor = AnchorStyles.Top | AnchorStyles.None
+
         };
         try
         {
