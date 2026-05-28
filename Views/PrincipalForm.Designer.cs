@@ -88,20 +88,21 @@ partial class PrincipalForm
             Width     = 70, Height = 70,
             SizeMode  = PictureBoxSizeMode.Zoom,
             BackColor = Color.Transparent,
-            Anchor    = AnchorStyles.Top | AnchorStyles.Right
+            Anchor    = AnchorStyles.Top | AnchorStyles.Right,
+            Image = Image.FromFile(@"C:\Users\LENOVO\Pictures\descargar.jpg")
         };
         picLogoInstituto.Paint += (s, e) =>
         {
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             e.Graphics.FillEllipse(new SolidBrush(Color.FromArgb(200,220,180)), 0, 0, 68, 68);
-            e.Graphics.DrawEllipse(new Pen(Color.FromArgb(100,130,60), 2), 0, 0, 68, 68);
+            e.Graphics.DrawEllipse(new Pen(Color.Transparent), 0, 0, 68, 68);
             using var f = new Font("Segoe UI", 6F);
             e.Graphics.DrawString("TecNM", f, Brushes.DarkGreen, 22, 28);
         };
 
         lblInstituto = new Label
         {
-            Text      = "Instituto Tecnológico Superior de San\nMiguel el Grande",
+            Text      = "Instituto Tecnológico Superior de San Miguel el Grande",
             Top       = 20,
             Font      = new Font("Segoe UI", 9F, FontStyle.Bold),
             ForeColor = Color.FromArgb(30, 30, 80),
