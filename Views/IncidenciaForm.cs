@@ -7,9 +7,10 @@ public partial class IncidenciaForm : Form, IIncidenciaView
 {
     private readonly IncidenciaPresenter _presenter;
 
-    public string   QuienReporta   => txtQuienReporta.Text;
-    public string   TipoIncidencia => cmbTipo.SelectedItem?.ToString() ?? "";
-    public string   NombreEquipo   => txtNombreEquipo.Text;
+    // ── Implementación de IIncidenciaView ────────────────────────
+    public string QuienReporta => txtQuienReporta.Text;
+    public string TipoIncidencia => cmbTipo.SelectedItem?.ToString() ?? "";
+    public string NombreEquipo => txtNombreEquipo.Text;
     public DateTime FechaHora
     {
         get
@@ -19,7 +20,7 @@ public partial class IncidenciaForm : Form, IIncidenciaView
                         .AddMinutes((double)nudMinuto.Value);
         }
     }
-    public string Descripcion    => txtDescripcion.Text;
+    public string Descripcion => txtDescripcion.Text;
     public string RutaEvidencia
     {
         get => lblEvidencia.Text;
@@ -38,18 +39,23 @@ public partial class IncidenciaForm : Form, IIncidenciaView
         cmbTipo.SelectedIndex = 0;
         txtNombreEquipo.Clear();
         dtpFecha.Value = DateTime.Now;
-        nudHora.Value   = DateTime.Now.Hour;
-        nudMinuto.Value = 0;
+        nudHora.Value = DateTime.Now.Hour;
+        nudMinuto.Value = DateTime.Now.Minute;
         txtDescripcion.Clear();
-        lblEvidencia.Text = "";
+        lblEvidencia.Text = "Ningún archivo seleccionado";
     }
 
+    // ── Constructor ──────────────────────────────────────────────
     public IncidenciaForm()
     {
         InitializeComponent();
         _presenter = new IncidenciaPresenter(this);
     }
 
-    private void btnEnviar_Click(object sender, EventArgs e)   => OnEnviarReporte?.Invoke(this, EventArgs.Empty);
-    private void btnAdjuntar_Click(object sender, EventArgs e) => OnAdjuntar?.Invoke(this, EventArgs.Empty);
+    // ── Eventos de botones ───────────────────────────────────────
+    private void btnEnviar_Click(object sender, EventArgs e) =>
+        OnEnviarReporte?.Invoke(this, EventArgs.Empty);
+
+    private void btnAdjuntar_Click(object sender, EventArgs e) =>
+        OnAdjuntar?.Invoke(this, EventArgs.Empty);
 }
