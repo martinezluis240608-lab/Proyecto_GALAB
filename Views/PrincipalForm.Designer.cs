@@ -73,32 +73,19 @@ partial class PrincipalForm
             BackColor = Color.Transparent,
             Anchor    = AnchorStyles.Top | AnchorStyles.Left
         };
-        picLogoGalab.Paint += (s, e) =>
-        {
-            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-            // Fondo azul claro del logo
-            e.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(200, 230, 245)), 0, 0, picLogoGalab.Width, picLogoGalab.Height);
-            using var f = new Font("Segoe UI", 9F, FontStyle.Bold);
-            e.Graphics.DrawString("⚙ GALAB", f, new SolidBrush(Color.FromArgb(30,30,80)), 10, 28);
-        };
+        try { picLogoGalab.Image = Properties.Resources.logo_GALAB_1; }
+        catch { picLogoGalab.BackColor = Color.FromArgb(200, 230, 245); }
 
         picLogoInstituto = new PictureBox
         {
             Top       = 8,
-            Width     = 70, Height = 70,
+            Width     = 80, Height = 80,
             SizeMode  = PictureBoxSizeMode.Zoom,
             BackColor = Color.Transparent,
-            Anchor    = AnchorStyles.Top | AnchorStyles.Right,
-            Image = Image.FromFile(@"C:\Users\LENOVO\Pictures\descargar.jpg")
+            Anchor    = AnchorStyles.Top | AnchorStyles.Right
         };
-        picLogoInstituto.Paint += (s, e) =>
-        {
-            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-            e.Graphics.FillEllipse(new SolidBrush(Color.FromArgb(200,220,180)), 0, 0, 68, 68);
-            e.Graphics.DrawEllipse(new Pen(Color.Transparent), 0, 0, 68, 68);
-            using var f = new Font("Segoe UI", 6F);
-            e.Graphics.DrawString("TecNM", f, Brushes.DarkGreen, 22, 28);
-        };
+        try { picLogoInstituto.Image = Properties.Resources.logo_instituto; }
+        catch { picLogoInstituto.BackColor = Color.FromArgb(200, 220, 180); }
 
         lblInstituto = new Label
         {
