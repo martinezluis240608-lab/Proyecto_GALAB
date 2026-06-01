@@ -7,8 +7,10 @@ public partial class LoginForm : Form, ILoginView
 {
     private readonly LoginPresenter _presenter;
 
-    public string Usuario    => txtUsuario.Text;
-    public string Contrasena => txtContrasena.Text;
+    public string Usuario        => txtUsuario.Text;
+    public string Contrasena     => txtContrasena.Text;
+    public string RolSeleccionado { get; private set; } = "alumno";
+
     public event EventHandler? OnIniciarSesion;
 
     public void MostrarError(string mensaje) =>
