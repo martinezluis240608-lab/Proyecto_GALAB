@@ -67,10 +67,37 @@ namespace Proyecto_GALAB.Views
 
             header.Controls.Add(tituloSistema);
 
+            PictureBox logoInstituto = new PictureBox()
+            {
+                Image = UiAssets.CargarLogoInstitucion(),
+                SizeMode = PictureBoxSizeMode.Zoom,
+                BackColor = Color.Transparent,
+                Size = new Size(70, 64),
+                Anchor = AnchorStyles.Top | AnchorStyles.Right
+            };
+
+            Label lblInstituto = new Label()
+            {
+                Text = "Instituto Tecnológico Superior\nde San Miguel el Grande",
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                ForeColor = azulPrincipal,
+                Size = new Size(260, 46),
+                Anchor = AnchorStyles.Top | AnchorStyles.Right
+            };
+
+            header.Resize += (s, e) =>
+            {
+                logoInstituto.Left = header.Width - 350;
+                logoInstituto.Top = 13;
+                lblInstituto.Left = header.Width - 270;
+                lblInstituto.Top = 22;
+            };
+            header.Controls.AddRange(new Control[] { logoInstituto, lblInstituto });
+
             // ===== SIDEBAR =====
             Panel sidebar = new Panel()
             {
-                Width = 260,
+                Width = 290,
                 Dock = DockStyle.Left,
                 BackColor = Color.White
             };
@@ -79,22 +106,22 @@ namespace Proyecto_GALAB.Views
 
             int y = 120;
 
-            AgregarBoton(sidebar, "🏠 Inicio", y);
+            AgregarBoton(sidebar, "⌂   Inicio", y);
             y += 70;
 
-            AgregarBoton(sidebar, "📋 Gestión de incidencias", y);
+            AgregarBoton(sidebar, "☰   Gestión de incidencias", y);
             y += 70;
 
             // BOTÓN ACTIVO
             Button btnPerfil = new Button()
             {
-                Text = "👤 Perfil",
+                Text = "●   Perfil",
                 Font = new Font("Segoe UI", 11, FontStyle.Bold),
                 ForeColor = azulPrincipal,
                 BackColor = Color.FromArgb(230, 240, 255),
                 FlatStyle = FlatStyle.Flat,
-                Size = new Size(220, 55),
-                Location = new Point(20, y),
+                Size = new Size(258, 54),
+                Location = new Point(16, y),
                 TextAlign = ContentAlignment.MiddleLeft
             };
 
@@ -104,10 +131,10 @@ namespace Proyecto_GALAB.Views
 
             y += 70;
 
-            AgregarBoton(sidebar, "📞 Contacto", y);
+            AgregarBoton(sidebar, "☎   Contacto", y);
             y += 70;
 
-            AgregarBoton(sidebar, "❓ Ayuda", y);
+            AgregarBoton(sidebar, "◎   Ayuda", y);
 
             // ===== BOTÓN CERRAR SESIÓN =====
             Button btnCerrar = new Button()
@@ -115,8 +142,8 @@ namespace Proyecto_GALAB.Views
                 Text = "↩ Cerrar sesión",
                 Font = new Font("Segoe UI", 11, FontStyle.Bold),
                 ForeColor = azulPrincipal,
-                Size = new Size(220, 50),
-                Location = new Point(20, 760),
+                Size = new Size(210, 48),
+                Location = new Point(40, 760),
                 FlatStyle = FlatStyle.Flat,
                 BackColor = Color.White,
                 Cursor = Cursors.Hand
@@ -127,14 +154,7 @@ namespace Proyecto_GALAB.Views
 
             btnCerrar.Click += (s, e) =>
             {
-                var login = new LoginForm();
-                login.Show();
-
-                foreach (Form form in Application.OpenForms.Cast<Form>().ToList())
-                {
-                    if (form != login)
-                        form.Close();
-                }
+                UiAssets.CerrarSesion(this);
             };
 
             sidebar.Controls.Add(btnCerrar);
@@ -218,8 +238,8 @@ namespace Proyecto_GALAB.Views
                 Text = texto,
                 Font = new Font("Segoe UI", 11),
                 ForeColor = Color.Black,
-                Size = new Size(220, 55),
-                Location = new Point(20, y),
+                Size = new Size(258, 54),
+                Location = new Point(16, y),
                 FlatStyle = FlatStyle.Flat,
                 BackColor = Color.White,
                 TextAlign = ContentAlignment.MiddleLeft,
@@ -232,23 +252,19 @@ namespace Proyecto_GALAB.Views
             {
                 if (texto.Contains("Inicio"))
                 {
-                    new PrincipalForm().Show();
-                    this.Close();
+                    UiAssets.AbrirCerrandoActual(this, new PrincipalForm());
                 }
                 else if (texto.Contains("Gestión"))
                 {
-                    new IncidenciaForm().Show();
-                    this.Close();
+                    UiAssets.AbrirCerrandoActual(this, new GestionIncidenciasForm());
                 }
                 else if (texto.Contains("Contacto"))
                 {
-                    new ContactoForm().Show();
-                    this.Close();
+                    UiAssets.AbrirCerrandoActual(this, new ContactoForm());
                 }
                 else if (texto.Contains("Ayuda"))
                 {
-                    new AyudaForm().Show();
-                    this.Close();
+                    UiAssets.AbrirCerrandoActual(this, new AyudaForm());
                 }
             };
 

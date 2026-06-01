@@ -6,6 +6,7 @@ partial class DashboardForm
 
     private Panel  panelHeader;
     private Label  lblHeaderTitle;
+    private PictureBox picLogoInstituto;
     private Label  lblTituloSeccion;
     private Panel  panelGrafica;
     private Panel  panelNotificaciones;
@@ -58,6 +59,15 @@ partial class DashboardForm
             TextAlign = ContentAlignment.MiddleCenter
         };
         panelHeader.Controls.Add(lblHeaderTitle);
+        picLogoInstituto = new PictureBox
+        {
+            Image = UiAssets.CargarLogoInstitucion(),
+            SizeMode = PictureBoxSizeMode.Zoom,
+            BackColor = Color.Transparent,
+            Dock = DockStyle.Right,
+            Width = 72
+        };
+        panelHeader.Controls.Add(picLogoInstituto);
 
         // ── Título sección ───────────────────────────────────────
         lblTituloSeccion = new Label

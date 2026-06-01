@@ -1,28 +1,34 @@
+using System.Drawing.Drawing2D;
+
 namespace Proyecto_GALAB.Views;
 
 partial class LoginForm
 {
     private System.ComponentModel.IContainer components = null!;
 
-    private Panel panelIzquierdo;
-    private PictureBox picLaboratorio;
-    private Label lblIniciarTitulo;
-    private Panel panelDerecho;
+    private Panel panelImagen;
+    private Panel panelLogin;
+    private Panel panelTopAzul;
+    private Panel panelFooter;
     private PictureBox picLogo;
     private Label lblGalab;
+    private Label lblSubtitulo;
     private Label lblUsuario;
     private TextBox txtUsuario;
     private Label lblContrasena;
     private TextBox txtContrasena;
     private Button btnIniciarSesion;
     private LinkLabel lblForgot;
+    private Button btnEstudiante;
+    private Button btnAdministrador;
+    private Button btnVerPassword;
+    private Label lblFooter;
 
-    // Nuevos controles para selección de tipo de usuario
-    private Label lblTipoUsuario;
-    private Button btnAlumno;
-    private Button btnAdmin;
-    private FlowLayoutPanel flowTipoUsuarioPanel;
-    private Label lblTipoSeleccionado;
+    private readonly Color azulPrincipal = Color.FromArgb(0, 96, 210);
+    private readonly Color azulOscuro = Color.FromArgb(10, 34, 78);
+    private readonly Color azulClaro = Color.FromArgb(211, 231, 255);
+    private readonly Color bordeCampo = Color.FromArgb(210, 218, 232);
+    private bool passwordVisible;
 
     protected override void Dispose(bool disposing)
     {
@@ -32,336 +38,318 @@ partial class LoginForm
 
     private void InitializeComponent()
     {
-        Text = "GALAB - Iniciar Sesión";
-        Size = new Size(1000, 620);
-        MinimumSize = new Size(800, 500);
+        Text = "GALAB - Iniciar Sesion";
+        Size = new Size(1280, 760);
+        MinimumSize = new Size(980, 620);
         StartPosition = FormStartPosition.CenterScreen;
         FormBorderStyle = FormBorderStyle.Sizable;
         MaximizeBox = true;
         BackColor = Color.White;
         Font = new Font("Segoe UI", 10F);
 
-        lblIniciarTitulo = new Label
+        panelImagen = new Panel
         {
-            Text = "INICIAR SESION",
-            Left = 0,
-            Top = 0,
-            Height = 35,
-            Font = new Font("Segoe UI", 10F, FontStyle.Bold),
-            ForeColor = Color.FromArgb(80, 80, 80),
-            BackColor = Color.White,
-            Padding = new Padding(15, 8, 0, 0),
-            Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
-        };
-
-        panelIzquierdo = new Panel
-        {
-            Left = 0,
-            Top = 35,
-            BackColor = Color.FromArgb(40, 40, 40),
+            BackColor = Color.FromArgb(235, 238, 242),
             Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left
         };
+        panelImagen.Paint += PanelImagen_Paint;
 
-        picLaboratorio = new PictureBox
+        panelLogin = new Panel
         {
-            Dock = DockStyle.Fill,
-            SizeMode = PictureBoxSizeMode.Zoom,
-            BackColor = Color.FromArgb(40, 40, 40)
-        };
-        try
-        {
-            picLaboratorio.Image = Image.FromFile(
-                @"C:\Users\LENOVO\Downloads\657dd35e-79a6-4145-9891-d15fea1a313c.png");
-        }
-        catch
-        {
-            picLaboratorio.BackColor = Color.FromArgb(200, 220, 200);
-        }
-        panelIzquierdo.Controls.Add(picLaboratorio);
-
-        panelDerecho = new Panel
-        {
-            Left = 0,
-            Top = 35,
-            BackColor = Color.FromArgb(173, 216, 230),
+            BackColor = Color.White,
             Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
         };
 
-        // Logo más grande
+        panelTopAzul = new Panel
+        {
+            Height = 40,
+            BackColor = Color.FromArgb(164, 205, 255),
+            Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
+        };
+
         picLogo = new PictureBox
         {
             SizeMode = PictureBoxSizeMode.Zoom,
-
-            Anchor = AnchorStyles.Top | AnchorStyles.None
-
+            BackColor = Color.Transparent
         };
-        try
-        {
-            picLogo.Image = Image.FromFile(@"C:\Users\LENOVO\Documents\dibujos\logo GALAB_1.png");
-        }
-        catch
-        {
-            picLogo.BackColor = Color.Transparent;
-        }
+        CargarLogo();
 
-        // TEXTO GALAB MÁS GRANDE
         lblGalab = new Label
         {
             Text = "GALAB",
-            Font = new Font("Segoe UI", 28F, FontStyle.Bold),  // Aumentado de 16 a 28
-            ForeColor = Color.FromArgb(30, 30, 80),
-            TextAlign = ContentAlignment.MiddleCenter,
-            Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
+            Font = new Font("Segoe UI", 30F, FontStyle.Bold),
+            ForeColor = azulPrincipal,
+            TextAlign = ContentAlignment.MiddleCenter
         };
 
-        // ── PANEL PARA TIPO DE USUARIO (NUEVO) ───────────────────
-        flowTipoUsuarioPanel = new FlowLayoutPanel
+        lblSubtitulo = new Label
         {
-            Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
-            Height = 50,
-            BackColor = Color.Transparent,
-            FlowDirection = FlowDirection.LeftToRight,
-            WrapContents = false
+            Text = "Sistema de Gestion de Incidencias",
+            Font = new Font("Segoe UI", 15F, FontStyle.Bold),
+            ForeColor = azulOscuro,
+            TextAlign = ContentAlignment.MiddleCenter
         };
 
-        lblTipoUsuario = new Label
-        {
-            Text = "Tipo de usuario:",
-            Font = new Font("Segoe UI", 9F, FontStyle.Bold),
-            ForeColor = Color.FromArgb(50, 50, 50),
-            Size = new Size(100, 32),
-            TextAlign = ContentAlignment.MiddleLeft
-        };
+        btnEstudiante = CrearBotonTipo("▱  Estudiante", true);
+        btnAdministrador = CrearBotonTipo("▣  Administrador", false);
+        btnEstudiante.Click += (s, e) => SeleccionarTipoUsuario(true);
+        btnAdministrador.Click += (s, e) => SeleccionarTipoUsuario(false);
 
-        // Botón Alumno
-        btnAlumno = new Button
+        lblUsuario = CrearLabelCampo("Usuario");
+        txtUsuario = CrearTextBox("Ingrese su numero de control", false);
+
+        lblContrasena = CrearLabelCampo("Contraseña");
+        txtContrasena = CrearTextBox("Ingrese su contraseña", true);
+
+        btnVerPassword = new Button
         {
-            Text = "👨‍🎓 ALUMNO",
-            Size = new Size(130, 34),
-            BackColor = Color.FromArgb(70, 130, 200),
-            ForeColor = Color.White,
+            Text = "◉",
+            Font = new Font("Segoe UI Symbol", 12F, FontStyle.Bold),
+            ForeColor = azulPrincipal,
+            BackColor = Color.White,
             FlatStyle = FlatStyle.Flat,
-            Font = new Font("Segoe UI", 9F, FontStyle.Bold),
-            Cursor = Cursors.Hand,
-            Tag = "alumno"
+            Cursor = Cursors.Hand
         };
-        btnAlumno.FlatAppearance.BorderSize = 0;
-        btnAlumno.Click += BtnTipoUsuario_Click;
-
-        // Botón Administrador
-        btnAdmin = new Button
+        btnVerPassword.FlatAppearance.BorderSize = 0;
+        btnVerPassword.Click += (s, e) =>
         {
-            Text = "👨‍💼 ADMINISTRADOR",
-            Size = new Size(150, 34),
-            BackColor = Color.FromArgb(100, 100, 100),
-            ForeColor = Color.White,
-            FlatStyle = FlatStyle.Flat,
-            Font = new Font("Segoe UI", 9F, FontStyle.Bold),
-            Cursor = Cursors.Hand,
-            Tag = "admin"
+            passwordVisible = !passwordVisible;
+            txtContrasena.PasswordChar = passwordVisible ? '\0' : '●';
+            btnVerPassword.Text = passwordVisible ? "●" : "◉";
         };
-        btnAdmin.FlatAppearance.BorderSize = 0;
-        btnAdmin.Click += BtnTipoUsuario_Click;
-
-        flowTipoUsuarioPanel.Controls.Add(lblTipoUsuario);
-        flowTipoUsuarioPanel.Controls.Add(btnAlumno);
-        flowTipoUsuarioPanel.Controls.Add(btnAdmin);
-
-        // Etiqueta para mostrar tipo seleccionado
-        lblTipoSeleccionado = new Label
-        {
-            Text = "▶ No seleccionado",
-            Font = new Font("Segoe UI", 8F, FontStyle.Italic),
-            ForeColor = Color.FromArgb(100, 100, 100),
-            Height = 25,
-            TextAlign = ContentAlignment.MiddleLeft,
-            Padding = new Padding(5, 0, 0, 0),
-            BackColor = Color.FromArgb(240, 248, 255),
-            Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
-        };
-
-        // ── CAMPOS EXISTENTES ───────────────────────────────────
-        lblUsuario = MkLabel("USUARIO");
-        txtUsuario = MkTextBox("INGRESE USUARIO", false);
-        lblContrasena = MkLabel("CONTRASEÑA");
-        txtContrasena = MkTextBox("INGRESE CONTRASEÑA", true);
 
         btnIniciarSesion = new Button
         {
-            Text = "INICIAR SESION",
-            Height = 45,
-            BackColor = Color.FromArgb(20, 20, 20),
+            Text = "🔒  Iniciar sesión",
+            Height = 46,
+            BackColor = azulPrincipal,
             ForeColor = Color.White,
             FlatStyle = FlatStyle.Flat,
-            Font = new Font("Segoe UI", 11F, FontStyle.Bold),
-            Cursor = Cursors.Hand,
-            Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
+            Font = new Font("Segoe UI", 12F, FontStyle.Bold),
+            Cursor = Cursors.Hand
         };
         btnIniciarSesion.FlatAppearance.BorderSize = 0;
         btnIniciarSesion.Click += btnIniciarSesion_Click;
 
         lblForgot = new LinkLabel
         {
-            Text = "Olvidaste tu contraseña?",
+            Text = "¿Olvidaste tu contraseña?",
             AutoSize = true,
-            Font = new Font("Segoe UI", 9F),
-            LinkColor = Color.FromArgb(30, 30, 80),
-            Anchor = AnchorStyles.Top | AnchorStyles.Left
+            Font = new Font("Segoe UI", 11F),
+            LinkColor = azulPrincipal,
+            ActiveLinkColor = azulOscuro,
+            LinkBehavior = LinkBehavior.HoverUnderline
         };
         lblForgot.LinkClicked += lblForgot_LinkClicked;
 
-        // Agregar todos los controles al panel derecho (en orden)
-        panelDerecho.Controls.AddRange(new Control[]
+        panelFooter = new Panel
         {
-            picLogo, lblGalab,
-            flowTipoUsuarioPanel, lblTipoSeleccionado,
+            BackColor = azulClaro,
+            Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom
+        };
+
+        lblFooter = new Label
+        {
+            Text = "Instituto Tecnológico Superior de San Miguel el Grande",
+            Dock = DockStyle.Fill,
+            Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+            ForeColor = azulOscuro,
+            TextAlign = ContentAlignment.MiddleCenter
+        };
+        panelFooter.Controls.Add(lblFooter);
+
+        panelLogin.Controls.AddRange(new Control[]
+        {
+            panelTopAzul, picLogo, lblGalab, lblSubtitulo,
+            btnEstudiante, btnAdministrador,
             lblUsuario, txtUsuario,
-            lblContrasena, txtContrasena,
-            btnIniciarSesion, lblForgot
+            lblContrasena, txtContrasena, btnVerPassword,
+            btnIniciarSesion, lblForgot, panelFooter
         });
 
-        Controls.AddRange(new Control[] { lblIniciarTitulo, panelIzquierdo, panelDerecho });
+        Controls.AddRange(new Control[] { panelImagen, panelLogin });
 
-        // Eventos de redimensionamiento
-        this.Resize += (s, e) => AjustarLayout();
-        this.Load += (s, e) => AjustarLayout();
+        Resize += (s, e) => AjustarLayout();
+        Load += (s, e) => AjustarLayout();
     }
 
     private void AjustarLayout()
     {
-        int w = ClientSize.Width;
-        int h = ClientSize.Height - 35;
-        int mitad = w / 2;
+        int margen = 14;
+        int alto = ClientSize.Height - margen * 2;
+        int anchoImagen = Math.Max(420, ClientSize.Width / 2);
 
-        lblIniciarTitulo.Width = w;
-        lblIniciarTitulo.Height = 35;
+        panelImagen.Left = margen;
+        panelImagen.Top = margen;
+        panelImagen.Width = anchoImagen;
+        panelImagen.Height = alto;
 
-        panelIzquierdo.Left = 0;
-        panelIzquierdo.Width = mitad;
-        panelIzquierdo.Height = h;
-        panelIzquierdo.Top = 35;
+        panelLogin.Left = panelImagen.Right;
+        panelLogin.Top = margen;
+        panelLogin.Width = ClientSize.Width - panelLogin.Left - margen;
+        panelLogin.Height = alto;
 
-        panelDerecho.Left = mitad;
-        panelDerecho.Width = w - mitad;
-        panelDerecho.Height = h;
-        panelDerecho.Top = 35;
+        panelTopAzul.Left = 0;
+        panelTopAzul.Top = 0;
+        panelTopAzul.Width = panelLogin.Width;
 
-        // Posicionar controles dentro del panel derecho
-        int pw = panelDerecho.Width;
-        int pad = (int)(pw * 0.12);
-        int cw = pw - pad * 2;
+        int pw = panelLogin.Width;
+        int formWidth = Math.Min(440, Math.Max(340, pw - 170));
+        int left = (pw - formWidth) / 2;
 
-        // Logo (más grande)
-        int logoSize = 200;
-        picLogo.Left = (pw - logoSize) / 2;
-        picLogo.Top = 25;
-        picLogo.Width = logoSize;
-        picLogo.Height = logoSize;
+        picLogo.SetBounds((pw - 140) / 2, 76, 140, 110);
+        lblGalab.SetBounds(0, 184, pw, 50);
+        lblSubtitulo.SetBounds(0, 232, pw, 32);
 
-        // Texto GALAB más grande
-        lblGalab.Left = 0;
-        lblGalab.Top = 140;
-        lblGalab.Width = pw;
-        lblGalab.Height = 50;
-        lblGalab.Font = new Font("Segoe UI", 28F, FontStyle.Bold);
+        int tabY = 305;
+        int tabW = formWidth / 2;
+        btnEstudiante.SetBounds(left, tabY, tabW, 48);
+        btnAdministrador.SetBounds(left + tabW, tabY, tabW, 48);
 
-        // Panel de tipo de usuario
-        flowTipoUsuarioPanel.Left = pad;
-        flowTipoUsuarioPanel.Top = 200;
-        flowTipoUsuarioPanel.Width = cw;
+        lblUsuario.SetBounds(left, 392, formWidth, 24);
+        txtUsuario.SetBounds(left, 418, formWidth, 44);
 
-        // Ajustar ancho de los botones según el espacio disponible
-        int espacioDisponible = cw - lblTipoUsuario.Width - 20;
-        if (espacioDisponible >= 290)
-        {
-            btnAlumno.Width = 140;
-            btnAdmin.Width = 160;
-        }
-        else if (espacioDisponible >= 240)
-        {
-            btnAlumno.Width = 120;
-            btnAdmin.Width = 130;
-        }
-        else
-        {
-            btnAlumno.Width = 100;
-            btnAdmin.Width = 110;
-        }
+        lblContrasena.SetBounds(left, 488, formWidth, 24);
+        txtContrasena.SetBounds(left, 514, formWidth, 44);
+        btnVerPassword.SetBounds(left + formWidth - 44, 518, 36, 34);
 
-        // Etiqueta de tipo seleccionado
-        lblTipoSeleccionado.Left = pad;
-        lblTipoSeleccionado.Top = 255;
-        lblTipoSeleccionado.Width = cw;
+        btnIniciarSesion.SetBounds(left, 590, formWidth, 48);
+        lblForgot.Left = left + (formWidth - lblForgot.Width) / 2;
+        lblForgot.Top = 664;
 
-        // Campos de usuario y contraseña
-        lblUsuario.Left = pad;
-        lblUsuario.Top = 295;
-
-        txtUsuario.Left = pad;
-        txtUsuario.Top = 315;
-        txtUsuario.Width = cw;
-        txtUsuario.Height = 38;
-
-        lblContrasena.Left = pad;
-        lblContrasena.Top = 370;
-
-        txtContrasena.Left = pad;
-        txtContrasena.Top = 390;
-        txtContrasena.Width = cw;
-        txtContrasena.Height = 38;
-
-        btnIniciarSesion.Left = pad;
-        btnIniciarSesion.Top = 455;
-        btnIniciarSesion.Width = cw;
-        btnIniciarSesion.Height = 45;
-
-        lblForgot.Left = pad;
-        lblForgot.Top = 515;
+        panelFooter.SetBounds(0, panelLogin.Height - 78, pw, 78);
     }
 
-    // Manejador para selección de tipo de usuario
-    private void BtnTipoUsuario_Click(object? sender, EventArgs e)
+    private Button CrearBotonTipo(string text, bool activo)
     {
-        Button btn = (Button)sender!;
-        string tipoUsuario = btn.Tag?.ToString() ?? "";
-
-        // Resetear colores
-        btnAlumno.BackColor = Color.FromArgb(100, 100, 100);
-        btnAdmin.BackColor = Color.FromArgb(100, 100, 100);
-
-        if (tipoUsuario == "alumno")
+        var boton = new Button
         {
-            btnAlumno.BackColor = Color.FromArgb(70, 130, 200);
-            lblTipoSeleccionado.Text = "▶ Modo ALUMNO - Acceso a reportes personales";
-            lblTipoSeleccionado.ForeColor = Color.FromArgb(70, 130, 200);
-            txtUsuario.PlaceholderText = "Ej: 202410001 (código de estudiante)";
-        }
-        else if (tipoUsuario == "admin")
-        {
-            btnAdmin.BackColor = Color.FromArgb(60, 180, 100);
-            lblTipoSeleccionado.Text = "▶ Modo ADMINISTRADOR - Acceso total al sistema";
-            lblTipoSeleccionado.ForeColor = Color.FromArgb(60, 180, 100);
-            txtUsuario.PlaceholderText = "Ej: admin";
-        }
+            Text = text,
+            Font = new Font("Segoe UI", 11F, FontStyle.Bold),
+            ForeColor = activo ? Color.White : azulPrincipal,
+            BackColor = activo ? azulPrincipal : Color.White,
+            FlatStyle = FlatStyle.Flat,
+            Cursor = Cursors.Hand
+        };
+        boton.FlatAppearance.BorderColor = bordeCampo;
+        boton.FlatAppearance.BorderSize = 1;
+        return boton;
+    }
 
+    private Label CrearLabelCampo(string text) => new()
+    {
+        Text = text,
+        Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+        ForeColor = azulOscuro,
+        TextAlign = ContentAlignment.MiddleLeft
+    };
+
+    private TextBox CrearTextBox(string placeholder, bool password) => new()
+    {
+        PlaceholderText = placeholder,
+        PasswordChar = password ? '●' : '\0',
+        BorderStyle = BorderStyle.FixedSingle,
+        Font = new Font("Segoe UI", 11F),
+        ForeColor = azulOscuro,
+        BackColor = Color.White
+    };
+
+    private void SeleccionarTipoUsuario(bool estudiante)
+    {
+        btnEstudiante.BackColor = estudiante ? azulPrincipal : Color.White;
+        btnEstudiante.ForeColor = estudiante ? Color.White : azulPrincipal;
+        btnAdministrador.BackColor = estudiante ? Color.White : azulPrincipal;
+        btnAdministrador.ForeColor = estudiante ? azulPrincipal : Color.White;
+        txtUsuario.PlaceholderText = estudiante ? "Ingrese su numero de control" : "Ingrese usuario administrador";
         txtUsuario.Focus();
     }
 
-    private static Label MkLabel(string text) => new Label
+    private void CargarLogo()
     {
-        Text = text,
-        AutoSize = true,
-        Font = new Font("Segoe UI", 9F, FontStyle.Bold),
-        ForeColor = Color.FromArgb(60, 60, 60)
-    };
+        picLogo.Image = UiAssets.CargarLogoInstitucion();
+        if (picLogo.Image == null)
+            picLogo.Paint += LogoFallback_Paint;
+    }
 
-    private static TextBox MkTextBox(string placeholder, bool password) => new TextBox
+    private void LogoFallback_Paint(object sender, PaintEventArgs e)
     {
-        PlaceholderText = placeholder,
-        Height = 36,
-        PasswordChar = password ? '●' : '\0',
-        BorderStyle = BorderStyle.FixedSingle,
-        Font = new Font("Segoe UI", 10F),
-        BackColor = Color.White
-    };
+        e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+        using var fondo = new SolidBrush(azulClaro);
+        using var borde = new Pen(azulPrincipal, 3);
+        e.Graphics.FillEllipse(fondo, 18, 8, 100, 94);
+        e.Graphics.DrawEllipse(borde, 18, 8, 100, 94);
+        using var fuente = new Font("Segoe UI", 18F, FontStyle.Bold);
+        e.Graphics.DrawString("G", fuente, new SolidBrush(azulPrincipal), 56, 36);
+    }
+
+    private void PanelImagen_Paint(object sender, PaintEventArgs e)
+    {
+        var g = e.Graphics;
+        g.SmoothingMode = SmoothingMode.AntiAlias;
+        g.Clear(Color.FromArgb(238, 241, 245));
+
+        using var pared = new LinearGradientBrush(panelImagen.ClientRectangle, Color.White, Color.FromArgb(210, 215, 222), 90F);
+        g.FillRectangle(pared, panelImagen.ClientRectangle);
+
+        using var luz = new SolidBrush(Color.FromArgb(245, 248, 252));
+        g.FillRectangle(luz, 120, 20, panelImagen.Width - 240, 24);
+        g.FillRectangle(luz, panelImagen.Width - 260, 54, 170, 22);
+
+        using var mesa = new SolidBrush(Color.FromArgb(0, 92, 185));
+        using var sombra = new SolidBrush(Color.FromArgb(25, 31, 40));
+        int baseY = (int)(panelImagen.Height * 0.62);
+        g.FillRectangle(mesa, 40, baseY, panelImagen.Width - 80, 96);
+        g.FillRectangle(sombra, 40, baseY + 96, panelImagen.Width - 80, 24);
+
+        for (int i = 0; i < 5; i++)
+        {
+            int x = 70 + i * Math.Max(92, (panelImagen.Width - 160) / 5);
+            DibujarMonitor(g, x, baseY - 105);
+        }
+
+        for (int i = 0; i < 4; i++)
+        {
+            int x = 120 + i * Math.Max(105, (panelImagen.Width - 190) / 4);
+            DibujarAlumno(g, x, baseY - 70);
+        }
+
+        using var ventana = new Pen(Color.FromArgb(70, 78, 90), 5);
+        int vx = panelImagen.Width - 130;
+        g.DrawRectangle(ventana, vx, 100, 92, 150);
+        g.DrawLine(ventana, vx + 46, 100, vx + 46, 250);
+        g.DrawLine(ventana, vx, 175, vx + 92, 175);
+    }
+
+    private void DibujarMonitor(Graphics g, int x, int y)
+    {
+        using var pantalla = new SolidBrush(Color.FromArgb(24, 31, 42));
+        using var baseMonitor = new SolidBrush(Color.FromArgb(36, 44, 55));
+        g.FillRectangle(pantalla, x, y, 82, 58);
+        g.FillRectangle(baseMonitor, x + 34, y + 58, 14, 28);
+        g.FillRectangle(baseMonitor, x + 20, y + 82, 42, 8);
+    }
+
+    private void DibujarAlumno(Graphics g, int x, int y)
+    {
+        using var piel = new SolidBrush(Color.FromArgb(205, 150, 110));
+        using var cabello = new SolidBrush(Color.FromArgb(35, 28, 24));
+        using var ropa = new SolidBrush(Color.FromArgb(18, 42, 75));
+        g.FillEllipse(piel, x, y, 34, 38);
+        g.FillPie(cabello, x - 2, y - 5, 38, 28, 180, 180);
+        g.FillRectangle(ropa, x - 10, y + 36, 54, 54);
+    }
+
+    protected override void OnPaint(PaintEventArgs e)
+    {
+        base.OnPaint(e);
+        using var path = new GraphicsPath();
+        int r = 18;
+        var rect = new Rectangle(0, 0, Width - 1, Height - 1);
+        path.AddArc(rect.Left, rect.Top, r, r, 180, 90);
+        path.AddArc(rect.Right - r, rect.Top, r, r, 270, 90);
+        path.AddArc(rect.Right - r, rect.Bottom - r, r, r, 0, 90);
+        path.AddArc(rect.Left, rect.Bottom - r, r, r, 90, 90);
+        path.CloseFigure();
+        Region = new Region(path);
+    }
 }

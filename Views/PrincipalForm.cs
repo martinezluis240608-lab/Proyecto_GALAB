@@ -15,19 +15,20 @@ public partial class PrincipalForm : Form, IPrincipalView
     public PrincipalForm()
     {
         InitializeComponent();
+        UiAssets.PrepararPantallaCompleta(this);
         _presenter = new PrincipalPresenter(this);
     }
 
-    public void NavegarAGestion()   => new IncidenciaForm().ShowDialog();
-    public void NavegarAPerfil()    => new PerfilForm().ShowDialog();
+    public void NavegarAGestion()   => UiAssets.AbrirCerrandoActual(this, new GestionIncidenciasForm());
+    public void NavegarAPerfil()    => UiAssets.AbrirCerrandoActual(this, new PerfilForm());
     public void MostrarAyuda()
     {
-        new AyudaForm().ShowDialog();
+        UiAssets.AbrirCerrandoActual(this, new AyudaForm());
     }
 
     public void MostrarContacto()
     {
-        new ContactoForm().ShowDialog();
+        UiAssets.AbrirCerrandoActual(this, new ContactoForm());
     }
 
     private void btnPerfil_Click(object s, EventArgs e)    => OnPerfil?.Invoke(this, e);

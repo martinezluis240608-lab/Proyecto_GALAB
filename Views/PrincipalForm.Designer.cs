@@ -89,10 +89,13 @@ partial class PrincipalForm
             SizeMode  = PictureBoxSizeMode.Zoom,
             BackColor = Color.Transparent,
             Anchor    = AnchorStyles.Top | AnchorStyles.Right,
-            Image = Image.FromFile(@"C:\Users\LENOVO\Pictures\descargar.jpg")
+            Image     = UiAssets.CargarLogoInstitucion()
         };
         picLogoInstituto.Paint += (s, e) =>
         {
+            if (picLogoInstituto.Image != null)
+                return;
+
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             e.Graphics.FillEllipse(new SolidBrush(Color.FromArgb(200,220,180)), 0, 0, 68, 68);
             e.Graphics.DrawEllipse(new Pen(Color.Transparent), 0, 0, 68, 68);
@@ -210,4 +213,5 @@ partial class PrincipalForm
         Cursor    = Cursors.Hand,
         TextAlign = ContentAlignment.MiddleCenter
     };
+
 }

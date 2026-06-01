@@ -16,7 +16,6 @@ partial class IncidenciaForm
     private Label lblFechaHora;
     private DateTimePicker dtpFecha;
     private NumericUpDown nudHora;
-    private Label lblDos;
     private NumericUpDown nudMinuto;
     private Label lblDescripcion;
     private TextBox txtDescripcion;
@@ -78,7 +77,7 @@ partial class IncidenciaForm
             ForeColor = Color.FromArgb(30, 30, 80),
             Dock = DockStyle.Fill,
             TextAlign = ContentAlignment.MiddleCenter,
-            Image = Image.FromFile(@"C:\Users\LENOVO\Documents\dibujos\logo GALAB.png"),
+            Image = UiAssets.CargarLogoInstitucion(),
             ImageAlign = ContentAlignment.MiddleLeft
         };
         panelHeader.Controls.Add(lblHeaderTitle);
@@ -393,4 +392,5 @@ partial class IncidenciaForm
         BackColor = Color.White,
         Margin = new Padding(0, 3, 0, 3)
     };
+
 }

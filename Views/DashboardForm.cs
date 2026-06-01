@@ -18,6 +18,7 @@ public partial class DashboardForm : Form, IDashboardView
     public DashboardForm()
     {
         InitializeComponent();
+        UiAssets.PrepararPantallaCompleta(this);
         _presenter = new DashboardPresenter(this);
         this.Load += (s, e) => OnCargarDatos?.Invoke(this, EventArgs.Empty);
     }
@@ -25,7 +26,7 @@ public partial class DashboardForm : Form, IDashboardView
     // ── Navegación ──────────────────────────────────────────────
     public void NavegarARegistro()
     {
-        new IncidenciaForm().Show();
+        UiAssets.AbrirCerrandoActual(this, new GestionIncidenciasForm());
     }
 
     public void NavegarALista()

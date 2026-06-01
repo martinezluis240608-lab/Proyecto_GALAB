@@ -16,13 +16,16 @@ public partial class LoginForm : Form, ILoginView
 
     public void NavegarARegistro()
     {
-        new PrincipalForm().Show();
+        var principal = new PrincipalForm();
+        UiAssets.PrepararPantallaCompleta(principal);
+        principal.Show();
         this.Hide();
     }
 
     public LoginForm()
     {
         InitializeComponent();
+        UiAssets.PrepararPantallaCompleta(this);
         _presenter = new LoginPresenter(this);
     }
 

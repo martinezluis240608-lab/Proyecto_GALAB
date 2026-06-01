@@ -24,6 +24,7 @@ public partial class AyudaForm : Form
         Size = new Size(1280, 760);
         MinimumSize = new Size(1050, 680);
         StartPosition = FormStartPosition.CenterScreen;
+        WindowState = FormWindowState.Maximized;
         BackColor = fondoGeneral;
         Font = new Font("Segoe UI", 10F);
 
@@ -100,6 +101,15 @@ public partial class AyudaForm : Form
             Size = new Size(290, 42)
         };
 
+        var logoInstituto = new PictureBox
+        {
+            Image = UiAssets.CargarLogoInstitucion(),
+            SizeMode = PictureBoxSizeMode.Zoom,
+            BackColor = Color.Transparent,
+            Anchor = AnchorStyles.Top | AnchorStyles.Right,
+            Size = new Size(64, 58)
+        };
+
         var campana = new Label
         {
             Text = "🔔",
@@ -122,12 +132,14 @@ public partial class AyudaForm : Form
 
         header.Resize += (s, e) =>
         {
+            logoInstituto.Left = header.Width - 665;
+            logoInstituto.Top = 20;
             instituto.Left = header.Width - 590;
             campana.Left = header.Width - 270;
             usuario.Left = header.Width - 220;
         };
 
-        header.Controls.AddRange(new Control[] { logoIcono, galab, subtitulo, instituto, campana, usuario });
+        header.Controls.AddRange(new Control[] { logoIcono, galab, subtitulo, logoInstituto, instituto, campana, usuario });
         return header;
     }
 
@@ -136,21 +148,21 @@ public partial class AyudaForm : Form
         var sidebar = new Panel
         {
             Dock = DockStyle.Left,
-            Width = 250,
+            Width = 290,
             BackColor = Color.White,
             Padding = new Padding(16, 28, 16, 16)
         };
 
         int y = 38;
-        sidebar.Controls.Add(CrearBotonMenu("⌂  Inicio", y, IrAInicio));
+        sidebar.Controls.Add(UiAssets.CrearBotonSidebar("⌂", "Inicio", y, false, () => UiAssets.AbrirCerrandoActual(this, new PrincipalForm())));
         y += 68;
-        sidebar.Controls.Add(CrearBotonMenu("☷  Gestión de Incidencias   ›", y, () => AbrirFormulario(new IncidenciaForm())));
+        sidebar.Controls.Add(UiAssets.CrearBotonSidebar("☰", "Gestión de incidencias   ›", y, false, () => UiAssets.AbrirCerrandoActual(this, new GestionIncidenciasForm())));
         y += 68;
-        sidebar.Controls.Add(CrearBotonMenu("👤  Perfil", y, () => AbrirFormulario(new PerfilForm())));
+        sidebar.Controls.Add(UiAssets.CrearBotonSidebar("●", "Perfil", y, false, () => UiAssets.AbrirCerrandoActual(this, new PerfilForm())));
         y += 68;
-        sidebar.Controls.Add(CrearBotonMenu("☎  Contacto", y, () => AbrirFormulario(new ContactoForm())));
+        sidebar.Controls.Add(UiAssets.CrearBotonSidebar("☎", "Contacto", y, false, () => UiAssets.AbrirCerrandoActual(this, new ContactoForm())));
         y += 68;
-        sidebar.Controls.Add(CrearBotonMenu("?  Ayuda", y, null, true));
+        sidebar.Controls.Add(UiAssets.CrearBotonSidebar("◎", "Ayuda", y, true, null));
 
         var cerrar = new Button
         {
@@ -161,13 +173,13 @@ public partial class AyudaForm : Form
             FlatStyle = FlatStyle.Flat,
             Cursor = Cursors.Hand,
             Anchor = AnchorStyles.Left | AnchorStyles.Bottom,
-            Location = new Point(24, 610),
-            Size = new Size(205, 44),
+            Location = new Point(40, 610),
+            Size = new Size(210, 48),
             TextAlign = ContentAlignment.MiddleCenter
         };
         cerrar.FlatAppearance.BorderColor = Color.FromArgb(172, 199, 232);
         cerrar.FlatAppearance.BorderSize = 1;
-        cerrar.Click += (s, e) => CerrarSesion();
+        cerrar.Click += (s, e) => UiAssets.CerrarSesion(this);
         sidebar.Resize += (s, e) => cerrar.Top = sidebar.Height - 70;
         sidebar.Controls.Add(cerrar);
 
@@ -406,7 +418,7 @@ public partial class AyudaForm : Form
         };
         irContacto.FlatAppearance.BorderColor = azulPrincipal;
         irContacto.FlatAppearance.BorderSize = 1;
-        irContacto.Click += (s, e) => AbrirFormulario(new ContactoForm());
+        irContacto.Click += (s, e) => UiAssets.AbrirCerrandoActual(this, new ContactoForm());
         contacto.Controls.AddRange(new Control[] { contactoTexto, irContacto });
 
         card.Resize += (s, e) =>
@@ -540,30 +552,6 @@ public partial class AyudaForm : Form
 
         recurso.Controls.AddRange(new Control[] { lblIcono, lblTitulo, lblDescripcion, flecha });
         return recurso;
-    }
-
-    private void IrAInicio()
-    {
-        Close();
-    }
-
-    private void AbrirFormulario(Form formulario)
-    {
-        formulario.StartPosition = FormStartPosition.CenterScreen;
-        formulario.Show();
-        Close();
-    }
-
-    private void CerrarSesion()
-    {
-        var login = new LoginForm();
-        login.Show();
-
-        foreach (Form form in Application.OpenForms.Cast<Form>().ToList())
-        {
-            if (form != login)
-                form.Close();
-        }
     }
 
     private void DescargarManual()
