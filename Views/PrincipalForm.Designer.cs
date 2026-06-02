@@ -123,7 +123,7 @@ partial class PrincipalForm
         lblBienvenido = new Label
         {
             Text      = "BIENVENIDO",
-            Font      = new Font("Segoe UI", 22F, FontStyle.Bold),
+            Font      = new Font("Segoe UI", 30F, FontStyle.Bold),
             ForeColor = Color.FromArgb(20, 20, 20),
             TextAlign = ContentAlignment.MiddleCenter,
             Anchor    = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
@@ -132,7 +132,7 @@ partial class PrincipalForm
         lblDescripcion = new Label
         {
             Text      = "GALAB es un sistema web para registrar y dar seguimiento a incidencias en\nlaboratorios de cómputo de manera rápida y organizada.",
-            Font      = new Font("Segoe UI", 10F),
+            Font      = new Font("Segoe UI", 14F),
             ForeColor = Color.FromArgb(80, 80, 80),
             TextAlign = ContentAlignment.MiddleCenter,
             Anchor    = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
@@ -143,6 +143,11 @@ partial class PrincipalForm
         btnGestion = MkMenuBtn("☰  GESTIÓN DE\n    INCIDENCIAS");
         btnAyuda   = MkMenuBtn("🌐  AYUDA");
         btnContacto= MkMenuBtn("📞  CONTACTO");
+
+        UiAssets.RedondearControl(btnPerfil, 10);
+        UiAssets.RedondearControl(btnGestion, 10);
+        UiAssets.RedondearControl(btnAyuda, 10);
+        UiAssets.RedondearControl(btnContacto, 10);
 
         btnPerfil.Click   += btnPerfil_Click;
         btnGestion.Click  += btnGestion_Click;
@@ -182,25 +187,35 @@ partial class PrincipalForm
         lblDescripcion.Left  = 20;  lblDescripcion.Top  = 168;
         lblDescripcion.Width = cw - 40; lblDescripcion.Height = 50;
 
-        // Fila 1 de botones (3 botones centrados)
-        int bw = 180, bh = 80, gap = 20;
+        // Escalado dinámico de botones de menú: tres arriba y uno abajo.
+        int bw = Math.Min(330, Math.Max(220, cw / 4));
+        int bh = Math.Min(135, Math.Max(95, ch / 8));
+        int gap = Math.Min(38, Math.Max(22, cw / 50));
+
+        // Ajustar fuentes proporcionalmente
+        float fontSize = bw > 280 ? 13F : 11F;
+        var btnFont = new Font("Segoe UI", fontSize, FontStyle.Bold);
+        btnPerfil.Font = btnFont;
+        btnGestion.Font = btnFont;
+        btnAyuda.Font = btnFont;
+        btnContacto.Font = btnFont;
+
         int totalW3 = bw * 3 + gap * 2;
-        int startX  = (cw - totalW3) / 2;
-        int row1Y   = 250;
+        if (totalW3 > cw - 60)
+        {
+            bw = Math.Max(190, (cw - 60 - gap * 2) / 3);
+            bh = Math.Max(90, bh);
+        }
 
-        btnPerfil.Left  = startX;           btnPerfil.Top  = row1Y;
-        btnGestion.Left = startX + bw + gap; btnGestion.Top = row1Y;
-        btnAyuda.Left   = startX + (bw+gap)*2; btnAyuda.Top = row1Y;
-
-        btnPerfil.Width = btnGestion.Width = btnAyuda.Width = bw;
-        btnPerfil.Height= btnGestion.Height= btnAyuda.Height= bh;
-
-        // Fila 2 (1 botón centrado)
+        int startX = (cw - (bw * 3 + gap * 2)) / 2;
+        int gridH = bh * 2 + gap;
+        int row1Y = Math.Max(270, 245 + (ch - 245 - gridH) / 2);
         int row2Y = row1Y + bh + gap;
-        btnContacto.Left   = (cw - bw) / 2;
-        btnContacto.Top    = row2Y;
-        btnContacto.Width  = bw;
-        btnContacto.Height = bh;
+
+        btnPerfil.SetBounds(startX, row1Y, bw, bh);
+        btnGestion.SetBounds(startX + bw + gap, row1Y, bw, bh);
+        btnAyuda.SetBounds(startX + (bw + gap) * 2, row1Y, bw, bh);
+        btnContacto.SetBounds((cw - bw) / 2, row2Y, bw, bh);
     }
 
     private static Button MkMenuBtn(string text) => new Button

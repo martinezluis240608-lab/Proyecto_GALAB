@@ -182,6 +182,7 @@ public partial class ContactoForm : Form
         cerrar.Click += (s, e) => UiAssets.CerrarSesion(this);
         sidebar.Resize += (s, e) => cerrar.Top = sidebar.Height - 70;
         sidebar.Controls.Add(cerrar);
+        UiAssets.RedondearControl(cerrar, 8);
 
         return sidebar;
     }
@@ -245,7 +246,16 @@ public partial class ContactoForm : Form
 
         contenido.Resize += (s, e) =>
         {
-            card.Width = Math.Min(620, Math.Max(560, contenido.ClientSize.Width - 92));
+            int w = Math.Min(620, Math.Max(560, contenido.ClientSize.Width - 92));
+            int left = Math.Max(36, (contenido.ClientSize.Width - w) / 2);
+            
+            card.Width = w;
+            card.Left = left;
+            
+            icono.Left = left - 2;
+            titulo.Left = left + 82;
+            descripcion.Left = left;
+            
             contenido.AutoScrollMinSize = new Size(0, card.Bottom + 50);
         };
 

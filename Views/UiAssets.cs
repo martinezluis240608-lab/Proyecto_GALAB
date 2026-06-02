@@ -1,4 +1,10 @@
+using System;
+using System.Collections.Generic;
+using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.IO;
+using System.Linq;
+using System.Windows.Forms;
 
 namespace Proyecto_GALAB.Views;
 
@@ -48,9 +54,10 @@ internal static class UiAssets
 
     public static void CerrarSesion(Form actual)
     {
-        var login = new LoginForm();
+        var login = Application.OpenForms.OfType<LoginForm>().FirstOrDefault() ?? new LoginForm();
         PrepararPantallaCompleta(login);
         login.Show();
+        login.BringToFront();
 
         foreach (Form form in Application.OpenForms.Cast<Form>().ToList())
         {
@@ -66,27 +73,47 @@ internal static class UiAssets
         form.MinimumSize = new Size(1050, 680);
     }
 
+    public static void RedondearControl(Control control, int radio)
+    {
+        control.SizeChanged += (s, e) =>
+        {
+            if (control.Width > 0 && control.Height > 0)
+            {
+                using var path = CrearRectanguloRedondo(new Rectangle(0, 0, control.Width, control.Height), radio);
+                control.Region = new Region(path);
+            }
+        };
+        if (control.Width > 0 && control.Height > 0)
+        {
+            using var path = CrearRectanguloRedondo(new Rectangle(0, 0, control.Width, control.Height), radio);
+            control.Region = new Region(path);
+        }
+    }
+
     public static Button CrearBotonSidebar(string icono, string texto, int y, bool activo, Action? accion)
     {
+        string textoLimpio = texto.Replace("   ›", "").Replace(" ›", "").Trim();
+
         var boton = new Button
         {
-            Text = $"{icono}   {texto}",
-            Font = new Font("Segoe UI", 11F, activo ? FontStyle.Bold : FontStyle.Regular),
+            Text = $"{icono}  {textoLimpio}",
+            Font = new Font("Segoe UI", 9.5F, activo ? FontStyle.Bold : FontStyle.Regular),
             ForeColor = Color.Black,
             BackColor = activo ? Color.FromArgb(238, 246, 255) : Color.White,
             FlatStyle = FlatStyle.Flat,
             Cursor = accion == null ? Cursors.Default : Cursors.Hand,
-            Location = new Point(16, y),
-            Size = new Size(258, 54),
+            Location = new Point(12, y),
+            Size = new Size(266, 46),
             TextAlign = ContentAlignment.MiddleLeft,
-            Padding = new Padding(16, 0, 0, 0)
+            Padding = new Padding(12, 0, 0, 0)
         };
 
-        boton.FlatAppearance.BorderColor = activo ? Color.FromArgb(178, 197, 220) : Color.White;
-        boton.FlatAppearance.BorderSize = activo ? 1 : 0;
+        boton.FlatAppearance.BorderSize = 0;
         boton.FlatAppearance.MouseOverBackColor = Color.FromArgb(238, 246, 255);
         if (accion != null)
             boton.Click += (s, e) => accion();
+
+        RedondearControl(boton, 8);
 
         return boton;
     }

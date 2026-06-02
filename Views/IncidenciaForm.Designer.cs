@@ -1,32 +1,30 @@
+using System.Drawing.Drawing2D;
+
 namespace Proyecto_GALAB.Views;
 
 partial class IncidenciaForm
 {
     private System.ComponentModel.IContainer components = null!;
 
-    private Panel panelHeader;
-    private Label lblHeaderTitle;
+    private Panel header;
+    private Panel contenido;
+    private Label lblInstituto;
+    private PictureBox picLogoInstituto;
+    private Button btnMenu;
     private Label lblTitulo;
-    private Label lblQuienReporta;
     private TextBox txtQuienReporta;
-    private Label lblTipo;
     private ComboBox cmbTipo;
-    private Label lblNombreEquipo;
+    private ComboBox cmbPrioridad;
     private TextBox txtNombreEquipo;
-    private Label lblFechaHora;
     private DateTimePicker dtpFecha;
     private NumericUpDown nudHora;
     private NumericUpDown nudMinuto;
-    private Label lblDescripcion;
     private TextBox txtDescripcion;
-    private Label lblEvidencias;
+    private TextBox txtEtiquetas;
     private Button btnAdjuntar;
     private Label lblEvidencia;
     private Button btnEnviar;
-
-    // Panel contenedor principal con scroll
-    private Panel mainContainer;
-    private TableLayoutPanel mainLayout;
+    private Button btnCancelar;
 
     protected override void Dispose(bool disposing)
     {
@@ -36,361 +34,409 @@ partial class IncidenciaForm
 
     private void InitializeComponent()
     {
-        // ── Form ────────────────────────────────────────────────
-        this.Text = "REGISTRO DE NUEVA INCIDENCIA";
-        this.Size = new Size(950, 700);
-        this.MinimumSize = new Size(600, 550);
-        this.StartPosition = FormStartPosition.CenterScreen;
-        this.FormBorderStyle = FormBorderStyle.Sizable;
-        this.MaximizeBox = true;
-        this.MinimizeBox = true;
-        this.BackColor = Color.FromArgb(173, 216, 230);
-        this.Font = new Font("Segoe UI", 10F);
-        this.AutoScaleMode = AutoScaleMode.Font;
+        components = new System.ComponentModel.Container();
+        Text = "GALAB - Registrar incidencia";
+        Size = new Size(1280, 760);
+        MinimumSize = new Size(1050, 680);
+        StartPosition = FormStartPosition.CenterScreen;
+        BackColor = UiAssets.Fondo;
+        Font = new Font("Segoe UI", 10F);
+        AutoScaleMode = AutoScaleMode.Font;
 
-        // ── Header (Dock Top para que siempre se vea) ───────────
-        panelHeader = new Panel
+        header = CrearHeader();
+        contenido = CrearContenido();
+
+        Controls.Add(contenido);
+        Controls.Add(header);
+    }
+
+    private Panel CrearHeader()
+    {
+        var panel = new Panel
         {
             Dock = DockStyle.Top,
-            Height = 100,
-            BackColor = Color.FromArgb(240, 235, 245)
+            Height = 126,
+            BackColor = UiAssets.AzulClaro
         };
 
-        panelHeader.Paint += (s, e) =>
+        btnMenu = new Button
         {
-            int r = 20;
-            var path = new System.Drawing.Drawing2D.GraphicsPath();
-            path.AddArc(0, 0, r, r, 180, 90);
-            path.AddArc(panelHeader.Width - r, 0, r, r, 270, 90);
-            path.AddArc(panelHeader.Width - r, panelHeader.Height - r, r, r, 0, 90);
-            path.AddArc(0, panelHeader.Height - r, r, r, 90, 90);
-            path.CloseAllFigures();
-            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-            e.Graphics.FillPath(new SolidBrush(Color.FromArgb(240, 235, 245)), path);
+            Text = "☰",
+            Font = new Font("Segoe UI", 22F, FontStyle.Bold),
+            ForeColor = Color.Black,
+            BackColor = Color.White,
+            FlatStyle = FlatStyle.Flat,
+            Cursor = Cursors.Hand,
+            Location = new Point(320, 32),
+            Size = new Size(54, 50),
+            TextAlign = ContentAlignment.MiddleCenter
         };
+        btnMenu.FlatAppearance.BorderColor = Color.FromArgb(220, 226, 235);
+        btnMenu.FlatAppearance.BorderSize = 1;
+        UiAssets.RedondearControl(btnMenu, 8);
 
-        // Logo más grande
-        lblHeaderTitle = new Label
+        picLogoInstituto = new PictureBox
         {
-            Text = "GALAB",
-            Font = new Font("Segoe UI", 32F, FontStyle.Bold),
-            ForeColor = Color.FromArgb(30, 30, 80),
-            Dock = DockStyle.Fill,
-            TextAlign = ContentAlignment.MiddleCenter,
+            Size = new Size(84, 76),
+            SizeMode = PictureBoxSizeMode.Zoom,
             Image = UiAssets.CargarLogoInstitucion(),
-            ImageAlign = ContentAlignment.MiddleLeft
+            BackColor = Color.Transparent,
+            Anchor = AnchorStyles.Top | AnchorStyles.Right
         };
-        panelHeader.Controls.Add(lblHeaderTitle);
 
-        // ── Contenedor principal con scroll automático ──────────
-        mainContainer = new Panel
+        lblInstituto = new Label
+        {
+            Text = "Instituto Tecnológico\nSuperior de San Miguel\nel Grande",
+            Font = new Font("Segoe UI", 11F, FontStyle.Bold),
+            ForeColor = UiAssets.AzulOscuro,
+            TextAlign = ContentAlignment.MiddleLeft,
+            Anchor = AnchorStyles.Top | AnchorStyles.Right,
+            Size = new Size(285, 76)
+        };
+
+        var campana = new Button
+        {
+            Text = "♢",
+            Font = new Font("Segoe UI Symbol", 24F, FontStyle.Bold),
+            BackColor = Color.White,
+            FlatStyle = FlatStyle.Flat,
+            Location = new Point(0, 24),
+            Size = new Size(64, 64),
+            Anchor = AnchorStyles.Top | AnchorStyles.Right
+        };
+        campana.FlatAppearance.BorderColor = Color.FromArgb(230, 235, 244);
+        UiAssets.RedondearControl(campana, 18);
+
+        var notificacion = new Label
+        {
+            Text = "3",
+            Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+            ForeColor = Color.White,
+            BackColor = UiAssets.AzulPrincipal,
+            TextAlign = ContentAlignment.MiddleCenter,
+            Size = new Size(24, 24),
+            Anchor = AnchorStyles.Top | AnchorStyles.Right
+        };
+        UiAssets.RedondearControl(notificacion, 12);
+
+        var usuarioIcono = new Label
+        {
+            Text = "○",
+            Font = new Font("Segoe UI Symbol", 38F, FontStyle.Regular),
+            ForeColor = Color.Black,
+            BackColor = Color.Transparent,
+            TextAlign = ContentAlignment.MiddleCenter,
+            Size = new Size(56, 64),
+            Anchor = AnchorStyles.Top | AnchorStyles.Right
+        };
+
+        var usuario = new Label
+        {
+            Text = "Usuario",
+            Font = new Font("Segoe UI", 12F, FontStyle.Bold),
+            ForeColor = Color.Black,
+            Size = new Size(105, 34),
+            TextAlign = ContentAlignment.MiddleLeft,
+            Anchor = AnchorStyles.Top | AnchorStyles.Right
+        };
+
+        panel.Resize += (s, e) =>
+        {
+            picLogoInstituto.Left = panel.Width - 602;
+            picLogoInstituto.Top = 22;
+            lblInstituto.Left = picLogoInstituto.Right + 18;
+            lblInstituto.Top = 28;
+            campana.Left = panel.Width - 248;
+            notificacion.Left = campana.Right - 22;
+            notificacion.Top = campana.Top + 4;
+            usuarioIcono.Left = panel.Width - 138;
+            usuarioIcono.Top = 28;
+            usuario.Left = panel.Width - 82;
+            usuario.Top = 48;
+        };
+
+        panel.Controls.AddRange(new Control[]
+        {
+            btnMenu, picLogoInstituto, lblInstituto, campana, notificacion, usuarioIcono, usuario
+        });
+        return panel;
+    }
+
+    private Panel CrearContenido()
+    {
+        var panel = new Panel
         {
             Dock = DockStyle.Fill,
-            AutoScroll = true,
-            BackColor = Color.Transparent
+            BackColor = UiAssets.Fondo,
+            AutoScroll = true
         };
 
-        // ── Layout principal con TableLayoutPanel ───────────────
-        mainLayout = new TableLayoutPanel
-        {
-            Dock = DockStyle.Top,
-            AutoSize = true,
-            Padding = new Padding(25, 15, 25, 25),
-            ColumnCount = 2,
-            RowCount = 12,
-            BackColor = Color.Transparent,
-            MinimumSize = new Size(500, 0)
-        };
-
-        // Configurar columnas (una fija para etiquetas, una flexible para campos)
-        mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 160));
-        mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-
-        // Configurar filas con altura automática
-        for (int i = 0; i < 12; i++)
-        {
-            mainLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        }
-
-        // ── Fila 0: Título ─────────────────────────────────────
         lblTitulo = new Label
         {
-            Text = "REGISTRO DE NUEVA INCIDENCIA",
-            Font = new Font("Segoe UI", 14F, FontStyle.Bold),
-            ForeColor = Color.FromArgb(30, 30, 80),
-            TextAlign = ContentAlignment.MiddleCenter,
-            Dock = DockStyle.Fill,
-            Height = 45
-        };
-        mainLayout.Controls.Add(lblTitulo, 0, 0);
-        mainLayout.SetColumnSpan(lblTitulo, 2);
-
-        // ── Fila 1: Espaciador ─────────────────────────────────
-        Panel spacer1 = new Panel { Height = 10 };
-        mainLayout.Controls.Add(spacer1, 0, 1);
-        mainLayout.SetColumnSpan(spacer1, 2);
-
-        // ── Fila 2: Quien reporta ───────────────────────────────
-        lblQuienReporta = MkLabel("QUIEN REPORTA");
-        lblQuienReporta.Dock = DockStyle.Fill;
-        lblQuienReporta.TextAlign = ContentAlignment.MiddleLeft;
-        mainLayout.Controls.Add(lblQuienReporta, 0, 2);
-
-        txtQuienReporta = MkTextBox("Ingrese nombre completo");
-        txtQuienReporta.Dock = DockStyle.Fill;
-        txtQuienReporta.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-        mainLayout.Controls.Add(txtQuienReporta, 1, 2);
-
-        // ── Fila 3: Tipo de incidencia ──────────────────────────
-        lblTipo = MkLabel("TIPO DE INCIDENCIA");
-        lblTipo.Dock = DockStyle.Fill;
-        lblTipo.TextAlign = ContentAlignment.MiddleLeft;
-        mainLayout.Controls.Add(lblTipo, 0, 3);
-
-        cmbTipo = new ComboBox
-        {
-            DropDownStyle = ComboBoxStyle.DropDownList,
-            Font = new Font("Segoe UI", 10F),
-            BackColor = Color.White,
-            Dock = DockStyle.Fill,
-            Anchor = AnchorStyles.Left | AnchorStyles.Right,
-            Height = 40
-        };
-        cmbTipo.Items.AddRange(new object[]
-        {
-            "INFRAESTRUCTURA", "SOFTWARE", "HARDWARE", "RED", "OTRO"
-        });
-        cmbTipo.SelectedIndex = 0;
-        mainLayout.Controls.Add(cmbTipo, 1, 3);
-
-        // ── Fila 4: Nombre del equipo ───────────────────────────
-        lblNombreEquipo = MkLabel("NOMBRE DEL EQUIPO");
-        lblNombreEquipo.Dock = DockStyle.Fill;
-        lblNombreEquipo.TextAlign = ContentAlignment.MiddleLeft;
-        mainLayout.Controls.Add(lblNombreEquipo, 0, 4);
-
-        txtNombreEquipo = MkTextBox("Ingrese el nombre del equipo");
-        txtNombreEquipo.Dock = DockStyle.Fill;
-        txtNombreEquipo.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-        mainLayout.Controls.Add(txtNombreEquipo, 1, 4);
-
-        // ── Fila 5: Fecha y hora ────────────────────────────────
-        lblFechaHora = MkLabel("FECHA Y HORA");
-        lblFechaHora.Dock = DockStyle.Fill;
-        lblFechaHora.TextAlign = ContentAlignment.MiddleLeft;
-        mainLayout.Controls.Add(lblFechaHora, 0, 5);
-
-        // Panel para organizar fecha y hora horizontalmente
-        Panel fechaHoraPanel = new Panel
-        {
-            Height = 40,
-            Dock = DockStyle.Fill
+            Text = "REGISTRAR INCIDENCIA",
+            Font = new Font("Segoe UI", 19F, FontStyle.Bold),
+            ForeColor = UiAssets.AzulPrincipal,
+            Location = new Point(340, 24),
+            Size = new Size(430, 42)
         };
 
-        dtpFecha = new DateTimePicker
+        var subrayado = new Panel
         {
-            Left = 0,
-            Top = 2,
-            Width = 180,
-            Height = 36,
-            Format = DateTimePickerFormat.Short,
-            Font = new Font("Segoe UI", 10F),
-            Anchor = AnchorStyles.Left
+            BackColor = UiAssets.AzulPrincipal,
+            Location = new Point(342, 68),
+            Size = new Size(62, 5)
         };
+        UiAssets.RedondearControl(subrayado, 3);
 
-        nudHora = new NumericUpDown
+        var cardGeneral = CrearTarjeta(340, 96, 690, 356);
+        CrearInfoGeneral(cardGeneral);
+
+        var cardAdicional = CrearTarjeta(340, 470, 690, 282);
+        CrearInfoAdicional(cardAdicional);
+
+        btnCancelar = new Button
         {
-            Left = 190,
-            Top = 2,
-            Width = 65,
-            Height = 36,
-            Minimum = 0,
-            Maximum = 23,
-            Value = DateTime.Now.Hour,
+            Text = "Cancelar",
             Font = new Font("Segoe UI", 12F, FontStyle.Bold),
-            TextAlign = HorizontalAlignment.Center,
-            Anchor = AnchorStyles.Left
-        };
-
-        Label lblDosLocal = new Label
-        {
-            Text = ":",
-            Left = 260,
-            Top = 2,
-            Width = 15,
-            Height = 36,
-            Font = new Font("Segoe UI", 14F, FontStyle.Bold),
-            TextAlign = ContentAlignment.MiddleCenter,
-            ForeColor = Color.FromArgb(30, 30, 30),
-            Anchor = AnchorStyles.Left
-        };
-
-        nudMinuto = new NumericUpDown
-        {
-            Left = 280,
-            Top = 2,
-            Width = 65,
-            Height = 36,
-            Minimum = 0,
-            Maximum = 59,
-            Value = DateTime.Now.Minute,
-            Font = new Font("Segoe UI", 12F, FontStyle.Bold),
-            TextAlign = HorizontalAlignment.Center,
-            Anchor = AnchorStyles.Left
-        };
-
-        fechaHoraPanel.Controls.AddRange(new Control[] { dtpFecha, nudHora, lblDosLocal, nudMinuto });
-        mainLayout.Controls.Add(fechaHoraPanel, 1, 5);
-
-        // ── Fila 6: Espaciador ──────────────────────────────────
-        Panel spacer2 = new Panel { Height = 10 };
-        mainLayout.Controls.Add(spacer2, 0, 6);
-        mainLayout.SetColumnSpan(spacer2, 2);
-
-        // ── Fila 7: Descripción ─────────────────────────────────
-        lblDescripcion = MkLabel("DESCRIPCION");
-        lblDescripcion.Dock = DockStyle.Fill;
-        lblDescripcion.TextAlign = ContentAlignment.MiddleLeft;
-        mainLayout.Controls.Add(lblDescripcion, 0, 7);
-
-        txtDescripcion = new TextBox
-        {
-            Multiline = true,
-            ScrollBars = ScrollBars.Vertical,
-            PlaceholderText = "Ingrese la descripción detallada de la incidencia...",
-            BorderStyle = BorderStyle.FixedSingle,
-            Font = new Font("Segoe UI", 10F),
+            ForeColor = Color.FromArgb(70, 78, 92),
             BackColor = Color.White,
-            Height = 100,
-            Dock = DockStyle.Fill,
-            Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom
-        };
-        mainLayout.Controls.Add(txtDescripcion, 1, 7);
-
-        // ── Fila 8: Espaciador ──────────────────────────────────
-        Panel spacer3 = new Panel { Height = 10 };
-        mainLayout.Controls.Add(spacer3, 0, 8);
-        mainLayout.SetColumnSpan(spacer3, 2);
-
-        // ── Fila 9: Evidencias ──────────────────────────────────
-        lblEvidencias = MkLabel("EVIDENCIAS");
-        lblEvidencias.Dock = DockStyle.Fill;
-        lblEvidencias.TextAlign = ContentAlignment.MiddleLeft;
-        mainLayout.Controls.Add(lblEvidencias, 0, 9);
-
-        Panel evidenciaPanel = new Panel
-        {
-            Height = 50,
-            Dock = DockStyle.Fill
-        };
-
-        btnAdjuntar = new Button
-        {
-            Text = "📎 ADJUNTAR ARCHIVO",
-            Left = 0,
-            Top = 5,
-            Width = 160,
-            Height = 40,
-            BackColor = Color.FromArgb(200, 40, 40),
-            ForeColor = Color.White,
             FlatStyle = FlatStyle.Flat,
-            Font = new Font("Segoe UI", 9F, FontStyle.Bold),
             Cursor = Cursors.Hand,
-            Anchor = AnchorStyles.Left
+            Location = new Point(340, 770),
+            Size = new Size(122, 48)
         };
-        btnAdjuntar.FlatAppearance.BorderSize = 0;
-        btnAdjuntar.Click += btnAdjuntar_Click;
-
-        lblEvidencia = new Label
-        {
-            Left = 170,
-            Top = 15,
-            Width = 350,
-            Height = 24,
-            ForeColor = Color.FromArgb(60, 60, 60),
-            Font = new Font("Segoe UI", 9F),
-            Text = "Ningún archivo seleccionado",
-            Anchor = AnchorStyles.Left | AnchorStyles.Right
-        };
-
-        evidenciaPanel.Controls.Add(btnAdjuntar);
-        evidenciaPanel.Controls.Add(lblEvidencia);
-        mainLayout.Controls.Add(evidenciaPanel, 1, 9);
-
-        // ── Fila 10: Espaciador ─────────────────────────────────
-        Panel spacer4 = new Panel { Height = 15 };
-        mainLayout.Controls.Add(spacer4, 0, 10);
-        mainLayout.SetColumnSpan(spacer4, 2);
-
-        // ── Fila 11: Botón Enviar ───────────────────────────────
-        Panel buttonPanel = new Panel
-        {
-            Height = 60,
-            Dock = DockStyle.Fill
-        };
+        btnCancelar.FlatAppearance.BorderColor = UiAssets.AzulPrincipal;
+        btnCancelar.FlatAppearance.BorderSize = 2;
+        btnCancelar.Click += (s, e) => UiAssets.AbrirCerrandoActual(this, new GestionIncidenciasForm());
+        UiAssets.RedondearControl(btnCancelar, 8);
 
         btnEnviar = new Button
         {
-            Text = "✓ ENVIAR REPORTE",
-            Width = 240,
-            Height = 45,
-            BackColor = Color.FromArgb(30, 30, 30),
+            Text = "✈  Registrar Incidencia",
+            Font = new Font("Segoe UI", 13F, FontStyle.Bold),
             ForeColor = Color.White,
+            BackColor = UiAssets.AzulPrincipal,
             FlatStyle = FlatStyle.Flat,
-            Font = new Font("Segoe UI", 11F, FontStyle.Bold),
             Cursor = Cursors.Hand,
-            Anchor = AnchorStyles.None
+            Location = new Point(572, 770),
+            Size = new Size(238, 48)
         };
         btnEnviar.FlatAppearance.BorderSize = 0;
         btnEnviar.Click += btnEnviar_Click;
+        UiAssets.RedondearControl(btnEnviar, 8);
 
-        // Centrar botón horizontalmente
-        btnEnviar.Location = new Point((buttonPanel.Width - btnEnviar.Width) / 2, 8);
-        buttonPanel.Controls.Add(btnEnviar);
-        buttonPanel.Resize += (s, e) =>
+        panel.Resize += (s, e) =>
         {
-            btnEnviar.Location = new Point((buttonPanel.Width - btnEnviar.Width) / 2, 8);
+            int available = Math.Max(760, panel.ClientSize.Width - 330);
+            int cardW = Math.Min(760, available - 90);
+            int startX = 330 + Math.Max(36, (available - cardW) / 2);
+
+            lblTitulo.Left = startX;
+            subrayado.Left = startX + 2;
+            cardGeneral.Left = startX;
+            cardAdicional.Left = startX;
+            cardGeneral.Width = cardW;
+            cardAdicional.Width = cardW;
+
+            AjustarTarjetaGeneral(cardGeneral);
+            AjustarTarjetaAdicional(cardAdicional);
+
+            btnCancelar.Left = startX;
+            btnEnviar.Left = startX + 232;
+            btnCancelar.Top = cardAdicional.Bottom + 22;
+            btnEnviar.Top = btnCancelar.Top;
+            panel.AutoScrollMinSize = new Size(1020, btnEnviar.Bottom + 32);
         };
 
-        mainLayout.Controls.Add(buttonPanel, 0, 11);
-        mainLayout.SetColumnSpan(buttonPanel, 2);
-
-        // Agregar layout al contenedor principal
-        mainContainer.Controls.Add(mainLayout);
-
-        // Agregar todo al formulario
-        this.Controls.Add(mainContainer);
-        this.Controls.Add(panelHeader);
-
-        // Asegurar que el layout se ajuste al ancho del contenedor
-        this.Resize += (s, e) =>
+        panel.Controls.AddRange(new Control[]
         {
-            if (mainContainer.Width > 0)
-            {
-                mainLayout.Width = mainContainer.Width - 20;
-            }
-        };
+            lblTitulo, subrayado, cardGeneral, cardAdicional, btnCancelar, btnEnviar
+        });
+        return panel;
     }
 
-    // ── Helpers actualizados ────────────────────────────────────
-    private static Label MkLabel(string text) => new Label
+    private Panel CrearTarjeta(int x, int y, int width, int height)
     {
-        Text = text,
-        AutoSize = true,
-        MinimumSize = new Size(150, 35),
-        Font = new Font("Segoe UI", 9F, FontStyle.Bold),
-        ForeColor = Color.FromArgb(50, 50, 50),
+        var panel = new Panel
+        {
+            Location = new Point(x, y),
+            Size = new Size(width, height),
+            BackColor = Color.White
+        };
+        panel.Paint += (s, e) =>
+        {
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            using var path = UiAssets.CrearRectanguloRedondo(new Rectangle(0, 0, panel.Width - 1, panel.Height - 1), 10);
+            using var shadow = new SolidBrush(Color.FromArgb(18, 0, 0, 0));
+            using var pen = new Pen(Color.FromArgb(226, 232, 241), 1);
+            e.Graphics.FillPath(Brushes.White, path);
+            e.Graphics.DrawPath(pen, path);
+        };
+        return panel;
+    }
+
+    private void CrearInfoGeneral(Panel card)
+    {
+        card.Controls.Add(CrearTituloSeccion("⌘", "Información general", 24, 24));
+
+        card.Controls.Add(CrearEtiqueta("Título de la incidencia *", 24, 76));
+        txtQuienReporta = CrearCaja("Ingresa un título breve y descriptivo", 24, 104, 642, 42);
+        card.Controls.Add(txtQuienReporta);
+
+        card.Controls.Add(CrearEtiqueta("Categoría *", 24, 168));
+        cmbTipo = CrearCombo(24, 196, 310, new[] { "Selecciona una categoría", "Hardware", "Software", "Red", "Infraestructura", "Otro" });
+        card.Controls.Add(cmbTipo);
+
+        card.Controls.Add(CrearEtiqueta("Prioridad *", 378, 168));
+        cmbPrioridad = CrearCombo(378, 196, 310, new[] { "Selecciona prioridad", "Alta", "Media", "Baja" });
+        card.Controls.Add(cmbPrioridad);
+
+        card.Controls.Add(CrearEtiqueta("Descripción *", 24, 248));
+        txtDescripcion = new TextBox
+        {
+            PlaceholderText = "Describe la incidencia con el mayor detalle posible...",
+            Multiline = true,
+            ScrollBars = ScrollBars.Vertical,
+            BorderStyle = BorderStyle.FixedSingle,
+            Font = new Font("Segoe UI", 10.5F),
+            Location = new Point(24, 276),
+            Size = new Size(642, 78)
+        };
+        card.Controls.Add(txtDescripcion);
+
+        card.Controls.Add(new Label
+        {
+            Text = "Mínimo 20 caracteres",
+            Font = new Font("Segoe UI", 9F),
+            ForeColor = Color.FromArgb(82, 91, 112),
+            Location = new Point(24, 356),
+            Size = new Size(180, 22)
+        });
+
+        txtNombreEquipo = new TextBox { Text = "Pendiente", Visible = false };
+        dtpFecha = new DateTimePicker { Value = DateTime.Now, Visible = false };
+        nudHora = new NumericUpDown { Value = DateTime.Now.Hour, Maximum = 23, Visible = false };
+        nudMinuto = new NumericUpDown { Value = DateTime.Now.Minute, Maximum = 59, Visible = false };
+        card.Controls.AddRange(new Control[] { txtNombreEquipo, dtpFecha, nudHora, nudMinuto });
+    }
+
+    private void CrearInfoAdicional(Panel card)
+    {
+        card.Controls.Add(CrearTituloSeccion("⌕", "Información adicional", 24, 24));
+
+        card.Controls.Add(CrearEtiqueta("Adjuntar archivos (opcional)", 24, 76));
+        btnAdjuntar = new Button
+        {
+            Text = "☁   Arrastra y suelta archivos aquí\r\no selecciona archivos",
+            Font = new Font("Segoe UI", 10F),
+            ForeColor = UiAssets.AzulPrincipal,
+            BackColor = Color.White,
+            FlatStyle = FlatStyle.Flat,
+            Cursor = Cursors.Hand,
+            Location = new Point(24, 106),
+            Size = new Size(642, 76),
+            TextAlign = ContentAlignment.MiddleCenter
+        };
+        btnAdjuntar.FlatAppearance.BorderColor = Color.FromArgb(190, 202, 218);
+        btnAdjuntar.FlatAppearance.BorderSize = 1;
+        btnAdjuntar.Click += btnAdjuntar_Click;
+        btnAdjuntar.Paint += (s, e) =>
+        {
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            using var pen = new Pen(Color.FromArgb(185, 198, 216), 1) { DashStyle = DashStyle.Dash };
+            e.Graphics.DrawRectangle(pen, 1, 1, btnAdjuntar.Width - 3, btnAdjuntar.Height - 3);
+        };
+        card.Controls.Add(btnAdjuntar);
+
+        lblEvidencia = new Label
+        {
+            Text = "Ningún archivo seleccionado",
+            Font = new Font("Segoe UI", 8.5F),
+            ForeColor = Color.FromArgb(90, 98, 116),
+            Location = new Point(24, 184),
+            Size = new Size(642, 22),
+            TextAlign = ContentAlignment.MiddleCenter
+        };
+        card.Controls.Add(lblEvidencia);
+
+        card.Controls.Add(CrearEtiqueta("Etiquetas (opcional)", 24, 210));
+        txtEtiquetas = CrearCaja("Ej: red, pantalla, hardware, etc.", 24, 238, 642, 42);
+        card.Controls.Add(txtEtiquetas);
+
+        card.Controls.Add(new Label
+        {
+            Text = "Separa las etiquetas con comas",
+            Font = new Font("Segoe UI", 9F),
+            ForeColor = Color.FromArgb(82, 91, 112),
+            Location = new Point(24, 284),
+            Size = new Size(230, 22)
+        });
+    }
+
+    private void AjustarTarjetaGeneral(Panel card)
+    {
+        int innerW = card.Width - 48;
+        txtQuienReporta.Width = innerW;
+        txtDescripcion.Width = innerW;
+
+        int gap = 36;
+        int comboW = Math.Max(250, (innerW - gap) / 2);
+        cmbTipo.Width = comboW;
+        cmbPrioridad.Left = 24 + comboW + gap;
+        cmbPrioridad.Width = comboW;
+
+        foreach (Control control in card.Controls)
+            if (control.Location.X >= 378 && control != cmbPrioridad)
+                control.Left = cmbPrioridad.Left;
+    }
+
+    private void AjustarTarjetaAdicional(Panel card)
+    {
+        int innerW = card.Width - 48;
+        btnAdjuntar.Width = innerW;
+        lblEvidencia.Width = innerW;
+        txtEtiquetas.Width = innerW;
+    }
+
+    private Label CrearTituloSeccion(string icono, string texto, int x, int y) => new()
+    {
+        Text = $"{icono}   {texto}",
+        Font = new Font("Segoe UI", 12F, FontStyle.Bold),
+        ForeColor = UiAssets.AzulPrincipal,
+        Location = new Point(x, y),
+        Size = new Size(360, 32),
         TextAlign = ContentAlignment.MiddleLeft
     };
 
-    private static TextBox MkTextBox(string placeholder) => new TextBox
+    private Label CrearEtiqueta(string texto, int x, int y) => new()
     {
-        PlaceholderText = placeholder,
-        Height = 40,
-        BorderStyle = BorderStyle.FixedSingle,
-        Font = new Font("Segoe UI", 10F),
-        BackColor = Color.White,
-        Margin = new Padding(0, 3, 0, 3)
+        Text = texto,
+        Font = new Font("Segoe UI", 9.5F, FontStyle.Bold),
+        ForeColor = UiAssets.AzulOscuro,
+        Location = new Point(x, y),
+        Size = new Size(260, 24)
     };
 
+    private TextBox CrearCaja(string placeholder, int x, int y, int width, int height) => new()
+    {
+        PlaceholderText = placeholder,
+        BorderStyle = BorderStyle.FixedSingle,
+        Font = new Font("Segoe UI", 10.5F),
+        Location = new Point(x, y),
+        Size = new Size(width, height)
+    };
+
+    private ComboBox CrearCombo(int x, int y, int width, string[] opciones)
+    {
+        var combo = new ComboBox
+        {
+            DropDownStyle = ComboBoxStyle.DropDownList,
+            Font = new Font("Segoe UI", 10.5F),
+            Location = new Point(x, y),
+            Size = new Size(width, 42)
+        };
+        combo.Items.AddRange(opciones);
+        combo.SelectedIndex = 0;
+        return combo;
+    }
 }

@@ -23,10 +23,11 @@ partial class DashboardForm
     {
         // ── Form ────────────────────────────────────────────────
         Text            = "GALAB - Dashboard";
-        Size            = new Size(940, 620);
+        Size            = new Size(1280, 760);
+        MinimumSize     = new Size(1050, 680);
         StartPosition   = FormStartPosition.CenterScreen;
-        FormBorderStyle = FormBorderStyle.FixedSingle;
-        MaximizeBox     = false;
+        FormBorderStyle = FormBorderStyle.Sizable;
+        MaximizeBox     = true;
         BackColor       = Color.FromArgb(173, 216, 230);
         Font            = new Font("Segoe UI", 10F);
 
@@ -34,7 +35,7 @@ partial class DashboardForm
         panelHeader = new Panel
         {
             Left      = 20, Top = 10,
-            Width     = 880, Height = 60,
+            Width     = 1180, Height = 76,
             BackColor = Color.FromArgb(240, 235, 245)
         };
         panelHeader.Paint += (s, e) =>
@@ -73,8 +74,8 @@ partial class DashboardForm
         lblTituloSeccion = new Label
         {
             Text      = "INCIDENCIAS REPORTADAS",
-            Left      = 20, Top = 82,
-            Width     = 880,
+            Left      = 20, Top = 98,
+            Width     = 1180,
             Font      = new Font("Segoe UI", 9F, FontStyle.Bold),
             ForeColor = Color.FromArgb(50, 50, 50),
             TextAlign = ContentAlignment.MiddleCenter
@@ -83,8 +84,8 @@ partial class DashboardForm
         // ── Panel gráfica ────────────────────────────────────────
         panelGrafica = new Panel
         {
-            Left      = 20, Top = 108,
-            Width     = 580, Height = 340,
+            Left      = 20, Top = 128,
+            Width     = 760, Height = 420,
             BackColor = Color.White
         };
         panelGrafica.Paint += PanelGrafica_Paint;
@@ -92,8 +93,8 @@ partial class DashboardForm
         // ── Panel notificaciones ─────────────────────────────────
         panelNotificaciones = new Panel
         {
-            Left        = 620, Top = 108,
-            Width       = 280, Height = 340,
+            Left        = 805, Top = 128,
+            Width       = 380, Height = 420,
             BackColor   = Color.Transparent,
             AutoScroll  = true
         };
@@ -102,7 +103,7 @@ partial class DashboardForm
         btnRegistrar = new Button
         {
             Text      = "REGISTRAR NUEVA INCIDENCIA",
-            Left      = 20, Top = 462,
+            Left      = 20, Top = 570,
             Width     = 260, Height = 40,
             BackColor = Color.FromArgb(37, 99, 235),
             ForeColor = Color.White,
@@ -117,7 +118,7 @@ partial class DashboardForm
         btnVerLista = new Button
         {
             Text      = "VER LISTA COMPLETA",
-            Left      = 300, Top = 462,
+            Left      = 300, Top = 570,
             Width     = 200, Height = 40,
             BackColor = Color.FromArgb(30, 30, 30),
             ForeColor = Color.White,
@@ -135,5 +136,19 @@ partial class DashboardForm
             panelGrafica, panelNotificaciones,
             btnRegistrar, btnVerLista
         });
+
+        Resize += (s, e) =>
+        {
+            int ancho = ClientSize.Width - 40;
+            panelHeader.Width = ancho;
+            lblTituloSeccion.Width = ancho;
+            panelGrafica.Width = Math.Max(520, (int)(ancho * 0.66));
+            panelGrafica.Height = Math.Max(320, ClientSize.Height - 220);
+            panelNotificaciones.Left = panelGrafica.Right + 24;
+            panelNotificaciones.Width = Math.Max(260, ancho - panelGrafica.Width - 24);
+            panelNotificaciones.Height = panelGrafica.Height;
+            btnRegistrar.Top = panelGrafica.Bottom + 22;
+            btnVerLista.Top = btnRegistrar.Top;
+        };
     }
 }

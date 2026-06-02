@@ -194,28 +194,48 @@ partial class LoginForm
         panelTopAzul.Width = panelLogin.Width;
 
         int pw = panelLogin.Width;
-        int formWidth = Math.Min(440, Math.Max(340, pw - 170));
+        int formWidth = Math.Min(480, Math.Max(360, pw - 180));
         int left = (pw - formWidth) / 2;
 
-        picLogo.SetBounds((pw - 140) / 2, 76, 140, 110);
-        lblGalab.SetBounds(0, 184, pw, 50);
-        lblSubtitulo.SetBounds(0, 232, pw, 32);
+        // Centrado vertical dinámico
+        int contentHeight = 610;
+        int startY = Math.Max(76, (panelLogin.Height - 78 - contentHeight) / 2);
 
-        int tabY = 305;
+        int txtH = formWidth > 420 ? 48 : 44;
+        int btnH = formWidth > 420 ? 52 : 48;
+        txtUsuario.Font = new Font("Segoe UI", formWidth > 420 ? 12F : 11F);
+        txtContrasena.Font = new Font("Segoe UI", formWidth > 420 ? 12F : 11F);
+        btnIniciarSesion.Font = new Font("Segoe UI", formWidth > 420 ? 13F : 12F, FontStyle.Bold);
+
+        int picH = 110;
+        int tabH = 48;
+        int lblH = 24;
+
+        picLogo.SetBounds((pw - 140) / 2, startY, 140, picH);
+        lblGalab.SetBounds(0, startY + 115, pw, 50);
+        lblSubtitulo.SetBounds(0, startY + 165, pw, 32);
+
+        int tabY = startY + 225;
         int tabW = formWidth / 2;
-        btnEstudiante.SetBounds(left, tabY, tabW, 48);
-        btnAdministrador.SetBounds(left + tabW, tabY, tabW, 48);
+        btnEstudiante.SetBounds(left, tabY, tabW, tabH);
+        btnAdministrador.SetBounds(left + tabW, tabY, tabW, tabH);
 
-        lblUsuario.SetBounds(left, 392, formWidth, 24);
-        txtUsuario.SetBounds(left, 418, formWidth, 44);
+        int lblUsrY = tabY + tabH + 35;
+        lblUsuario.SetBounds(left, lblUsrY, formWidth, lblH);
+        int txtUsrY = lblUsrY + lblH + 4;
+        txtUsuario.SetBounds(left, txtUsrY, formWidth, txtH);
 
-        lblContrasena.SetBounds(left, 488, formWidth, 24);
-        txtContrasena.SetBounds(left, 514, formWidth, 44);
-        btnVerPassword.SetBounds(left + formWidth - 44, 518, 36, 34);
+        int lblPwdY = txtUsrY + txtH + 20;
+        lblContrasena.SetBounds(left, lblPwdY, formWidth, lblH);
+        int txtPwdY = lblPwdY + lblH + 4;
+        txtContrasena.SetBounds(left, txtPwdY, formWidth, txtH);
+        btnVerPassword.SetBounds(left + formWidth - 44, txtPwdY + (txtH - 34) / 2, 36, 34);
 
-        btnIniciarSesion.SetBounds(left, 590, formWidth, 48);
+        int btnY = txtPwdY + txtH + 28;
+        btnIniciarSesion.SetBounds(left, btnY, formWidth, btnH);
+
         lblForgot.Left = left + (formWidth - lblForgot.Width) / 2;
-        lblForgot.Top = 664;
+        lblForgot.Top = btnY + btnH + 24;
 
         panelFooter.SetBounds(0, panelLogin.Height - 78, pw, 78);
     }

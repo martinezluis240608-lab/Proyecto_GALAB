@@ -207,7 +207,7 @@ public class GestionIncidenciasForm : Form
         var registrar = new Button
         {
             Text = "⊕   Registrar nueva incidencia",
-            Font = new Font("Segoe UI", 17F, FontStyle.Bold),
+            Font = new Font("Segoe UI", 18F, FontStyle.Bold),
             ForeColor = Color.White,
             BackColor = Color.FromArgb(238, 0, 100),
             FlatStyle = FlatStyle.Flat,
@@ -221,32 +221,97 @@ public class GestionIncidenciasForm : Form
 
         var historial = new Button
         {
-            Text = "▤   Consultar historial\n     Revisa el historial de tus incidencias.",
-            Font = new Font("Segoe UI", 12F, FontStyle.Bold),
+            Text = "Consultar historial",
+            Font = new Font("Segoe UI", 18F, FontStyle.Bold),
             ForeColor = Color.Black,
             BackColor = Color.FromArgb(223, 242, 255),
             FlatStyle = FlatStyle.Flat,
             Cursor = Cursors.Hand,
             Location = new Point(530, 510),
             Size = new Size(390, 74),
-            TextAlign = ContentAlignment.MiddleLeft,
-            Padding = new Padding(28, 0, 0, 0)
+            TextAlign = ContentAlignment.MiddleCenter,
+            Padding = new Padding(0)
         };
         historial.FlatAppearance.BorderColor = Color.FromArgb(58, 174, 220);
         historial.FlatAppearance.BorderSize = 1;
         historial.Click += (s, e) =>
             MessageBox.Show("El historial de incidencias se conectará cuando exista una base de datos. Por ahora el botón ya responde correctamente.", "Historial", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
+        UiAssets.RedondearControl(registrar, 12);
+        UiAssets.RedondearControl(historial, 12);
+
         panel.Resize += (s, e) =>
         {
-            int ancho = Math.Max(940, panel.ClientSize.Width);
+            int clientW = panel.ClientSize.Width;
+            int clientH = panel.ClientSize.Height;
+
+            int ancho = Math.Max(940, clientW);
+            int alto = Math.Max(600, clientH);
             titulo.Width = ancho;
-            computadora.Left = ancho - 315;
-            cardActivas.Left = Math.Max(52, ancho / 2 - 410);
-            cardProceso.Left = cardActivas.Right + 70;
-            cardResueltas.Left = cardProceso.Right + 70;
-            registrar.Left = Math.Max(52, ancho / 2 - 360);
-            historial.Left = registrar.Right + 48;
+
+            int layoutWidth = Math.Min(1120, Math.Max(900, ancho - 110));
+            int startX = (ancho - layoutWidth) / 2;
+
+            // Alinea cabecera con el layout
+            lblGalab.Left = startX + 4;
+            descripcion.Left = startX + 8;
+            computadora.Left = startX + layoutWidth - computadora.Width;
+
+            // Centrado de tarjetas
+            int cardW = Math.Min(310, Math.Max(250, (layoutWidth - 80) / 3));
+            int cardH = Math.Min(130, Math.Max(105, alto / 7));
+            cardActivas.Size = cardProceso.Size = cardResueltas.Size = new Size(cardW, cardH);
+
+            int totalCardsWidth = cardW * 3 + 40 * 2;
+            int startCardsX = startX + (layoutWidth - totalCardsWidth) / 2;
+            cardActivas.Left = startCardsX;
+            cardProceso.Left = cardActivas.Right + 40;
+            cardResueltas.Left = cardProceso.Right + 40;
+
+            // Centrado de botones e igualación de tamaños
+            int registrarW = Math.Min(470, Math.Max(410, layoutWidth / 2 - 32));
+            int historialW = registrarW;
+
+            int contentGroupHeight;
+            int startGroupY;
+
+            if (ancho < 920)
+            {
+                // Apilado vertical si es angosto para que no se corten
+                int activeBtnW = Math.Min(400, ancho - 100);
+                registrar.Width = activeBtnW;
+                historial.Width = activeBtnW;
+                registrar.Left = (ancho - activeBtnW) / 2;
+                historial.Left = registrar.Left;
+
+                contentGroupHeight = cardH + 30 + 74 + 16 + 74;
+                int remainingHeight = alto - 280;
+                startGroupY = Math.Max(320, 270 + (remainingHeight - contentGroupHeight) / 2);
+
+                cardActivas.Top = cardProceso.Top = cardResueltas.Top = startGroupY;
+                registrar.Top = startGroupY + cardH + 30;
+                historial.Top = registrar.Top + 74 + 16;
+            }
+            else
+            {
+                // Lado a lado
+                registrar.Width = registrarW;
+                historial.Width = historialW;
+
+                int totalBtnsWidth = registrarW + 48 + historialW;
+                int startBtnsX = (ancho - totalBtnsWidth) / 2;
+
+                registrar.Left = startBtnsX;
+                historial.Left = registrar.Right + 48;
+
+                contentGroupHeight = cardH + 78 + 74;
+                int remainingHeight = alto - 280;
+                startGroupY = Math.Max(320, 270 + (remainingHeight - contentGroupHeight) / 2);
+
+                cardActivas.Top = cardProceso.Top = cardResueltas.Top = startGroupY;
+                registrar.Top = historial.Top = startGroupY + cardH + 78;
+            }
+
             panel.AutoScrollMinSize = new Size(980, 660);
         };
 
@@ -265,7 +330,7 @@ public class GestionIncidenciasForm : Form
         var panel = new Panel
         {
             Location = new Point(x, y),
-            Size = new Size(235, 92),
+            Size = new Size(285, 120),
             BackColor = Color.White
         };
         panel.Paint += (s, e) =>
@@ -279,29 +344,60 @@ public class GestionIncidenciasForm : Form
         panel.Controls.Add(new Label
         {
             Text = titulo,
-            Font = new Font("Segoe UI", 13F, FontStyle.Bold),
+            Font = new Font("Segoe UI", 15F, FontStyle.Bold),
             ForeColor = Color.Black,
             Location = new Point(22, 8),
-            Size = new Size(160, 30)
+            Size = new Size(220, 34),
+            Tag = "titulo"
         });
         panel.Controls.Add(new Label
         {
             Text = total,
-            Font = new Font("Segoe UI", 22F, FontStyle.Bold),
+            Font = new Font("Segoe UI", 28F, FontStyle.Bold),
             ForeColor = color,
-            Location = new Point(62, 42),
-            Size = new Size(70, 40),
-            TextAlign = ContentAlignment.MiddleCenter
+            Location = new Point(56, 52),
+            Size = new Size(90, 48),
+            TextAlign = ContentAlignment.MiddleCenter,
+            Tag = "total"
         });
         panel.Controls.Add(new Label
         {
             Text = icono,
-            Font = new Font("Segoe UI Symbol", 32F, FontStyle.Bold),
+            Font = new Font("Segoe UI Symbol", 38F, FontStyle.Bold),
             ForeColor = color == Color.FromArgb(235, 145, 12) ? Color.Black : color,
-            Location = new Point(145, 32),
-            Size = new Size(70, 48),
-            TextAlign = ContentAlignment.MiddleCenter
+            Location = new Point(190, 44),
+            Size = new Size(78, 58),
+            TextAlign = ContentAlignment.MiddleCenter,
+            Tag = "icono"
         });
+
+        panel.Resize += (s, e) =>
+        {
+            foreach (Control control in panel.Controls)
+            {
+                if (control.Tag?.ToString() == "titulo")
+                {
+                    control.Left = 22;
+                    control.Top = 10;
+                    control.Width = panel.Width - 44;
+                    control.Height = 36;
+                }
+                else if (control.Tag?.ToString() == "total")
+                {
+                    control.Left = 36;
+                    control.Top = panel.Height - 68;
+                    control.Width = 100;
+                    control.Height = 52;
+                }
+                else if (control.Tag?.ToString() == "icono")
+                {
+                    control.Left = panel.Width - 92;
+                    control.Top = panel.Height - 74;
+                    control.Width = 76;
+                    control.Height = 62;
+                }
+            }
+        };
 
         return panel;
     }

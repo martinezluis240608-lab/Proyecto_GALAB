@@ -248,22 +248,42 @@ public partial class AyudaForm : Form
 
         contenedor.Resize += (s, e) =>
         {
-            int anchoDisponible = Math.Max(720, contenedor.ClientSize.Width - 80);
-            int anchoCard = (anchoDisponible - 24) / 2;
-            manual.Width = anchoCard;
-            material.Width = anchoCard;
-            material.Left = manual.Right + 24;
+            int anchoDisponible;
+            int leftMargin;
+            int maxAncho = 1140;
+
+            if (contenedor.ClientSize.Width > maxAncho + 64)
+            {
+                anchoDisponible = maxAncho;
+                leftMargin = (contenedor.ClientSize.Width - maxAncho) / 2;
+            }
+            else
+            {
+                leftMargin = 32;
+                anchoDisponible = Math.Max(500, contenedor.ClientSize.Width - 64);
+            }
+
+            // Alinear cabecera
+            icono.Left = leftMargin - 4;
+            titulo.Left = leftMargin + 84;
+            descripcion.Left = leftMargin;
 
             if (contenedor.ClientSize.Width < 980)
             {
+                manual.Left = leftMargin;
                 manual.Width = anchoDisponible;
+                material.Left = leftMargin;
                 material.Width = anchoDisponible;
-                material.Left = 32;
                 material.Top = manual.Bottom + 22;
                 contenedor.AutoScrollMinSize = new Size(0, material.Bottom + 40);
             }
             else
             {
+                int anchoCard = (anchoDisponible - 24) / 2;
+                manual.Left = leftMargin;
+                manual.Width = anchoCard;
+                material.Left = manual.Right + 24;
+                material.Width = anchoCard;
                 material.Top = manual.Top;
                 contenedor.AutoScrollMinSize = new Size(0, Math.Max(manual.Bottom, material.Bottom) + 40);
             }

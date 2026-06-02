@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -104,37 +104,23 @@ namespace Proyecto_GALAB.Views
 
             this.Controls.Add(sidebar);
 
-            int y = 120;
+            int y = 56;
 
-            AgregarBoton(sidebar, "⌂   Inicio", y);
+            sidebar.Controls.Add(UiAssets.CrearBotonSidebar("⌂", "Inicio", y, false, () => UiAssets.AbrirCerrandoActual(this, new PrincipalForm())));
             y += 70;
 
-            AgregarBoton(sidebar, "☰   Gestión de incidencias", y);
+            sidebar.Controls.Add(UiAssets.CrearBotonSidebar("☰", "Gestión de incidencias", y, false, () => UiAssets.AbrirCerrandoActual(this, new GestionIncidenciasForm())));
             y += 70;
 
             // BOTÓN ACTIVO
-            Button btnPerfil = new Button()
-            {
-                Text = "●   Perfil",
-                Font = new Font("Segoe UI", 11, FontStyle.Bold),
-                ForeColor = azulPrincipal,
-                BackColor = Color.FromArgb(230, 240, 255),
-                FlatStyle = FlatStyle.Flat,
-                Size = new Size(258, 54),
-                Location = new Point(16, y),
-                TextAlign = ContentAlignment.MiddleLeft
-            };
-
-            btnPerfil.FlatAppearance.BorderSize = 0;
-
-            sidebar.Controls.Add(btnPerfil);
+            sidebar.Controls.Add(UiAssets.CrearBotonSidebar("●", "Perfil", y, true, null));
 
             y += 70;
 
-            AgregarBoton(sidebar, "☎   Contacto", y);
+            sidebar.Controls.Add(UiAssets.CrearBotonSidebar("☎", "Contacto", y, false, () => UiAssets.AbrirCerrandoActual(this, new ContactoForm())));
             y += 70;
 
-            AgregarBoton(sidebar, "◎   Ayuda", y);
+            sidebar.Controls.Add(UiAssets.CrearBotonSidebar("◎", "Ayuda", y, false, () => UiAssets.AbrirCerrandoActual(this, new AyudaForm())));
 
             // ===== BOTÓN CERRAR SESIÓN =====
             Button btnCerrar = new Button()
@@ -148,6 +134,7 @@ namespace Proyecto_GALAB.Views
                 BackColor = Color.White,
                 Cursor = Cursors.Hand
             };
+            sidebar.Resize += (s, e) => btnCerrar.Top = sidebar.Height - 78;
 
             btnCerrar.FlatAppearance.BorderColor = azulPrincipal;
             btnCerrar.FlatAppearance.BorderSize = 1;
@@ -158,18 +145,18 @@ namespace Proyecto_GALAB.Views
             };
 
             sidebar.Controls.Add(btnCerrar);
+            UiAssets.RedondearControl(btnCerrar, 8);
 
             // ===== CONTENIDO =====
             Panel contenido = new Panel()
             {
-                Location = new Point(280, 110),
-                Size = new Size(1600, 1200),
+                Dock = DockStyle.Fill,
                 BackColor = fondoGeneral,
                 AutoScroll = true
             };
 
             // IMPORTANTE PARA VISUALIZAR TODO
-            contenido.AutoScrollMinSize = new Size(1500, 1100);
+            contenido.AutoScrollMinSize = new Size(960, 660);
 
             this.Controls.Add(contenido);
 
@@ -177,11 +164,18 @@ namespace Proyecto_GALAB.Views
             Panel card = new Panel()
             {
                 BackColor = Color.White,
-                Size = new Size(1100, 650),
+                Size = new Size(920, 620),
                 Location = new Point(40, 40)
             };
 
             contenido.Controls.Add(card);
+            UiAssets.RedondearControl(card, 12);
+
+            contenido.Resize += (s, e) =>
+            {
+                card.Left = Math.Max(40, (contenido.ClientSize.Width - card.Width) / 2);
+                card.Top = Math.Max(40, (contenido.ClientSize.Height - card.Height) / 2);
+            };
 
             Label tituloPerfil = new Label()
             {
@@ -207,10 +201,10 @@ namespace Proyecto_GALAB.Views
             card.Controls.Add(foto);
 
             // DATOS
-            AgregarCampo(card, "Nombre completo:", NombreUsuarioActual, 300);
-            AgregarCampo(card, "Correo electrónico:", CorreoUsuarioActual, 380);
-            AgregarCampo(card, "Rol:", RolUsuarioActual, 460);
-            AgregarCampo(card, "Carrera:", CarreraUsuarioActual, 540);
+            AgregarCampo(card, "Nombre completo:", NombreUsuarioActual, 120);
+            AgregarCampo(card, "Correo electrónico:", CorreoUsuarioActual, 200);
+            AgregarCampo(card, "Rol:", RolUsuarioActual, 280);
+            AgregarCampo(card, "Carrera:", CarreraUsuarioActual, 360);
 
             // BOTÓN EDITAR
             Button btnEditar = new Button()
@@ -220,14 +214,15 @@ namespace Proyecto_GALAB.Views
                 ForeColor = Color.White,
                 BackColor = azulPrincipal,
                 FlatStyle = FlatStyle.Flat,
-                Size = new Size(200, 55),
-                Location = new Point(60, 540),
+                Size = new Size(200, 48),
+                Location = new Point(300, 460),
                 Cursor = Cursors.Hand
             };
 
             btnEditar.FlatAppearance.BorderSize = 0;
 
             card.Controls.Add(btnEditar);
+            UiAssets.RedondearControl(btnEditar, 8);
         }
 
         // ===== BOTONES MENU =====
@@ -281,7 +276,7 @@ namespace Proyecto_GALAB.Views
             Label lblTitulo = new Label()
             {
                 Text = titulo,
-                Font = new Font("Segoe UI", 12, FontStyle.Bold),
+                Font = new Font("Segoe UI", 11, FontStyle.Bold),
                 ForeColor = Color.Black,
                 AutoSize = true,
                 Location = new Point(300, y)
@@ -292,9 +287,9 @@ namespace Proyecto_GALAB.Views
             TextBox txt = new TextBox()
             {
                 Text = valor,
-                Font = new Font("Segoe UI", 11),
-                Size = new Size(500, 35),
-                Location = new Point(300, y + 35),
+                Font = new Font("Segoe UI", 10.5F),
+                Size = new Size(560, 32),
+                Location = new Point(300, y + 26),
                 ReadOnly = true
             };
 
