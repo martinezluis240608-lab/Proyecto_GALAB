@@ -1,5 +1,6 @@
 using Proyecto_GALAB.Interfaces;
 using Proyecto_GALAB.Models;
+using Proyecto_GALAB.Services;
 
 namespace Proyecto_GALAB.Presenters;
 
@@ -44,7 +45,7 @@ public class IncidenciaPresenter
             return;
         }
 
-        // Aquí conectarías la BD en el futuro
+        IncidenciaListadoStore.RegistrarDesdeIncidencia(incidencia);
         _view.MostrarMensaje("✅ Reporte enviado correctamente.");
         _view.LimpiarFormulario();
     }

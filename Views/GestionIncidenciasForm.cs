@@ -1,4 +1,5 @@
 using System.Drawing.Drawing2D;
+using Proyecto_GALAB.Services;
 
 namespace Proyecto_GALAB.Views;
 
@@ -203,9 +204,10 @@ public class GestionIncidenciasForm : Form
         };
         computadora.Paint += (s, e) => DibujarComputadoraGalab(e.Graphics, computadora.ClientRectangle);
 
-        var cardActivas = CrearCardEstado("Incidencias activas", "12", Color.FromArgb(210, 30, 55), "▯", 76, 340);
-        var cardProceso = CrearCardEstado("En proceso", "5", Color.FromArgb(235, 145, 12), "◷", 382, 340);
-        var cardResueltas = CrearCardEstado("Resueltas", "8", Color.FromArgb(10, 170, 55), "✓", 686, 340);
+        var resumen = new IncidenciaEstadisticasService().ObtenerResumen();
+        var cardActivas = CrearCardEstado("Incidencias activas", resumen.Activas.ToString(), Color.FromArgb(210, 30, 55), "▯", 76, 340);
+        var cardProceso = CrearCardEstado("En proceso", resumen.EnProceso.ToString(), Color.FromArgb(235, 145, 12), "◷", 382, 340);
+        var cardResueltas = CrearCardEstado("Resueltas", resumen.Resueltas.ToString(), Color.FromArgb(10, 170, 55), "✓", 686, 340);
 
         var registrar = new Button
         {

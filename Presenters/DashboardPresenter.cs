@@ -1,4 +1,5 @@
 using Proyecto_GALAB.Interfaces;
+using Proyecto_GALAB.Services;
 
 namespace Proyecto_GALAB.Presenters;
 
@@ -16,11 +17,10 @@ public class DashboardPresenter
 
     private void OnCargarDatos(object? sender, EventArgs e)
     {
-        // Aquí en el futuro conectas la BD
-        // Por ahora datos de ejemplo
-        _view.TotalEnviadas   = 12;
-        _view.TotalEnProgreso = 5;
-        _view.TotalResueltas  = 8;
+        var resumen = new IncidenciaEstadisticasService().ObtenerResumen();
+        _view.TotalEnviadas   = resumen.Activas;
+        _view.TotalEnProgreso = resumen.EnProceso;
+        _view.TotalResueltas  = resumen.Resueltas;
 
         var notificaciones = new List<(string admin, string estado, string tiempo)>
         {

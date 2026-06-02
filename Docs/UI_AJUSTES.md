@@ -8,12 +8,19 @@ Archivo: `Views/PrincipalForm.Designer.cs`
 
 - `lblDescripcion` se posiciona en `AjustarLayout()` entre `lblBienvenido` y la primera fila de botones.
 - `lblBienvenido` se aumento a mayor tamano visual (fuente y altura).
-- Botones principales:
-  - Gestion: rosa.
-  - Ayuda: amarillo.
-  - Contacto: verde.
-  - Perfil: azul claro.
+- Botones principales con color azul claro uniforme (estilo original).
 - Se incremento tamano minimo de botones y fuente para mejor legibilidad.
+
+## 4) Tarjetas de incidencias en cero (sin BD)
+
+Archivos:
+
+- `Services/IncidenciaEstadisticasService.cs`
+- `Views/GestionIncidenciasForm.cs`
+- `Presenters/DashboardPresenter.cs`
+
+Muestran **0** en Activas, En proceso y Resueltas hasta conectar base de datos.
+Ver tambien `Docs/ROLES_Y_NAVEGACION.md`.
 
 ## 2) Historial de incidencias
 

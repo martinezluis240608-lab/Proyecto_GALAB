@@ -281,6 +281,7 @@ partial class LoginForm
         btnAdministrador.BackColor = estudiante ? Color.White : azulPrincipal;
         btnAdministrador.ForeColor = estudiante ? azulPrincipal : Color.White;
         txtUsuario.PlaceholderText = estudiante ? "Ingrese su numero de control" : "Ingrese usuario administrador";
+        EstablecerRol(estudiante ? Models.RolUsuario.Estudiante : Models.RolUsuario.Administrador);
         txtUsuario.Focus();
     }
 

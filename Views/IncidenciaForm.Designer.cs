@@ -206,7 +206,7 @@ partial class IncidenciaForm
         };
         btnCancelar.FlatAppearance.BorderColor = UiAssets.AzulPrincipal;
         btnCancelar.FlatAppearance.BorderSize = 2;
-        btnCancelar.Click += (s, e) => UiAssets.AbrirCerrandoActual(this, new GestionIncidenciasForm());
+        btnCancelar.Click += (s, e) => UiAssets.NavegarAGestionIncidencias(this);
         UiAssets.RedondearControl(btnCancelar, 8);
 
         btnEnviar = new Button

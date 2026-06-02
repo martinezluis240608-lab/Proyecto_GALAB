@@ -67,7 +67,7 @@ public partial class IncidenciaForm : Form, IIncidenciaView
         int y = 56;
         sidebar.Controls.Add(UiAssets.CrearBotonSidebar("⌂", "Inicio", y, false, () => UiAssets.AbrirCerrandoActual(this, new PrincipalForm())));
         y += 72;
-        sidebar.Controls.Add(UiAssets.CrearBotonSidebar("☰", "Gestión de incidencias   ›", y, true, () => UiAssets.AbrirCerrandoActual(this, new GestionIncidenciasForm())));
+        sidebar.Controls.Add(UiAssets.CrearBotonSidebar("☰", "Gestión de incidencias   ›", y, true, () => UiAssets.NavegarAGestionIncidencias(this)));
         y += 72;
         sidebar.Controls.Add(UiAssets.CrearBotonSidebar("●", "Perfil", y, false, () => UiAssets.AbrirCerrandoActual(this, new PerfilForm())));
         y += 72;

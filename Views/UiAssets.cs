@@ -5,6 +5,8 @@ using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using Proyecto_GALAB.Services;
+using Proyecto_GALAB.Views.Admin;
 
 namespace Proyecto_GALAB.Views;
 
@@ -35,6 +37,14 @@ internal static class UiAssets
         return CargarPrimeraExistente(rutas);
     }
 
+    public static void NavegarAGestionIncidencias(Form actual)
+    {
+        if (SesionActual.EsAdministrador)
+            AbrirCerrandoActual(actual, new AdminGestionIncidenciasForm());
+        else
+            AbrirCerrandoActual(actual, new GestionIncidenciasForm());
+    }
+
     public static void AbrirCerrandoActual(Form actual, Form destino)
     {
         PrepararPantallaCompleta(destino);
@@ -54,6 +64,7 @@ internal static class UiAssets
 
     public static void CerrarSesion(Form actual)
     {
+        Services.SesionActual.Cerrar();
         var login = Application.OpenForms.OfType<LoginForm>().FirstOrDefault() ?? new LoginForm();
         PrepararPantallaCompleta(login);
         login.Show();
