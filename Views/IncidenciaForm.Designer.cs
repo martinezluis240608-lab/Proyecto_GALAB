@@ -14,7 +14,6 @@ partial class IncidenciaForm
     private Label lblTitulo;
     private TextBox txtQuienReporta;
     private ComboBox cmbTipo;
-    private ComboBox cmbPrioridad;
     private TextBox txtNombreEquipo;
     private DateTimePicker dtpFecha;
     private NumericUpDown nudHora;
@@ -283,13 +282,9 @@ partial class IncidenciaForm
         txtQuienReporta = CrearCaja("Ingresa un título breve y descriptivo", 24, 104, 642, 42);
         card.Controls.Add(txtQuienReporta);
 
-        card.Controls.Add(CrearEtiqueta("Categoría *", 24, 168));
-        cmbTipo = CrearCombo(24, 196, 310, new[] { "Selecciona una categoría", "Hardware", "Software", "Red", "Infraestructura", "Otro" });
+        card.Controls.Add(CrearEtiqueta("Tipo de incidencia *", 24, 168));
+        cmbTipo = CrearCombo(24, 196, 642, new[] { "Selecciona un tipo de incidencia", "Hardware y software", "Infraestructura" });
         card.Controls.Add(cmbTipo);
-
-        card.Controls.Add(CrearEtiqueta("Prioridad *", 378, 168));
-        cmbPrioridad = CrearCombo(378, 196, 310, new[] { "Selecciona prioridad", "Alta", "Media", "Baja" });
-        card.Controls.Add(cmbPrioridad);
 
         card.Controls.Add(CrearEtiqueta("Descripción *", 24, 248));
         txtDescripcion = new TextBox
@@ -377,17 +372,8 @@ partial class IncidenciaForm
     {
         int innerW = card.Width - 48;
         txtQuienReporta.Width = innerW;
+        cmbTipo.Width = innerW;
         txtDescripcion.Width = innerW;
-
-        int gap = 36;
-        int comboW = Math.Max(250, (innerW - gap) / 2);
-        cmbTipo.Width = comboW;
-        cmbPrioridad.Left = 24 + comboW + gap;
-        cmbPrioridad.Width = comboW;
-
-        foreach (Control control in card.Controls)
-            if (control.Location.X >= 378 && control != cmbPrioridad)
-                control.Left = cmbPrioridad.Left;
     }
 
     private void AjustarTarjetaAdicional(Panel card)

@@ -186,9 +186,12 @@ public class GestionIncidenciasForm : Form
         {
             Text = "Sistema de registro y seguimiento de\nincidencias en laboratorios de computo",
             Font = new Font("Segoe UI", 16F),
-            ForeColor = Color.Black,
+            ForeColor = UiAssets.AzulOscuro,
+            BackColor = Color.White,
             Location = new Point(52, 172),
-            Size = new Size(520, 86)
+            Size = new Size(520, 86),
+            AutoSize = false,
+            TextAlign = ContentAlignment.TopLeft
         };
 
         var computadora = new Panel
@@ -234,8 +237,7 @@ public class GestionIncidenciasForm : Form
         };
         historial.FlatAppearance.BorderColor = Color.FromArgb(58, 174, 220);
         historial.FlatAppearance.BorderSize = 1;
-        historial.Click += (s, e) =>
-            MessageBox.Show("El historial de incidencias se conectará cuando exista una base de datos. Por ahora el botón ya responde correctamente.", "Historial", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        historial.Click += (s, e) => UiAssets.AbrirCerrandoActual(this, new HistorialIncidenciasForm());
 
         UiAssets.RedondearControl(registrar, 12);
         UiAssets.RedondearControl(historial, 12);
@@ -317,10 +319,12 @@ public class GestionIncidenciasForm : Form
 
         panel.Controls.AddRange(new Control[]
         {
-            titulo, lblGalab, descripcion, computadora,
+            titulo, lblGalab, computadora,
             cardActivas, cardProceso, cardResueltas,
             registrar, historial
         });
+        panel.Controls.Add(descripcion);
+        descripcion.BringToFront();
 
         return panel;
     }

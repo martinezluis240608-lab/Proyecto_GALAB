@@ -37,7 +37,6 @@
             ClientSize = new Size(800, 450);
             Name = "PerfilForm";
             Text = "PerfilForm";
-            Load += PerfilForm_Load;
             ResumeLayout(false);
         }
 

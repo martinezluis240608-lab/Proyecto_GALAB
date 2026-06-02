@@ -133,8 +133,11 @@ partial class PrincipalForm
         {
             Text      = "GALAB es un sistema web para registrar y dar seguimiento a incidencias en\nlaboratorios de cómputo de manera rápida y organizada.",
             Font      = new Font("Segoe UI", 14F),
-            ForeColor = Color.FromArgb(80, 80, 80),
-            TextAlign = ContentAlignment.MiddleCenter,
+            ForeColor = Color.FromArgb(35, 45, 65),
+            BackColor = Color.White,
+            TextAlign = ContentAlignment.TopCenter,
+            AutoSize  = false,
+            UseMnemonic = false,
             Anchor    = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
         };
 
@@ -180,20 +183,13 @@ partial class PrincipalForm
         picLogoInstituto.Left = cw - 90;
         lblInstituto.Left     = cw - 300;
 
-        // Bienvenido
-        lblBienvenido.Left  = 0;    lblBienvenido.Top  = 108;
-        lblBienvenido.Width = cw - 2; lblBienvenido.Height = 50;
-
-        lblDescripcion.Left  = 20;  lblDescripcion.Top  = 168;
-        lblDescripcion.Width = cw - 40; lblDescripcion.Height = 50;
-
         // Escalado dinámico de botones de menú: tres arriba y uno abajo.
-        int bw = Math.Min(330, Math.Max(220, cw / 4));
-        int bh = Math.Min(135, Math.Max(95, ch / 8));
+        int bw = Math.Min(370, Math.Max(250, cw / 3));
+        int bh = Math.Min(160, Math.Max(120, ch / 6));
         int gap = Math.Min(38, Math.Max(22, cw / 50));
 
         // Ajustar fuentes proporcionalmente
-        float fontSize = bw > 280 ? 13F : 11F;
+        float fontSize = bw > 300 ? 15F : 13F;
         var btnFont = new Font("Segoe UI", fontSize, FontStyle.Bold);
         btnPerfil.Font = btnFont;
         btnGestion.Font = btnFont;
@@ -212,6 +208,25 @@ partial class PrincipalForm
         int row1Y = Math.Max(270, 245 + (ch - 245 - gridH) / 2);
         int row2Y = row1Y + bh + gap;
 
+        // Bienvenido y descripción: descripción centrada entre título y botones
+        lblBienvenido.Left  = 0;
+        lblBienvenido.Top   = 108;
+        lblBienvenido.Width = cw - 2;
+        lblBienvenido.Height = 58;
+        lblBienvenido.Font = new Font("Segoe UI", 36F, FontStyle.Bold);
+
+        lblDescripcion.Left = 20;
+        lblDescripcion.Width = cw - 40;
+        int descripcionHeight = Math.Max(66, TextRenderer.MeasureText(
+            lblDescripcion.Text,
+            lblDescripcion.Font,
+            new Size(Math.Max(200, cw - 40), int.MaxValue),
+            TextFormatFlags.WordBreak | TextFormatFlags.TextBoxControl).Height + 4);
+        lblDescripcion.Height = descripcionHeight;
+        int espacioSuperior = lblBienvenido.Bottom + 12;
+        int espacioInferior = row1Y - 12;
+        lblDescripcion.Top = Math.Max(espacioSuperior, espacioSuperior + Math.Max(0, (espacioInferior - espacioSuperior - descripcionHeight) / 2));
+
         btnPerfil.SetBounds(startX, row1Y, bw, bh);
         btnGestion.SetBounds(startX + bw + gap, row1Y, bw, bh);
         btnAyuda.SetBounds(startX + (bw + gap) * 2, row1Y, bw, bh);
@@ -224,7 +239,7 @@ partial class PrincipalForm
         BackColor = Color.FromArgb(210, 235, 250),
         ForeColor = Color.FromArgb(30, 30, 30),
         FlatStyle = FlatStyle.Flat,
-        Font      = new Font("Segoe UI", 9F, FontStyle.Bold),
+        Font      = new Font("Segoe UI", 12F, FontStyle.Bold),
         Cursor    = Cursors.Hand,
         TextAlign = ContentAlignment.MiddleCenter
     };

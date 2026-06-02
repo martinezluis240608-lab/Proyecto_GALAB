@@ -13,6 +13,9 @@ public class Incidencia
     {
         if (string.IsNullOrWhiteSpace(QuienReporta))
             return (false, "El campo 'Quién reporta' es obligatorio.");
+        if (string.IsNullOrWhiteSpace(TipoIncidencia) ||
+            TipoIncidencia.StartsWith("Selecciona", StringComparison.OrdinalIgnoreCase))
+            return (false, "Seleccione un tipo de incidencia.");
         if (string.IsNullOrWhiteSpace(NombreEquipo))
             return (false, "El campo 'Nombre del equipo' es obligatorio.");
         if (string.IsNullOrWhiteSpace(Descripcion))
