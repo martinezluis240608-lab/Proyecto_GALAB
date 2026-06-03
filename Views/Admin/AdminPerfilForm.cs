@@ -4,7 +4,7 @@ using Proyecto_GALAB.Services;
 namespace Proyecto_GALAB.Views.Admin;
 
 /// <summary>
-/// Perfil del administrador: igual al estudiante pero sin bloque escolar (carrera, semestre, etc.).
+/// Perfil del administrador, sin datos escolares ni campos personales no necesarios.
 /// </summary>
 public class AdminPerfilForm : Form
 {
@@ -13,10 +13,8 @@ public class AdminPerfilForm : Form
     private TextBox txtCurp = null!;
     private TextBox txtFechaNacimiento = null!;
     private TextBox txtGenero = null!;
-    private TextBox txtEstadoCivil = null!;
     private TextBox txtTelefono = null!;
     private TextBox txtCorreo = null!;
-    private TextBox txtSeguro = null!;
     private TextBox txtCalle = null!;
     private TextBox txtColonia = null!;
     private TextBox txtCodigoPostal = null!;
@@ -60,8 +58,8 @@ public class AdminPerfilForm : Form
     {
         var panel = new Panel { Dock = DockStyle.Fill, BackColor = UiAssets.Fondo, AutoScroll = true };
 
-        var cardGeneral = CrearSeccion("👤  Información general", 24, 22, 520, 520);
-        var cardContacto = CrearSeccion("📞  Información de contacto", 560, 22, 520, 520);
+        var cardGeneral = CrearSeccion("Informacion general", 24, 22, 520, 460);
+        var cardContacto = CrearSeccion("Informacion de contacto", 560, 22, 520, 460);
 
         picFoto = new PictureBox
         {
@@ -94,28 +92,26 @@ public class AdminPerfilForm : Form
         txtNombre = CrearFila(cardGeneral, "Nombre", 268);
         txtCurp = CrearFila(cardGeneral, "CURP", 306);
         txtFechaNacimiento = CrearFila(cardGeneral, "Fecha de nacimiento", 344);
-        txtGenero = CrearFila(cardGeneral, "Género", 382);
-        txtEstadoCivil = CrearFila(cardGeneral, "Estado civil", 420);
-        txtTelefono = CrearFila(cardGeneral, "Teléfono", 458);
-        txtCorreo = CrearFila(cardGeneral, "Correo electrónico", 496);
-        txtSeguro = CrearFila(cardGeneral, "N° de servicio médico", 534);
+        txtGenero = CrearFila(cardGeneral, "Genero", 382);
+        txtTelefono = CrearFila(cardGeneral, "Telefono", 420);
+        txtCorreo = CrearFila(cardGeneral, "Correo electronico", 458);
 
-        txtCalle = CrearFila(cardContacto, "Calle y número", 56);
+        txtCalle = CrearFila(cardContacto, "Calle y numero", 56);
         txtColonia = CrearFila(cardContacto, "Colonia", 104);
-        txtCodigoPostal = CrearFila(cardContacto, "Código postal", 152);
+        txtCodigoPostal = CrearFila(cardContacto, "Codigo postal", 152);
         txtMunicipio = CrearFila(cardContacto, "Municipio", 200);
         txtEstado = CrearFila(cardContacto, "Estado", 248);
 
         btnEditar = new Button
         {
-            Text = "✎  Editar perfil",
+            Text = "Editar perfil",
             Font = new Font("Segoe UI", 13F, FontStyle.Bold),
             ForeColor = Color.White,
             BackColor = UiAssets.AzulPrincipal,
             FlatStyle = FlatStyle.Flat,
             Cursor = Cursors.Hand,
             Size = new Size(210, 50),
-            Location = new Point(870, 560)
+            Location = new Point(870, 500)
         };
         btnEditar.FlatAppearance.BorderSize = 0;
         btnEditar.Click += (_, _) => ActivarEdicion();
@@ -138,7 +134,7 @@ public class AdminPerfilForm : Form
             btnEditar.Left = cardContacto.Right - btnEditar.Width;
             btnGuardar.Left = btnEditar.Left - btnGuardar.Width - 12;
             btnCancelar.Left = cardContacto.Right - btnCancelar.Width;
-            panel.AutoScrollMinSize = new Size(startX + w + 20, 640);
+            panel.AutoScrollMinSize = new Size(startX + w + 20, 620);
         };
         return panel;
     }
@@ -154,7 +150,7 @@ public class AdminPerfilForm : Form
             FlatStyle = FlatStyle.Flat,
             Cursor = Cursors.Hand,
             Size = new Size(160, 50),
-            Location = new Point(x, 560),
+            Location = new Point(x, 500),
             Visible = visible
         };
         b.FlatAppearance.BorderSize = 0;
@@ -206,7 +202,7 @@ public class AdminPerfilForm : Form
 
     private IEnumerable<TextBox> Campos() => new[]
     {
-        txtNombre, txtCurp, txtFechaNacimiento, txtGenero, txtEstadoCivil, txtTelefono, txtCorreo, txtSeguro,
+        txtNombre, txtCurp, txtFechaNacimiento, txtGenero, txtTelefono, txtCorreo,
         txtCalle, txtColonia, txtCodigoPostal, txtMunicipio, txtEstado
     };
 
@@ -240,10 +236,8 @@ public class AdminPerfilForm : Form
         p.Curp = txtCurp.Text.Trim();
         p.FechaNacimiento = txtFechaNacimiento.Text.Trim();
         p.Genero = txtGenero.Text.Trim();
-        p.EstadoCivil = txtEstadoCivil.Text.Trim();
         p.Telefono = txtTelefono.Text.Trim();
         p.Correo = txtCorreo.Text.Trim();
-        p.NumeroServicioMedico = txtSeguro.Text.Trim();
         p.Calle = txtCalle.Text.Trim();
         p.Colonia = txtColonia.Text.Trim();
         p.CodigoPostal = txtCodigoPostal.Text.Trim();
@@ -278,10 +272,8 @@ public class AdminPerfilForm : Form
         txtCurp.Text = p.Curp;
         txtFechaNacimiento.Text = p.FechaNacimiento;
         txtGenero.Text = p.Genero;
-        txtEstadoCivil.Text = p.EstadoCivil;
         txtTelefono.Text = p.Telefono;
         txtCorreo.Text = p.Correo;
-        txtSeguro.Text = p.NumeroServicioMedico;
         txtCalle.Text = p.Calle;
         txtColonia.Text = p.Colonia;
         txtCodigoPostal.Text = p.CodigoPostal;
@@ -293,7 +285,7 @@ public class AdminPerfilForm : Form
 
     private void CambiarFoto()
     {
-        using var dlg = new OpenFileDialog { Filter = "Imágenes|*.jpg;*.jpeg;*.png;*.bmp;*.webp" };
+        using var dlg = new OpenFileDialog { Filter = "Imagenes|*.jpg;*.jpeg;*.png;*.bmp;*.webp" };
         if (dlg.ShowDialog(this) != DialogResult.OK) return;
         var p = PerfilAdministradorStore.Obtener();
         p.RutaFotoPerfil = dlg.FileName;
@@ -309,6 +301,8 @@ public class AdminPerfilForm : Form
             picFoto.Image = new Bitmap(img);
         }
         else
+        {
             picFoto.Image = null;
+        }
     }
 }

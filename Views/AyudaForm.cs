@@ -407,13 +407,12 @@ public partial class AyudaForm : Form
 
         var guia = CrearRecurso("📖", "Guía rápida", "Pasos básicos para registrar una incidencia.", 190, () => MostrarRecurso("Guía rápida", "1. Inicia sesión.\n2. Entra a Gestión de Incidencias.\n3. Llena los datos de la incidencia.\n4. Adjunta evidencia si es necesario.\n5. Presiona Enviar reporte."));
         var faq = CrearRecurso("?", "Preguntas frecuentes (FAQ)", "Resuelve las dudas más comunes sobre el sistema.", 252, () => MostrarRecurso("Preguntas frecuentes", "¿Cómo registro una incidencia?\nDesde Gestión de Incidencias.\n\n¿Qué hago si olvidé mi contraseña?\nContacta al administrador.\n\n¿Puedo adjuntar evidencia?\nSí, desde el botón Adjuntar."));
-        var videos = CrearRecurso("▶", "Videos tutoriales", "Aprende a usar GALAB con videos explicativos.", 314, AbrirVideos);
-        var plantillas = CrearRecurso("⇩", "Formatos y plantillas", "Descarga formatos útiles para tus reportes.", 376, AbrirPlantillas);
+        var plantillas = CrearRecurso("⇩", "Formatos y plantillas", "Descarga formatos útiles para tus reportes.", 314, AbrirPlantillas);
 
         var contacto = new Panel
         {
             BackColor = azulClaro,
-            Location = new Point(24, 454),
+            Location = new Point(24, 392),
             Size = new Size(520, 58)
         };
         contacto.Paint += (s, e) => DibujarBordeRedondo(e.Graphics, contacto.ClientRectangle, 10, azulClaro, azulClaro);
@@ -454,7 +453,7 @@ public partial class AyudaForm : Form
             irContacto.Left = Math.Max(330, contacto.Width - 150);
         };
 
-        card.Controls.AddRange(new Control[] { titulo, intro, separador, disponibles, guia, faq, videos, plantillas, contacto });
+        card.Controls.AddRange(new Control[] { titulo, intro, separador, disponibles, guia, faq, plantillas, contacto });
         return card;
     }
 
@@ -593,15 +592,6 @@ public partial class AyudaForm : Form
     private void MostrarRecurso(string titulo, string mensaje)
     {
         MessageBox.Show(mensaje, titulo, MessageBoxButtons.OK, MessageBoxIcon.Information);
-    }
-
-    private void AbrirVideos()
-    {
-        MessageBox.Show(
-            "Aquí puedes conectar tus videos tutoriales de GALAB.\n\nPor ahora este botón ya responde y queda listo para abrir una liga o una ventana de videos.",
-            "Videos tutoriales",
-            MessageBoxButtons.OK,
-            MessageBoxIcon.Information);
     }
 
     private void AbrirPlantillas()

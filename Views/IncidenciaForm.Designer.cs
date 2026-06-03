@@ -11,7 +11,7 @@ partial class IncidenciaForm
     private Label lblInstituto;
     private PictureBox picLogoInstituto;
     private Button btnMenu;
-    private Label lblTitulo;
+    private TextBox txtTitulo;
     private TextBox txtQuienReporta;
     private ComboBox cmbTipo;
     private TextBox txtNombreEquipo;
@@ -170,7 +170,7 @@ partial class IncidenciaForm
             AutoScroll = true
         };
 
-        lblTitulo = new Label
+        txtTitulo = new TextBox
         {
             Text = "REGISTRAR INCIDENCIA",
             Font = new Font("Segoe UI", 19F, FontStyle.Bold),
@@ -230,7 +230,7 @@ partial class IncidenciaForm
             int cardW = Math.Min(760, available - 90);
             int startX = 330 + Math.Max(36, (available - cardW) / 2);
 
-            lblTitulo.Left = startX;
+            txtTitulo.Left = startX;
             subrayado.Left = startX + 2;
             cardGeneral.Left = startX;
             cardAdicional.Left = startX;
@@ -249,7 +249,7 @@ partial class IncidenciaForm
 
         panel.Controls.AddRange(new Control[]
         {
-            lblTitulo, subrayado, cardGeneral, cardAdicional, btnCancelar, btnEnviar
+            txtTitulo, subrayado, cardGeneral, cardAdicional, btnCancelar, btnEnviar
         });
         return panel;
     }

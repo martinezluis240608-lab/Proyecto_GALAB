@@ -2,6 +2,7 @@ namespace Proyecto_GALAB.Interfaces;
 
 public interface IIncidenciaView
 {
+    string Titulo { get; }
     string QuienReporta { get; }
     string TipoIncidencia { get; }
     string NombreEquipo { get; }

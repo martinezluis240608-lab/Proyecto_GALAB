@@ -30,6 +30,7 @@ public class IncidenciaPresenter
     {
         var incidencia = new Incidencia
         {
+            Titulo         = _view.Titulo,
             QuienReporta   = _view.QuienReporta,
             TipoIncidencia = _view.TipoIncidencia,
             NombreEquipo   = _view.NombreEquipo,

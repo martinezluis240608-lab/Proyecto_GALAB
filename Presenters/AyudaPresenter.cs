@@ -22,7 +22,6 @@ namespace Proyecto_GALAB.Presenters
             _view.CargarManualPdf += OnCargarManualPdf;
             _view.AbrirGuiaRapida += OnAbrirGuiaRapida;
             _view.AbrirFaq += OnAbrirFaq;
-            _view.AbrirVideos += OnAbrirVideos;
             _view.AbrirPlantillas += OnAbrirPlantillas;
             _view.ContactarSoporte += OnContactarSoporte;
         }
@@ -46,11 +45,6 @@ namespace Proyecto_GALAB.Presenters
         {
             _view.MostrarContenido("Preguntas frecuentes",
                 "<html><body><h2>FAQ</h2><b>¿Cómo registro una incidencia?</b><br>Desde Gestión → Nueva incidencia.<br><br><b>¿Puedo editar una incidencia?</b><br>Solo si está en borrador.<br><br><b>¿Cómo contacto con soporte?</b><br>Usa el botón 'Contáctanos' de esta ventana.</body></html>");
-        }
-
-        private void OnAbrirVideos(object? sender, EventArgs e)
-        {
-            Process.Start(new ProcessStartInfo("https://www.youtube.com/results?search_query=galab+tutorial") { UseShellExecute = true });
         }
 
         private void OnAbrirPlantillas(object? sender, EventArgs e)

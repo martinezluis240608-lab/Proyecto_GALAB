@@ -179,7 +179,7 @@ public class AdminGestionUsuariosForm : Form
 
     private void Grid_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
     {
-        if (e.RowIndex < 0 || grid.Columns[e.ColumnIndex].Name != "Estado") return;
+        if (e.RowIndex < 0 || grid.Columns[e.ColumnIndex].Name != "Estado" || e.CellStyle is null) return;
         var activo = e.Value?.ToString()?.Equals("Activo", StringComparison.OrdinalIgnoreCase) == true;
         e.CellStyle.ForeColor = activo ? Color.FromArgb(20, 130, 60) : Color.FromArgb(190, 45, 55);
         e.CellStyle.BackColor = activo ? Color.FromArgb(230, 248, 236) : Color.FromArgb(255, 235, 238);

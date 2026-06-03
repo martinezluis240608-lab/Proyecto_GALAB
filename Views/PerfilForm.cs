@@ -10,17 +10,13 @@ public partial class PerfilForm : Form
     private TextBox txtCurp = null!;
     private TextBox txtFechaNacimiento = null!;
     private TextBox txtGenero = null!;
-    private TextBox txtEstadoCivil = null!;
     private TextBox txtTelefono = null!;
     private TextBox txtCorreo = null!;
-    private TextBox txtSeguro = null!;
     private TextBox txtControl = null!;
     private TextBox txtEstatus = null!;
     private TextBox txtSemestre = null!;
-    private TextBox txtCveCarrera = null!;
     private TextBox txtCarrera = null!;
-    private TextBox txtEspecialidad = null!;
-    private TextBox txtPlan = null!;
+    private TextBox txtGrupo = null!;
     private TextBox txtCalle = null!;
     private TextBox txtColonia = null!;
     private TextBox txtCodigoPostal = null!;
@@ -51,7 +47,7 @@ public partial class PerfilForm : Form
         var contenido = CrearContenido();
         var footer = new Label
         {
-            Text = "© 2025 GALAB - Instituto Tecnológico Superior de San Miguel el Grande",
+            Text = "© 2025 GALAB - Instituto Tecnologico Superior de San Miguel el Grande",
             Dock = DockStyle.Bottom,
             Height = 34,
             BackColor = UiAssets.AzulClaro,
@@ -77,7 +73,7 @@ public partial class PerfilForm : Form
 
         var titulo = new Label
         {
-            Text = "Instituto Tecnológico Superior de San Miguel el Grande",
+            Text = "Instituto Tecnologico Superior de San Miguel el Grande",
             Font = new Font("Segoe UI", 20F, FontStyle.Bold),
             ForeColor = UiAssets.AzulOscuro,
             Location = new Point(30, 34),
@@ -94,7 +90,7 @@ public partial class PerfilForm : Form
         };
         var instituto = new Label
         {
-            Text = "Instituto Tecnológico\nSuperior de San Miguel\nel Grande",
+            Text = "Instituto Tecnologico\nSuperior de San Miguel\nel Grande",
             Font = new Font("Segoe UI", 12F, FontStyle.Bold),
             ForeColor = UiAssets.AzulOscuro,
             TextAlign = ContentAlignment.MiddleLeft,
@@ -125,7 +121,7 @@ public partial class PerfilForm : Form
         int y = 56;
         panel.Controls.Add(UiAssets.CrearBotonSidebar("⌂", "Inicio", y, false, () => UiAssets.AbrirCerrandoActual(this, new PrincipalForm())));
         y += 72;
-        panel.Controls.Add(UiAssets.CrearBotonSidebar("☰", "Gestión de incidencias", y, false, () => UiAssets.AbrirCerrandoActual(this, new GestionIncidenciasForm())));
+        panel.Controls.Add(UiAssets.CrearBotonSidebar("☰", "Gestion de incidencias", y, false, () => UiAssets.AbrirCerrandoActual(this, new GestionIncidenciasForm())));
         y += 72;
         panel.Controls.Add(UiAssets.CrearBotonSidebar("●", "Perfil", y, true, null));
         y += 72;
@@ -135,7 +131,7 @@ public partial class PerfilForm : Form
 
         var cerrar = new Button
         {
-            Text = "↪  Cerrar sesión",
+            Text = "↪  Cerrar sesion",
             Font = new Font("Segoe UI", 10.5F, FontStyle.Bold),
             ForeColor = UiAssets.AzulPrincipal,
             BackColor = Color.White,
@@ -164,9 +160,9 @@ public partial class PerfilForm : Form
             AutoScroll = true
         };
 
-        var cardGeneral = CrearSeccion("👤  Información general", 24, 22, 380, 618);
-        var cardEscolar = CrearSeccion("🎓  Información escolar", 426, 22, 716, 302);
-        var cardContacto = CrearSeccion("📞  Información de contacto", 426, 338, 716, 302);
+        var cardGeneral = CrearSeccion("Informacion general", 24, 22, 380, 542);
+        var cardEscolar = CrearSeccion("Informacion escolar", 426, 22, 716, 244);
+        var cardContacto = CrearSeccion("Informacion de contacto", 426, 280, 716, 302);
 
         picFoto = new PictureBox
         {
@@ -200,23 +196,19 @@ public partial class PerfilForm : Form
         txtNombre = CrearFila(cardGeneral, "Nombre", 268);
         txtCurp = CrearFila(cardGeneral, "CURP", 306);
         txtFechaNacimiento = CrearFila(cardGeneral, "Fecha de nacimiento", 344);
-        txtGenero = CrearFila(cardGeneral, "Género", 382);
-        txtEstadoCivil = CrearFila(cardGeneral, "Estado civil", 420);
-        txtTelefono = CrearFila(cardGeneral, "Teléfono", 458);
-        txtCorreo = CrearFila(cardGeneral, "Correo electrónico", 496);
-        txtSeguro = CrearFila(cardGeneral, "N° de servicio médico", 534);
+        txtGenero = CrearFila(cardGeneral, "Genero", 382);
+        txtTelefono = CrearFila(cardGeneral, "Telefono", 420);
+        txtCorreo = CrearFila(cardGeneral, "Correo electronico", 458);
 
-        txtControl = CrearFila(cardEscolar, "N° de control", 56);
+        txtControl = CrearFila(cardEscolar, "No. de control", 56);
         txtEstatus = CrearFila(cardEscolar, "Estatus", 92);
         txtSemestre = CrearFila(cardEscolar, "Semestre", 128);
-        txtCveCarrera = CrearFila(cardEscolar, "CVE Carrera", 164);
-        txtCarrera = CrearFila(cardEscolar, "Carrera", 200);
-        txtEspecialidad = CrearFila(cardEscolar, "Especialidad", 236);
-        txtPlan = CrearFila(cardEscolar, "Plan de estudios", 272);
+        txtCarrera = CrearFila(cardEscolar, "Carrera", 164);
+        txtGrupo = CrearFila(cardEscolar, "Grupo", 200);
 
-        txtCalle = CrearFila(cardContacto, "Calle y número", 56);
+        txtCalle = CrearFila(cardContacto, "Calle y numero", 56);
         txtColonia = CrearFila(cardContacto, "Colonia", 92);
-        txtCodigoPostal = CrearFila(cardContacto, "Código postal", 128);
+        txtCodigoPostal = CrearFila(cardContacto, "Codigo postal", 128);
         txtMunicipio = CrearFila(cardContacto, "Municipio", 164);
         txtEstado = CrearFila(cardContacto, "Estado", 200);
 
@@ -224,7 +216,7 @@ public partial class PerfilForm : Form
 
         btnEditar = new Button
         {
-            Text = "✎  Editar perfil",
+            Text = "Editar perfil",
             Font = new Font("Segoe UI", 13F, FontStyle.Bold),
             ForeColor = Color.White,
             BackColor = UiAssets.AzulPrincipal,
@@ -365,9 +357,21 @@ public partial class PerfilForm : Form
     {
         var perfil = PerfilUsuarioStore.Obtener();
         perfil.NombreCompleto = txtNombre.Text.Trim();
+        perfil.Curp = txtCurp.Text.Trim();
+        perfil.FechaNacimiento = txtFechaNacimiento.Text.Trim();
+        perfil.Genero = txtGenero.Text.Trim();
+        perfil.Telefono = txtTelefono.Text.Trim();
         perfil.Correo = txtCorreo.Text.Trim();
+        perfil.ControlNumber = txtControl.Text.Trim();
         perfil.Rol = txtEstatus.Text.Trim();
+        perfil.Semestre = txtSemestre.Text.Trim();
         perfil.Carrera = txtCarrera.Text.Trim();
+        perfil.Grupo = txtGrupo.Text.Trim();
+        perfil.Calle = txtCalle.Text.Trim();
+        perfil.Colonia = txtColonia.Text.Trim();
+        perfil.CodigoPostal = txtCodigoPostal.Text.Trim();
+        perfil.Municipio = txtMunicipio.Text.Trim();
+        perfil.Estado = txtEstado.Text.Trim();
         PerfilUsuarioStore.Guardar(perfil);
         FinalizarEdicion();
     }
@@ -405,8 +409,8 @@ public partial class PerfilForm : Form
     {
         return new[]
         {
-            txtNombre, txtCurp, txtFechaNacimiento, txtGenero, txtEstadoCivil, txtTelefono, txtCorreo, txtSeguro,
-            txtControl, txtEstatus, txtSemestre, txtCveCarrera, txtCarrera, txtEspecialidad, txtPlan,
+            txtNombre, txtCurp, txtFechaNacimiento, txtGenero, txtTelefono, txtCorreo,
+            txtControl, txtEstatus, txtSemestre, txtCarrera, txtGrupo,
             txtCalle, txtColonia, txtCodigoPostal, txtMunicipio, txtEstado
         };
     }
@@ -415,25 +419,21 @@ public partial class PerfilForm : Form
     {
         var perfil = PerfilUsuarioStore.Obtener();
         txtNombre.Text = perfil.NombreCompleto;
-        txtCurp.Text = "";
-        txtFechaNacimiento.Text = "";
-        txtGenero.Text = "";
-        txtEstadoCivil.Text = "";
-        txtTelefono.Text = "";
+        txtCurp.Text = perfil.Curp;
+        txtFechaNacimiento.Text = perfil.FechaNacimiento;
+        txtGenero.Text = perfil.Genero;
+        txtTelefono.Text = perfil.Telefono;
         txtCorreo.Text = perfil.Correo;
-        txtSeguro.Text = "";
-        txtControl.Text = "";
+        txtControl.Text = perfil.ControlNumber;
         txtEstatus.Text = perfil.Rol;
-        txtSemestre.Text = "";
-        txtCveCarrera.Text = "";
+        txtSemestre.Text = perfil.Semestre;
         txtCarrera.Text = perfil.Carrera;
-        txtEspecialidad.Text = "";
-        txtPlan.Text = "";
-        txtCalle.Text = "";
-        txtColonia.Text = "";
-        txtCodigoPostal.Text = "";
-        txtMunicipio.Text = "";
-        txtEstado.Text = "";
+        txtGrupo.Text = perfil.Grupo;
+        txtCalle.Text = perfil.Calle;
+        txtColonia.Text = perfil.Colonia;
+        txtCodigoPostal.Text = perfil.CodigoPostal;
+        txtMunicipio.Text = perfil.Municipio;
+        txtEstado.Text = perfil.Estado;
         SetReadOnlyCampos(true);
         CargarFoto(picFoto, perfil.RutaFotoPerfil);
     }
@@ -443,7 +443,7 @@ public partial class PerfilForm : Form
         using var dialog = new OpenFileDialog
         {
             Title = "Seleccionar foto de perfil",
-            Filter = "Imágenes|*.jpg;*.jpeg;*.png;*.bmp;*.webp"
+            Filter = "Imagenes|*.jpg;*.jpeg;*.png;*.bmp;*.webp"
         };
         if (dialog.ShowDialog(this) != DialogResult.OK)
             return;

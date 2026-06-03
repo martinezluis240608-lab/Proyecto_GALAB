@@ -7,7 +7,16 @@ public partial class IncidenciaForm : Form, IIncidenciaView
 {
     private readonly IncidenciaPresenter _presenter;
 
-    public string   QuienReporta   => txtQuienReporta.Text;
+    public string   Titulo         => txtQuienReporta.Text;
+    public string   QuienReporta
+    {
+        get
+        {
+            if (Services.SesionActual.EsAdministrador)
+                return Services.PerfilAdministradorStore.Obtener().NombreCompleto;
+            return Services.PerfilUsuarioStore.Obtener().NombreCompleto;
+        }
+    }
     public string   TipoIncidencia => cmbTipo.SelectedItem?.ToString() ?? "";
     public string   NombreEquipo   => txtNombreEquipo.Text;
     public DateTime FechaHora
@@ -34,6 +43,7 @@ public partial class IncidenciaForm : Form, IIncidenciaView
 
     public void LimpiarFormulario()
     {
+        txtTitulo.Text = "REGISTRAR INCIDENCIA";
         txtQuienReporta.Clear();
         cmbTipo.SelectedIndex = 0;
         txtNombreEquipo.Clear();

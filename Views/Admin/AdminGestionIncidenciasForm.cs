@@ -325,7 +325,7 @@ public class AdminGestionIncidenciasForm : Form
 
     private void Grid_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
     {
-        if (e.RowIndex < 0 || grid.Columns[e.ColumnIndex].Name != "Estado") return;
+        if (e.RowIndex < 0 || grid.Columns[e.ColumnIndex].Name != "Estado" || e.CellStyle is null) return;
         var estado = e.Value?.ToString() ?? "";
         e.CellStyle.ForeColor = Color.White;
         e.CellStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);

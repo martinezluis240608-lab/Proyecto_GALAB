@@ -13,7 +13,6 @@ namespace Proyecto_GALAB.Interfaces
         event EventHandler? CargarManualPdf;
         event EventHandler? AbrirGuiaRapida;
         event EventHandler? AbrirFaq;
-        event EventHandler? AbrirVideos;
         event EventHandler? AbrirPlantillas;
         event EventHandler? ContactarSoporte;
 

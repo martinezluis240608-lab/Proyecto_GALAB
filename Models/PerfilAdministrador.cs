@@ -9,10 +9,8 @@ public class PerfilAdministrador
     public string Curp { get; set; } = string.Empty;
     public string FechaNacimiento { get; set; } = string.Empty;
     public string Genero { get; set; } = string.Empty;
-    public string EstadoCivil { get; set; } = string.Empty;
     public string Telefono { get; set; } = string.Empty;
     public string Correo { get; set; } = "admin@itsmg.edu.mx";
-    public string NumeroServicioMedico { get; set; } = string.Empty;
     public string Calle { get; set; } = string.Empty;
     public string Colonia { get; set; } = string.Empty;
     public string CodigoPostal { get; set; } = string.Empty;

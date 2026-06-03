@@ -7,6 +7,7 @@ public class IncidenciaListadoItem
 {
     public string Folio { get; set; } = string.Empty;
     public string Titulo { get; set; } = string.Empty;
+    public string QuienReporta { get; set; } = string.Empty;
     public string TipoIncidencia { get; set; } = string.Empty;
     public string Estado { get; set; } = "Activa";
     public DateTime Fecha { get; set; } = DateTime.Now;
