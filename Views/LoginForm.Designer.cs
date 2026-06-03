@@ -1,4 +1,4 @@
-using System.Drawing.Drawing2D;
+﻿using System.Drawing.Drawing2D;
 
 namespace Proyecto_GALAB.Views;
 
@@ -70,7 +70,7 @@ partial class LoginForm
         picLogo = new PictureBox
         {
             SizeMode = PictureBoxSizeMode.Zoom,
-            BackColor = Color.Transparent
+            BackColor = Color.White
         };
         CargarLogo();
 
@@ -287,9 +287,8 @@ partial class LoginForm
 
     private void CargarLogo()
     {
-        picLogo.Image = UiAssets.CargarLogoInstitucion();
-        if (picLogo.Image == null)
-            picLogo.Paint += LogoFallback_Paint;
+        try { picLogo.Image = Properties.Resources.logo_instituto; }
+        catch { picLogo.Paint += LogoFallback_Paint; }
     }
 
     private void LogoFallback_Paint(object sender, PaintEventArgs e)
@@ -303,61 +302,58 @@ partial class LoginForm
         e.Graphics.DrawString("G", fuente, new SolidBrush(azulPrincipal), 56, 36);
     }
 
+    private static bool TienePixelesTransparentes(Image image)
+    {
+        if (image is not Bitmap bitmap) return false;
+
+        int pasoX = Math.Max(1, bitmap.Width / 32);
+        int pasoY = Math.Max(1, bitmap.Height / 32);
+        for (int x = 0; x < bitmap.Width; x += pasoX)
+        {
+            for (int y = 0; y < bitmap.Height; y += pasoY)
+            {
+                if (bitmap.GetPixel(x, y).A < 255) return true;
+            }
+        }
+
+        return false;
+    }
     private void PanelImagen_Paint(object sender, PaintEventArgs e)
     {
         var g = e.Graphics;
-        g.SmoothingMode = SmoothingMode.AntiAlias;
-        g.Clear(Color.FromArgb(238, 241, 245));
+        g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+        g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+        g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+        g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
 
-        using var pared = new LinearGradientBrush(panelImagen.ClientRectangle, Color.White, Color.FromArgb(210, 215, 222), 90F);
-        g.FillRectangle(pared, panelImagen.ClientRectangle);
+        // 1. Fondo azul claro (igual que el panel de login) en lugar de negro
+        g.Clear(Color.FromArgb(235, 238, 242));
 
-        using var luz = new SolidBrush(Color.FromArgb(245, 248, 252));
-        g.FillRectangle(luz, 120, 20, panelImagen.Width - 240, 24);
-        g.FillRectangle(luz, panelImagen.Width - 260, 54, 170, 22);
-
-        using var mesa = new SolidBrush(Color.FromArgb(0, 92, 185));
-        using var sombra = new SolidBrush(Color.FromArgb(25, 31, 40));
-        int baseY = (int)(panelImagen.Height * 0.62);
-        g.FillRectangle(mesa, 40, baseY, panelImagen.Width - 80, 96);
-        g.FillRectangle(sombra, 40, baseY + 96, panelImagen.Width - 80, 24);
-
-        for (int i = 0; i < 5; i++)
+        try
         {
-            int x = 70 + i * Math.Max(92, (panelImagen.Width - 160) / 5);
-            DibujarMonitor(g, x, baseY - 105);
-        }
+            var img = Properties.Resources.logo_GALAB_1;
+            if (!TienePixelesTransparentes(img))
+            {
+                img = Properties.Resources.g88;
+            }
 
-        for (int i = 0; i < 4; i++)
+            // 2. Calcular tamaño manteniendo proporción
+            float escala = Math.Min(
+                (panelImagen.Width * 0.80f) / img.Width,
+                (panelImagen.Height * 0.80f) / img.Height);
+            int w = (int)(img.Width * escala);
+            int h = (int)(img.Height * escala);
+            int x = (panelImagen.Width - w) / 2;
+            int y = (panelImagen.Height - h) / 2;
+
+            // 3. Dibujar con CompositingMode.SourceOver respeta el alfa del PNG
+            g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
+            g.DrawImage(img, new Rectangle(x, y, w, h));
+        }
+        catch
         {
-            int x = 120 + i * Math.Max(105, (panelImagen.Width - 190) / 4);
-            DibujarAlumno(g, x, baseY - 70);
+            g.Clear(Color.FromArgb(173, 216, 230));
         }
-
-        using var ventana = new Pen(Color.FromArgb(70, 78, 90), 5);
-        int vx = panelImagen.Width - 130;
-        g.DrawRectangle(ventana, vx, 100, 92, 150);
-        g.DrawLine(ventana, vx + 46, 100, vx + 46, 250);
-        g.DrawLine(ventana, vx, 175, vx + 92, 175);
-    }
-
-    private void DibujarMonitor(Graphics g, int x, int y)
-    {
-        using var pantalla = new SolidBrush(Color.FromArgb(24, 31, 42));
-        using var baseMonitor = new SolidBrush(Color.FromArgb(36, 44, 55));
-        g.FillRectangle(pantalla, x, y, 82, 58);
-        g.FillRectangle(baseMonitor, x + 34, y + 58, 14, 28);
-        g.FillRectangle(baseMonitor, x + 20, y + 82, 42, 8);
-    }
-
-    private void DibujarAlumno(Graphics g, int x, int y)
-    {
-        using var piel = new SolidBrush(Color.FromArgb(205, 150, 110));
-        using var cabello = new SolidBrush(Color.FromArgb(35, 28, 24));
-        using var ropa = new SolidBrush(Color.FromArgb(18, 42, 75));
-        g.FillEllipse(piel, x, y, 34, 38);
-        g.FillPie(cabello, x - 2, y - 5, 38, 28, 180, 180);
-        g.FillRectangle(ropa, x - 10, y + 36, 54, 54);
     }
 
     protected override void OnPaint(PaintEventArgs e)
@@ -374,3 +370,4 @@ partial class LoginForm
         Region = new Region(path);
     }
 }
+
