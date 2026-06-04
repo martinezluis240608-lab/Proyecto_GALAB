@@ -46,7 +46,9 @@ public partial class LoginForm : Form, ILoginView
     private void btnIniciarSesion_Click(object sender, EventArgs e) =>
         OnIniciarSesion?.Invoke(this, EventArgs.Empty);
 
-    private void lblForgot_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e) =>
-        MessageBox.Show("Contacta al administrador para recuperar tu contraseña.",
-                        "Recuperar contraseña", MessageBoxButtons.OK, MessageBoxIcon.Information);
+    private void lblForgot_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+    {
+        using var dlg = new RecuperarContrasenaForm();
+        dlg.ShowDialog(this);
+    }
 }

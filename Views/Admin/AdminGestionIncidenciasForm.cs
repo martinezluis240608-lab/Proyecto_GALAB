@@ -30,6 +30,14 @@ public class AdminGestionIncidenciasForm : Form
 
     private void CrearInterfaz()
     {
+        Controls.Clear();
+
+        var panelDerecho = new Panel
+        {
+            Dock = DockStyle.Fill,
+            BackColor = UiAssets.Fondo
+        };
+
         var header = AdminSidebar.CrearHeader();
         var sidebar = AdminSidebar.Crear(this, AdminModulo.Incidencias);
         var contenido = CrearContenido();
@@ -43,10 +51,15 @@ public class AdminGestionIncidenciasForm : Form
             TextAlign = ContentAlignment.MiddleCenter,
             Font = new Font("Segoe UI", 9F)
         };
-        Controls.Add(contenido);
-        Controls.Add(sidebar);
-        Controls.Add(header);
-        Controls.Add(footer);
+
+        // Nest header and contenido into panelDerecho
+        panelDerecho.Controls.Add(contenido); // Dock.Fill
+        panelDerecho.Controls.Add(header);    // Dock.Top
+
+        // Add controls to main Form in correct docking Z-order
+        Controls.Add(panelDerecho);
+        Controls.Add(sidebar); // Dock.Left
+        Controls.Add(footer);  // Dock.Bottom
     }
 
     private Panel CrearContenido()
@@ -65,13 +78,13 @@ public class AdminGestionIncidenciasForm : Form
 
         var resumen = new IncidenciaEstadisticasService().ObtenerResumen();
         var cardTotal = CrearTarjetaMetrica("Total", resumen.Total, "incidencias", "📋", Color.FromArgb(0, 82, 170), 36, 88);
-        lblTotalCard = (Label)cardTotal.Controls[1];
-        var cardActivas = CrearTarjetaMetrica("Activas", resumen.Activas, "incidencias", "👤", Color.FromArgb(210, 30, 55), 280, 88);
-        lblActivasCard = (Label)cardActivas.Controls[1];
-        var cardProceso = CrearTarjetaMetrica("En proceso", resumen.EnProceso, "incidencias", "◷", Color.FromArgb(235, 145, 12), 524, 88);
-        lblProcesoCard = (Label)cardProceso.Controls[1];
-        var cardResueltas = CrearTarjetaMetrica("Resueltas", resumen.Resueltas, "incidencias", "✓", Color.FromArgb(10, 170, 55), 768, 88);
-        lblResueltasCard = (Label)cardResueltas.Controls[1];
+        lblTotalCard = cardTotal.Controls.OfType<Label>().First(c => c.Tag?.ToString() == "valor");
+        var cardActivas = CrearTarjetaMetrica("Activas", resumen.Activas, "incidencias", "🚨", Color.FromArgb(210, 30, 55), 280, 88);
+        lblActivasCard = cardActivas.Controls.OfType<Label>().First(c => c.Tag?.ToString() == "valor");
+        var cardProceso = CrearTarjetaMetrica("En proceso", resumen.EnProceso, "incidencias", "⏳", Color.FromArgb(235, 145, 12), 524, 88);
+        lblProcesoCard = cardProceso.Controls.OfType<Label>().First(c => c.Tag?.ToString() == "valor");
+        var cardResueltas = CrearTarjetaMetrica("Resueltas", resumen.Resueltas, "incidencias", "✅", Color.FromArgb(10, 170, 55), 768, 88);
+        lblResueltasCard = cardResueltas.Controls.OfType<Label>().First(c => c.Tag?.ToString() == "valor");
 
         var cardLista = new Panel
         {
@@ -117,27 +130,6 @@ public class AdminGestionIncidenciasForm : Form
         cmbEstado.SelectedIndex = 0;
         cmbEstado.SelectedIndexChanged += (_, _) => { paginaActual = 1; CargarGrid(); };
 
-        var btnNueva = new Button
-        {
-            Text = "+  Nueva incidencia",
-            Font = new Font("Segoe UI", 11F, FontStyle.Bold),
-            ForeColor = Color.White,
-            BackColor = UiAssets.AzulPrincipal,
-            FlatStyle = FlatStyle.Flat,
-            Cursor = Cursors.Hand,
-            Size = new Size(190, 38),
-            Anchor = AnchorStyles.Top | AnchorStyles.Right
-        };
-        btnNueva.FlatAppearance.BorderSize = 0;
-        btnNueva.Click += (_, _) =>
-        {
-            var form = new IncidenciaForm();
-            UiAssets.PrepararPantallaCompleta(form);
-            form.FormClosed += (_, _) => { RefrescarTarjetas(); CargarGrid(); };
-            form.Show();
-        };
-        UiAssets.RedondearControl(btnNueva, 8);
-
         grid = CrearGrid();
         grid.CellContentClick += Grid_CellContentClick;
         grid.CellFormatting += Grid_CellFormatting;
@@ -155,32 +147,76 @@ public class AdminGestionIncidenciasForm : Form
         btnPrev.Click += (_, _) => { if (paginaActual > 1) { paginaActual--; CargarGrid(); } };
         btnNext.Click += (_, _) => { paginaActual++; CargarGrid(); };
 
-        cardLista.Controls.AddRange(new Control[] { lblListado, txtBuscar, cmbEstado, btnNueva, grid, lblPaginacion, btnPrev, btnNext });
+        cardLista.Controls.AddRange(new Control[] { lblListado, txtBuscar, cmbEstado, grid, lblPaginacion, btnPrev, btnNext });
         cardLista.Resize += (s, e) =>
         {
-            btnNueva.Left = cardLista.Width - btnNueva.Width - 20;
-            btnNueva.Top = 52;
             grid.Width = cardLista.Width - 40;
-            grid.Height = cardLista.Height - 120;
+            grid.Height = Math.Max(150, cardLista.Height - 160);
+            lblPaginacion.Top = cardLista.Height - 46;
+            btnPrev.Top = cardLista.Height - 52;
+            btnNext.Top = cardLista.Height - 52;
             btnPrev.Left = cardLista.Width - 180;
             btnNext.Left = cardLista.Width - 60;
         };
-
         panel.Controls.AddRange(new Control[] { titulo, subrayado, cardTotal, cardActivas, cardProceso, cardResueltas, cardLista });
         panel.Resize += (s, e) =>
         {
+            if (WindowState == FormWindowState.Minimized) return;
             int w = Math.Max(1000, panel.ClientSize.Width - 72);
             int startX = (panel.ClientSize.Width - w) / 2;
-            int gap = (w - 4 * 220) / 3;
             titulo.Left = startX;
             subrayado.Left = startX + 2;
-            cardTotal.Left = startX;
-            cardActivas.Left = startX + 220 + gap;
-            cardProceso.Left = startX + (220 + gap) * 2;
-            cardResueltas.Left = startX + (220 + gap) * 3;
-            cardLista.Left = startX;
-            cardLista.Width = w;
-            cardLista.Height = Math.Max(420, panel.ClientSize.Height - 250);
+
+            bool dosFilas = w < 1300;
+            if (dosFilas)
+            {
+                int cardW = (w - 24) / 2;
+                int cardH = 96;
+                int gapX = 24;
+                int gapY = 16;
+
+                // Fila 1
+                cardTotal.Location = new Point(startX, 88);
+                cardTotal.Size = new Size(cardW, cardH);
+
+                cardActivas.Location = new Point(startX + cardW + gapX, 88);
+                cardActivas.Size = new Size(cardW, cardH);
+
+                // Fila 2
+                cardProceso.Location = new Point(startX, 88 + cardH + gapY);
+                cardProceso.Size = new Size(cardW, cardH);
+
+                cardResueltas.Location = new Point(startX + cardW + gapX, 88 + cardH + gapY);
+                cardResueltas.Size = new Size(cardW, cardH);
+
+                // Tabla de incidencias desplazada hacia abajo
+                cardLista.Location = new Point(startX, 88 + (cardH + gapY) * 2 + 16);
+                cardLista.Width = w;
+                cardLista.Height = Math.Max(300, panel.ClientSize.Height - cardLista.Top - 34);
+            }
+            else
+            {
+                int cardW = Math.Min(360, Math.Max(280, (w - 90) / 4));
+                int gap = (w - 4 * cardW) / 3;
+                int cardH = 100;
+
+                cardTotal.Location = new Point(startX, 88);
+                cardTotal.Size = new Size(cardW, cardH);
+
+                cardActivas.Location = new Point(startX + cardW + gap, 88);
+                cardActivas.Size = new Size(cardW, cardH);
+
+                cardProceso.Location = new Point(startX + (cardW + gap) * 2, 88);
+                cardProceso.Size = new Size(cardW, cardH);
+
+                cardResueltas.Location = new Point(startX + (cardW + gap) * 3, 88);
+                cardResueltas.Size = new Size(cardW, cardH);
+
+                // Tabla de incidencias en su posición original
+                cardLista.Location = new Point(startX, 210);
+                cardLista.Width = w;
+                cardLista.Height = Math.Max(420, panel.ClientSize.Height - 250);
+            }
         };
 
         return panel;
@@ -191,7 +227,7 @@ public class AdminGestionIncidenciasForm : Form
         var card = new Panel
         {
             Location = new Point(x, y),
-            Size = new Size(220, 100),
+            Size = new Size(250, 110),
             BackColor = Color.White
         };
         card.Paint += (s, e) =>
@@ -199,32 +235,50 @@ public class AdminGestionIncidenciasForm : Form
             using var pen = new Pen(Color.FromArgb(220, 227, 238));
             e.Graphics.DrawRectangle(pen, 0, 0, card.Width - 1, card.Height - 1);
         };
-        card.Controls.Add(new Label
+        
+        var lblTitulo = new Label
         {
             Text = titulo,
             Font = new Font("Segoe UI", 11F, FontStyle.Bold),
             ForeColor = Color.FromArgb(50, 58, 72),
-            Location = new Point(16, 12),
+            Location = new Point(16, 16),
             AutoSize = true
-        });
-        card.Controls.Add(new Label
+        };
+        card.Controls.Add(lblTitulo);
+
+        var lblValor = new Label
         {
             Text = $"{valor} {unidad}",
-            Font = new Font("Segoe UI", 13F, FontStyle.Bold),
+            Font = new Font("Segoe UI", 12.5F, FontStyle.Bold),
             ForeColor = color,
-            Location = new Point(16, 40),
+            Location = new Point(16, 50),
             AutoSize = true,
             Tag = "valor"
-        });
-        card.Controls.Add(new Label
+        };
+        card.Controls.Add(lblValor);
+        
+        var lblIcono = new Label
         {
             Text = icono,
-            Font = new Font("Segoe UI Symbol", 22F, FontStyle.Bold),
+            Font = new Font("Segoe UI Emoji", 26F),
             ForeColor = color,
-            Location = new Point(170, 38),
-            Size = new Size(40, 40),
-            TextAlign = ContentAlignment.MiddleCenter
-        });
+            AutoSize = true
+        };
+        card.Controls.Add(lblIcono);
+        lblIcono.BringToFront();
+
+        card.Resize += (s, e) =>
+        {
+            lblIcono.Left = card.Width - lblIcono.Width - 16;
+            lblIcono.Top = (card.Height - lblIcono.Height) / 2;
+            lblValor.MaximumSize = new Size(Math.Max(50, lblIcono.Left - 24), 0);
+            lblTitulo.MaximumSize = new Size(Math.Max(50, lblIcono.Left - 24), 0);
+        };
+        lblIcono.Left = card.Width - lblIcono.Width - 16;
+        lblIcono.Top = (card.Height - lblIcono.Height) / 2;
+        lblValor.MaximumSize = new Size(Math.Max(50, lblIcono.Left - 24), 0);
+        lblTitulo.MaximumSize = new Size(Math.Max(50, lblIcono.Left - 24), 0);
+
         return card;
     }
 
@@ -256,7 +310,7 @@ public class AdminGestionIncidenciasForm : Form
         g.Columns.Add("Tipo", "Tipo de incidencia");
         g.Columns.Add("Estado", "Estado");
         g.Columns.Add("Fecha", "Fecha");
-        var colVer = new DataGridViewButtonColumn { Name = "Ver", HeaderText = "Acciones", Text = "👁", UseColumnTextForButtonValue = true, Width = 50 };
+        var colVer = new DataGridViewButtonColumn { Name = "Ver", HeaderText = "Detalles", Text = "👁", UseColumnTextForButtonValue = true, Width = 60 };
         var colEdit = new DataGridViewButtonColumn { Name = "Editar", Text = "✎", UseColumnTextForButtonValue = true, Width = 50 };
         var colDel = new DataGridViewButtonColumn { Name = "Eliminar", Text = "🗑", UseColumnTextForButtonValue = true, Width = 50 };
         g.Columns.Add(colVer);
@@ -346,9 +400,8 @@ public class AdminGestionIncidenciasForm : Form
         var col = grid.Columns[e.ColumnIndex].Name;
         if (col == "Ver")
         {
-            MessageBox.Show(
-                $"Folio: {item.Folio}\nTítulo: {item.Titulo}\nTipo: {item.TipoIncidencia}\nEstado: {item.Estado}\nFecha: {item.Fecha:dd/MM/yyyy}\nEquipo: {item.Equipo}\n\n{item.Descripcion}",
-                "Detalle de incidencia", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            using var dlg = new IncidenciaDetalleForm(item);
+            dlg.ShowDialog(this);
         }
         else if (col == "Editar")
         {

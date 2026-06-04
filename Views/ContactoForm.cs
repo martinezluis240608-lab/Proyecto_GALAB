@@ -12,8 +12,6 @@ public partial class ContactoForm : Form
     private readonly Color borde = Color.FromArgb(220, 228, 238);
     private readonly Color texto = Color.FromArgb(8, 18, 48);
 
-    // Datos editables del módulo Contacto.
-    // Cuando conectes una base de datos, estos valores pueden venir de una tabla de configuración.
     private const string NombreUsuarioActual = "Nombre del usuario";
     private const string RolUsuarioActual = "Rol del usuario";
     private const string DireccionContacto = "Carretera a Valsequillo Km. 1.5, San Miguel el Grande,\nTlaxiaco, Oaxaca, C.P. 69800";
@@ -39,10 +37,13 @@ public partial class ContactoForm : Form
         Font = new Font("Segoe UI", 10F);
         Controls.Clear();
 
-        Controls.Add(CrearContenido());
-        Controls.Add(CrearSidebar());
-        Controls.Add(CrearHeader());
-        Controls.Add(new Label
+        var panelDerecho = new Panel
+        {
+            Dock = DockStyle.Fill,
+            BackColor = fondoGeneral
+        };
+
+        var footer = new Label
         {
             Text = "© 2026 GALAB - Instituto Tecnológico Superior de San Miguel el Grande",
             Dock = DockStyle.Bottom,
@@ -51,7 +52,20 @@ public partial class ContactoForm : Form
             ForeColor = texto,
             TextAlign = ContentAlignment.MiddleCenter,
             Font = new Font("Segoe UI", 9F)
-        });
+        };
+
+        var sidebar = CrearSidebar();
+        var header = CrearHeader();
+        var contenido = CrearContenido();
+
+        // Nest header and contenido into panelDerecho
+        panelDerecho.Controls.Add(contenido); // Dock.Fill
+        panelDerecho.Controls.Add(header);    // Dock.Top
+
+        // Add controls to main Form in correct docking Z-order
+        Controls.Add(panelDerecho);
+        Controls.Add(sidebar); // Dock.Left
+        Controls.Add(footer);  // Dock.Bottom
     }
 
     private Panel CrearHeader()
@@ -63,23 +77,13 @@ public partial class ContactoForm : Form
             BackColor = azulClaro
         };
 
-        var logoIcono = new Label
+        var picLogoGalab = new PictureBox
         {
-            Text = "⚙",
-            Font = new Font("Segoe UI Symbol", 36F, FontStyle.Bold),
-            ForeColor = azulPrincipal,
-            Location = new Point(24, 18),
-            Size = new Size(62, 58),
-            TextAlign = ContentAlignment.MiddleCenter
-        };
-
-        var galab = new Label
-        {
-            Text = "GALAB",
-            Font = new Font("Segoe UI", 24F, FontStyle.Bold),
-            ForeColor = azulOscuro,
-            Location = new Point(96, 16),
-            Size = new Size(180, 34)
+            Image = UiAssets.CargarLogoGalab(),
+            SizeMode = PictureBoxSizeMode.Zoom,
+            Location = new Point(24, 10),
+            Size = new Size(180, 76),
+            BackColor = Color.Transparent
         };
 
         var subtitulo = new Label
@@ -87,8 +91,8 @@ public partial class ContactoForm : Form
             Text = "Sistema de Gestión\nde Incidencias",
             Font = new Font("Segoe UI", 9F, FontStyle.Bold),
             ForeColor = texto,
-            Location = new Point(100, 52),
-            Size = new Size(180, 40)
+            Location = new Point(210, 32),
+            AutoSize = true
         };
 
         var instituto = new Label
@@ -97,8 +101,8 @@ public partial class ContactoForm : Form
             Font = new Font("Segoe UI", 10F, FontStyle.Bold),
             ForeColor = texto,
             Anchor = AnchorStyles.Top | AnchorStyles.Right,
-            Location = new Point(760, 30),
-            Size = new Size(290, 42)
+            Location = new Point(400, 30),
+            AutoSize = true
         };
 
         var logoInstituto = new PictureBox
@@ -115,31 +119,36 @@ public partial class ContactoForm : Form
             Text = "🔔",
             Font = new Font("Segoe UI Emoji", 20F),
             Anchor = AnchorStyles.Top | AnchorStyles.Right,
-            Location = new Point(1065, 28),
+            Location = new Point(700, 28),
             Size = new Size(44, 40),
             TextAlign = ContentAlignment.MiddleCenter
         };
 
+        var perfil = Proyecto_GALAB.Services.PerfilUsuarioStore.Obtener();
+        string nombre = !string.IsNullOrWhiteSpace(perfil.NombreCompleto) ? perfil.NombreCompleto : NombreUsuarioActual;
+        string rol = !string.IsNullOrWhiteSpace(perfil.Rol) ? perfil.Rol : RolUsuarioActual;
+
         var usuario = new Label
         {
-            Text = $"👤  {NombreUsuarioActual}\n     {RolUsuarioActual}",
+            Text = $"👤  {nombre}\n     {rol}",
             Font = new Font("Segoe UI", 10F, FontStyle.Bold),
             ForeColor = texto,
             Anchor = AnchorStyles.Top | AnchorStyles.Right,
-            Location = new Point(1075, 28),
-            Size = new Size(190, 44)
+            Location = new Point(760, 28),
+            AutoSize = true
         };
 
         header.Resize += (s, e) =>
         {
+            if (WindowState == FormWindowState.Minimized) return;
             logoInstituto.Left = header.Width - 665;
             logoInstituto.Top = 20;
             instituto.Left = header.Width - 590;
             campana.Left = header.Width - 270;
-            usuario.Left = header.Width - 220;
+            usuario.Left = header.Width - usuario.Width - 20;
         };
 
-        header.Controls.AddRange(new Control[] { logoIcono, galab, subtitulo, logoInstituto, instituto, campana, usuario });
+        header.Controls.AddRange(new Control[] { picLogoGalab, subtitulo, logoInstituto, instituto, campana, usuario });
         return header;
     }
 
@@ -187,29 +196,6 @@ public partial class ContactoForm : Form
         return sidebar;
     }
 
-    private Button CrearBotonMenu(string textoBoton, int y, Action? accion, bool activo = false)
-    {
-        var boton = new Button
-        {
-            Text = textoBoton,
-            Font = new Font("Segoe UI", 10F, activo ? FontStyle.Bold : FontStyle.Regular),
-            ForeColor = activo ? azulPrincipal : texto,
-            BackColor = activo ? azulClaro : Color.White,
-            FlatStyle = FlatStyle.Flat,
-            Cursor = Cursors.Hand,
-            Location = new Point(16, y),
-            Size = new Size(218, 50),
-            TextAlign = ContentAlignment.MiddleLeft,
-            Padding = new Padding(10, 0, 0, 0)
-        };
-        boton.FlatAppearance.BorderSize = 0;
-        boton.FlatAppearance.MouseOverBackColor = azulClaro;
-        if (accion != null)
-            boton.Click += (s, e) => accion();
-
-        return boton;
-    }
-
     private Panel CrearContenido()
     {
         var contenido = new Panel
@@ -229,7 +215,7 @@ public partial class ContactoForm : Form
             Font = new Font("Segoe UI", 24F, FontStyle.Bold),
             ForeColor = azulPrincipal,
             Location = new Point(118, 35),
-            Size = new Size(260, 44)
+            AutoSize = true
         };
 
         var descripcion = new Label
@@ -238,7 +224,7 @@ public partial class ContactoForm : Form
             Font = new Font("Segoe UI", 13F),
             ForeColor = texto,
             Location = new Point(36, 105),
-            Size = new Size(780, 34)
+            AutoSize = true
         };
 
         var card = CrearCardContacto();
@@ -246,7 +232,8 @@ public partial class ContactoForm : Form
 
         contenido.Resize += (s, e) =>
         {
-            int w = Math.Min(620, Math.Max(560, contenido.ClientSize.Width - 92));
+            if (WindowState == FormWindowState.Minimized) return;
+            int w = Math.Min(980, Math.Max(560, contenido.ClientSize.Width - 92));
             int left = Math.Max(36, (contenido.ClientSize.Width - w) / 2);
             
             card.Width = w;
@@ -267,36 +254,36 @@ public partial class ContactoForm : Form
     {
         var card = new Panel
         {
-            Size = new Size(620, 520),
+            Size = new Size(650, 640),
             BackColor = Color.White
         };
         card.Paint += (s, e) => DibujarBordeRedondo(e.Graphics, card.ClientRectangle, 12, Color.White, borde);
 
-        var titulo = new Label
+        var lblTituloCard = new Label
         {
             Text = "📄  Información de contacto",
             Font = new Font("Segoe UI", 14F, FontStyle.Bold),
             ForeColor = azulOscuro,
-            Location = new Point(28, 24),
-            Size = new Size(380, 38)
+            Location = new Point(28, 20),
+            AutoSize = true
         };
         var separador = new Panel
         {
             BackColor = borde,
-            Location = new Point(28, 82),
-            Size = new Size(560, 1),
+            Location = new Point(28, 68),
+            Size = new Size(590, 1),
             Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
         };
 
         card.Controls.AddRange(new Control[]
         {
-            titulo,
+            lblTituloCard,
             separador,
-            CrearDatoContacto("📍", "Dirección", DireccionContacto, 108, null),
-            CrearDatoContacto("☎", "Teléfono", TelefonoContacto, 198, () => CopiarAlPortapapeles(TelefonoContacto, "Teléfono copiado.")),
-            CrearDatoContacto("✉", "Correo electrónico", CorreoContacto, 276, () => AbrirCorreo()),
-            CrearDatoContacto("◷", "Horario de atención", HorarioContacto, 354, null),
-            CrearDatoContacto("🌐", "Sitio web", SitioWebContacto, 442, AbrirSitioWeb)
+            CrearDatoContacto("📍", "Dirección", DireccionContacto, 85, null),
+            CrearDatoContacto("☎", "Teléfono", TelefonoContacto, 195, () => CopiarAlPortapapeles(TelefonoContacto, "Teléfono copiado.")),
+            CrearDatoContacto("✉", "Correo electrónico", CorreoContacto, 305, () => AbrirCorreo()),
+            CrearDatoContacto("◷", "Horario de atención", HorarioContacto, 415, null),
+            CrearDatoContacto("🌐", "Sitio web", SitioWebContacto, 525, AbrirSitioWeb)
         });
 
         return card;
@@ -308,7 +295,7 @@ public partial class ContactoForm : Form
         {
             BackColor = Color.White,
             Location = new Point(28, y),
-            Size = new Size(560, 72),
+            Size = new Size(590, 96),
             Cursor = accion == null ? Cursors.Default : Cursors.Hand,
             Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
         };
@@ -316,10 +303,10 @@ public partial class ContactoForm : Form
         var cajaIcono = new Label
         {
             Text = icono,
-            Font = new Font("Segoe UI Emoji", 16F, FontStyle.Bold),
+            Font = new Font("Segoe UI Emoji", 18F),
             ForeColor = azulPrincipal,
             BackColor = azulClaro,
-            Location = new Point(0, 6),
+            Location = new Point(0, 12),
             Size = new Size(48, 48),
             TextAlign = ContentAlignment.MiddleCenter
         };
@@ -327,10 +314,11 @@ public partial class ContactoForm : Form
         var lblTitulo = new Label
         {
             Text = titulo,
-            Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+            Font = new Font("Segoe UI", 10.5F, FontStyle.Bold),
             ForeColor = azulPrincipal,
-            Location = new Point(72, 2),
-            Size = new Size(430, 24)
+            Location = new Point(72, 4),
+            AutoSize = true,
+            Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
         };
 
         var lblValor = new Label
@@ -339,8 +327,15 @@ public partial class ContactoForm : Form
             Font = new Font("Segoe UI", 10F),
             ForeColor = texto,
             Location = new Point(72, 28),
-            Size = new Size(465, 42)
+            AutoSize = true,
+            Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
         };
+
+        item.Resize += (s, e) =>
+        {
+            lblValor.MaximumSize = new Size(item.Width - 80, 0);
+        };
+        lblValor.MaximumSize = new Size(item.Width - 80, 0);
 
         if (accion != null)
         {

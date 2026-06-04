@@ -42,9 +42,14 @@ public partial class PerfilForm : Form
 
     private void CrearInterfaz()
     {
-        var header = CrearHeader();
-        var sidebar = CrearSidebar();
-        var contenido = CrearContenido();
+        Controls.Clear();
+
+        var panelDerecho = new Panel
+        {
+            Dock = DockStyle.Fill,
+            BackColor = UiAssets.Fondo
+        };
+
         var footer = new Label
         {
             Text = "© 2025 GALAB - Instituto Tecnologico Superior de San Miguel el Grande",
@@ -56,10 +61,18 @@ public partial class PerfilForm : Form
             Font = new Font("Segoe UI", 9F)
         };
 
-        Controls.Add(contenido);
-        Controls.Add(sidebar);
-        Controls.Add(header);
-        Controls.Add(footer);
+        var sidebar = CrearSidebar();
+        var header = CrearHeader();
+        var contenido = CrearContenido();
+
+        // Nest header and contenido into panelDerecho
+        panelDerecho.Controls.Add(contenido); // Dock.Fill
+        panelDerecho.Controls.Add(header);    // Dock.Top
+
+        // Add controls to main Form in correct docking Z-order
+        Controls.Add(panelDerecho);
+        Controls.Add(sidebar); // Dock.Left
+        Controls.Add(footer);  // Dock.Bottom
     }
 
     private Panel CrearHeader()
@@ -95,13 +108,14 @@ public partial class PerfilForm : Form
             ForeColor = UiAssets.AzulOscuro,
             TextAlign = ContentAlignment.MiddleLeft,
             Anchor = AnchorStyles.Top | AnchorStyles.Right,
-            Size = new Size(300, 76)
+            AutoSize = true
         };
         panel.Resize += (s, e) =>
         {
+            if (WindowState == FormWindowState.Minimized) return;
             logo.Left = panel.Width - 390;
             logo.Top = 24;
-            instituto.Left = panel.Width - 292;
+            instituto.Left = logo.Right + 12;
             instituto.Top = 28;
         };
 
@@ -160,9 +174,9 @@ public partial class PerfilForm : Form
             AutoScroll = true
         };
 
-        var cardGeneral = CrearSeccion("Informacion general", 24, 22, 380, 542);
-        var cardEscolar = CrearSeccion("Informacion escolar", 426, 22, 716, 244);
-        var cardContacto = CrearSeccion("Informacion de contacto", 426, 280, 716, 302);
+        var cardGeneral = CrearSeccion("Informacion general", 24, 22, 380, 600);
+        var cardEscolar = CrearSeccion("Informacion escolar", 426, 22, 716, 320);
+        var cardContacto = CrearSeccion("Informacion de contacto", 426, 280, 716, 320);
 
         picFoto = new PictureBox
         {
@@ -194,23 +208,34 @@ public partial class PerfilForm : Form
         cardGeneral.Controls.Add(btnCambiarFoto);
 
         txtNombre = CrearFila(cardGeneral, "Nombre", 268);
-        txtCurp = CrearFila(cardGeneral, "CURP", 306);
-        txtFechaNacimiento = CrearFila(cardGeneral, "Fecha de nacimiento", 344);
-        txtGenero = CrearFila(cardGeneral, "Genero", 382);
-        txtTelefono = CrearFila(cardGeneral, "Telefono", 420);
-        txtCorreo = CrearFila(cardGeneral, "Correo electronico", 458);
+        txtCurp = CrearFila(cardGeneral, "CURP", 316);
+        txtFechaNacimiento = CrearFila(cardGeneral, "Fecha de nacimiento", 364);
+        txtGenero = CrearFila(cardGeneral, "Genero", 412);
+        txtTelefono = CrearFila(cardGeneral, "Telefono", 460);
+        txtCorreo = CrearFila(cardGeneral, "Correo electronico", 508);
 
         txtControl = CrearFila(cardEscolar, "No. de control", 56);
-        txtEstatus = CrearFila(cardEscolar, "Estatus", 92);
-        txtSemestre = CrearFila(cardEscolar, "Semestre", 128);
-        txtCarrera = CrearFila(cardEscolar, "Carrera", 164);
-        txtGrupo = CrearFila(cardEscolar, "Grupo", 200);
+        txtEstatus = CrearFila(cardEscolar, "Estatus", 104);
+        txtSemestre = CrearFila(cardEscolar, "Semestre", 152);
+        txtCarrera = CrearFila(cardEscolar, "Carrera", 200);
+        txtGrupo = CrearFila(cardEscolar, "Grupo", 248);
 
         txtCalle = CrearFila(cardContacto, "Calle y numero", 56);
-        txtColonia = CrearFila(cardContacto, "Colonia", 92);
-        txtCodigoPostal = CrearFila(cardContacto, "Codigo postal", 128);
-        txtMunicipio = CrearFila(cardContacto, "Municipio", 164);
-        txtEstado = CrearFila(cardContacto, "Estado", 200);
+        txtColonia = CrearFila(cardContacto, "Colonia", 104);
+        txtCodigoPostal = CrearFila(cardContacto, "Codigo postal", 152);
+        txtMunicipio = CrearFila(cardContacto, "Municipio", 200);
+        txtEstado = CrearFila(cardContacto, "Estado", 248);
+
+        txtNombre.KeyPress += SoloLetras_KeyPress;
+        txtGenero.KeyPress += SoloLetras_KeyPress;
+        txtCarrera.KeyPress += SoloLetras_KeyPress;
+        txtMunicipio.KeyPress += SoloLetras_KeyPress;
+        txtEstado.KeyPress += SoloLetras_KeyPress;
+
+        txtTelefono.KeyPress += SoloNumeros_KeyPress;
+        txtControl.KeyPress += SoloNumeros_KeyPress;
+        txtSemestre.KeyPress += SoloNumeros_KeyPress;
+        txtCodigoPostal.KeyPress += SoloNumeros_KeyPress;
 
         panel.Controls.AddRange(new Control[] { cardGeneral, cardEscolar, cardContacto });
 
@@ -264,18 +289,46 @@ public partial class PerfilForm : Form
 
         panel.Controls.AddRange(new Control[] { btnEditar, btnGuardar, btnCancelar });
 
+        cardGeneral.Resize += (s, e) =>
+        {
+            picFoto.Left = (cardGeneral.Width - picFoto.Width) / 2;
+            btnCambiarFoto.Left = (cardGeneral.Width - btnCambiarFoto.Width) / 2;
+        };
+
         panel.Resize += (s, e) =>
         {
-            int contentW = Math.Max(1160, panel.ClientSize.Width - 40);
-            int startX = Math.Max(18, (panel.ClientSize.Width - contentW) / 2);
+            if (WindowState == FormWindowState.Minimized) return;
+            int clientW = panel.ClientSize.Width;
+            int clientH = panel.ClientSize.Height;
 
-            cardGeneral.Left = startX;
-            cardEscolar.Left = cardGeneral.Right + 22;
-            cardContacto.Left = cardEscolar.Left;
-            btnEditar.Left = cardContacto.Right - btnEditar.Width;
-            btnGuardar.Left = cardContacto.Right - (btnGuardar.Width * 2 + 10);
-            btnCancelar.Left = cardContacto.Right - btnCancelar.Width;
-            panel.AutoScrollMinSize = new Size(startX + 1148 + 30, 760);
+            int padding = 24;
+            int gap = 20;
+
+            int availableW = clientW - (padding * 2) - gap;
+            if (availableW < 900) availableW = 900;
+
+            int generalW = (int)(availableW * 0.35);
+            int escolarW = availableW - generalW;
+
+            generalW = Math.Max(350, Math.Min(450, generalW));
+            escolarW = availableW - generalW;
+
+            int startX = padding;
+            cardGeneral.Location = new Point(startX, padding);
+            cardGeneral.Size = new Size(generalW, 600);
+
+            int col2X = startX + generalW + gap;
+            cardEscolar.Location = new Point(col2X, padding);
+            cardEscolar.Size = new Size(escolarW, 320);
+
+            cardContacto.Location = new Point(col2X, cardEscolar.Bottom + gap);
+            cardContacto.Size = new Size(escolarW, 320);
+
+            btnEditar.Location = new Point(col2X + escolarW - btnEditar.Width, cardContacto.Bottom + gap);
+            btnGuardar.Location = new Point(col2X + escolarW - (btnGuardar.Width * 2 + 10), cardContacto.Bottom + gap);
+            btnCancelar.Location = new Point(col2X + escolarW - btnCancelar.Width, cardContacto.Bottom + gap);
+
+            panel.AutoScrollMinSize = new Size(col2X + escolarW + padding, btnEditar.Bottom + padding);
         };
 
         return panel;
@@ -318,20 +371,21 @@ public partial class PerfilForm : Form
         var label = new Label
         {
             Text = $"{etiqueta}:",
-            Font = new Font("Segoe UI", 11F),
+            Font = new Font("Segoe UI", 12F),
             ForeColor = Color.FromArgb(45, 55, 70),
             Location = new Point(24, y + 2),
-            Size = new Size(220, 28)
+            Size = new Size(220, 30)
         };
         var txt = new TextBox
         {
             ReadOnly = true,
             BorderStyle = BorderStyle.None,
             BackColor = Color.White,
-            Font = new Font("Segoe UI", 11F),
+            Font = new Font("Segoe UI", 12F),
             ForeColor = Color.FromArgb(35, 45, 65),
             Location = new Point(250, y + 2),
-            Size = new Size(parent.Width - 270, 28),
+            Size = new Size(parent.Width - 270, 30),
+            Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
             TabStop = true
         };
         parent.Controls.Add(label);
@@ -355,6 +409,13 @@ public partial class PerfilForm : Form
 
     private void GuardarEdicion()
     {
+        string email = txtCorreo.Text.Trim();
+        if (!System.Text.RegularExpressions.Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+        {
+            MessageBox.Show("El correo electrónico no tiene un formato válido (ejemplo: usuario@dominio.com).", "Error de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
         var perfil = PerfilUsuarioStore.Obtener();
         perfil.NombreCompleto = txtNombre.Text.Trim();
         perfil.Curp = txtCurp.Text.Trim();
@@ -464,5 +525,21 @@ public partial class PerfilForm : Form
         }
 
         pictureBox.Image = null;
+    }
+
+    private void SoloNumeros_KeyPress(object? sender, KeyPressEventArgs e)
+    {
+        if (!char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar))
+        {
+            e.Handled = true;
+        }
+    }
+
+    private void SoloLetras_KeyPress(object? sender, KeyPressEventArgs e)
+    {
+        if (!char.IsLetter(e.KeyChar) && !char.IsControl(e.KeyChar) && e.KeyChar != ' ')
+        {
+            e.Handled = true;
+        }
     }
 }

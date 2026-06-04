@@ -1,4 +1,4 @@
-﻿using System.Drawing.Drawing2D;
+using System.Drawing.Drawing2D;
 
 namespace Proyecto_GALAB.Views;
 
@@ -79,15 +79,17 @@ partial class LoginForm
             Text = "GALAB",
             Font = new Font("Segoe UI", 30F, FontStyle.Bold),
             ForeColor = azulPrincipal,
-            TextAlign = ContentAlignment.MiddleCenter
+            TextAlign = ContentAlignment.MiddleCenter,
+            AutoSize = true
         };
 
         lblSubtitulo = new Label
         {
-            Text = "Sistema de Gestion de Incidencias",
+            Text = "Sistema de Gestión de Incidencias",
             Font = new Font("Segoe UI", 15F, FontStyle.Bold),
             ForeColor = azulOscuro,
-            TextAlign = ContentAlignment.MiddleCenter
+            TextAlign = ContentAlignment.MiddleCenter,
+            AutoSize = true
         };
 
         btnEstudiante = CrearBotonTipo("▱  Estudiante", true);
@@ -178,6 +180,18 @@ partial class LoginForm
         int margen = 14;
         int alto = ClientSize.Height - margen * 2;
         int anchoImagen = Math.Max(420, ClientSize.Width / 2);
+        try
+        {
+            var img = Properties.Resources.ima_L;
+            if (img != null)
+            {
+                anchoImagen = (int)(alto * ((float)img.Width / img.Height));
+                int maxAncho = (int)(ClientSize.Width * 0.55f);
+                int minAncho = 360;
+                anchoImagen = Math.Max(minAncho, Math.Min(maxAncho, anchoImagen));
+            }
+        }
+        catch {}
 
         panelImagen.Left = margen;
         panelImagen.Top = margen;
@@ -197,10 +211,6 @@ partial class LoginForm
         int formWidth = Math.Min(480, Math.Max(360, pw - 180));
         int left = (pw - formWidth) / 2;
 
-        // Centrado vertical dinámico
-        int contentHeight = 610;
-        int startY = Math.Max(76, (panelLogin.Height - 78 - contentHeight) / 2);
-
         int txtH = formWidth > 420 ? 48 : 44;
         int btnH = formWidth > 420 ? 52 : 48;
         txtUsuario.Font = new Font("Segoe UI", formWidth > 420 ? 12F : 11F);
@@ -211,16 +221,24 @@ partial class LoginForm
         int tabH = 48;
         int lblH = 24;
 
-        picLogo.SetBounds((pw - 140) / 2, startY, 140, picH);
-        lblGalab.SetBounds(0, startY + 115, pw, 50);
-        lblSubtitulo.SetBounds(0, startY + 165, pw, 32);
+        // Centrado vertical dinámico basado en un estimado
+        int contentHeight = 630;
+        int startY = Math.Max(40, (panelLogin.Height - 78 - contentHeight) / 2);
 
-        int tabY = startY + 225;
+        picLogo.SetBounds((pw - 140) / 2, startY, 140, picH);
+        
+        lblGalab.Left = (pw - lblGalab.Width) / 2;
+        lblGalab.Top = startY + picH + 10;
+        
+        lblSubtitulo.Left = (pw - lblSubtitulo.Width) / 2;
+        lblSubtitulo.Top = lblGalab.Bottom + 8;
+
+        int tabY = lblSubtitulo.Bottom + 18;
         int tabW = formWidth / 2;
         btnEstudiante.SetBounds(left, tabY, tabW, tabH);
         btnAdministrador.SetBounds(left + tabW, tabY, tabW, tabH);
 
-        int lblUsrY = tabY + tabH + 35;
+        int lblUsrY = tabY + tabH + 30;
         lblUsuario.SetBounds(left, lblUsrY, formWidth, lblH);
         int txtUsrY = lblUsrY + lblH + 4;
         txtUsuario.SetBounds(left, txtUsrY, formWidth, txtH);
@@ -326,33 +344,30 @@ partial class LoginForm
         g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
         g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
 
-        // 1. Fondo azul claro (igual que el panel de login) en lugar de negro
-        g.Clear(Color.FromArgb(235, 238, 242));
-
         try
         {
-            var img = Properties.Resources.logo_GALAB_1;
-            if (!TienePixelesTransparentes(img))
+            var img = Properties.Resources.ima_L;
+            if (img != null)
             {
-                img = Properties.Resources.g88;
+                float escala = Math.Min(
+                    (float)panelImagen.Width / img.Width,
+                    (float)panelImagen.Height / img.Height);
+                int w = (int)(img.Width * escala);
+                int h = (int)(img.Height * escala);
+                int x = (panelImagen.Width - w) / 2;
+                int y = (panelImagen.Height - h) / 2;
+
+                g.Clear(panelImagen.BackColor);
+                g.DrawImage(img, new Rectangle(x, y, w, h));
             }
-
-            // 2. Calcular tamaño manteniendo proporción
-            float escala = Math.Min(
-                (panelImagen.Width * 0.80f) / img.Width,
-                (panelImagen.Height * 0.80f) / img.Height);
-            int w = (int)(img.Width * escala);
-            int h = (int)(img.Height * escala);
-            int x = (panelImagen.Width - w) / 2;
-            int y = (panelImagen.Height - h) / 2;
-
-            // 3. Dibujar con CompositingMode.SourceOver respeta el alfa del PNG
-            g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
-            g.DrawImage(img, new Rectangle(x, y, w, h));
+            else
+            {
+                g.Clear(Color.FromArgb(235, 238, 242));
+            }
         }
         catch
         {
-            g.Clear(Color.FromArgb(173, 216, 230));
+            g.Clear(Color.FromArgb(235, 238, 242));
         }
     }
 

@@ -23,10 +23,18 @@ public class AdminGestionUsuariosForm : Form
 
     private void CrearInterfaz()
     {
-        Controls.Add(CrearContenido());
-        Controls.Add(AdminSidebar.Crear(this, AdminModulo.Usuarios));
-        Controls.Add(AdminSidebar.CrearHeader());
-        Controls.Add(new Label
+        Controls.Clear();
+
+        var panelDerecho = new Panel
+        {
+            Dock = DockStyle.Fill,
+            BackColor = UiAssets.Fondo
+        };
+
+        var header = AdminSidebar.CrearHeader();
+        var sidebar = AdminSidebar.Crear(this, AdminModulo.Usuarios);
+        var contenido = CrearContenido();
+        var footer = new Label
         {
             Text = "© 2025 GALAB - Panel administrador",
             Dock = DockStyle.Bottom,
@@ -35,7 +43,16 @@ public class AdminGestionUsuariosForm : Form
             ForeColor = UiAssets.AzulOscuro,
             TextAlign = ContentAlignment.MiddleCenter,
             Font = new Font("Segoe UI", 9F)
-        });
+        };
+
+        // Nest header and contenido into panelDerecho
+        panelDerecho.Controls.Add(contenido); // Dock.Fill
+        panelDerecho.Controls.Add(header);    // Dock.Top
+
+        // Add controls to main Form in correct docking Z-order
+        Controls.Add(panelDerecho);
+        Controls.Add(sidebar); // Dock.Left
+        Controls.Add(footer);  // Dock.Bottom
     }
 
     private Panel CrearContenido()
@@ -127,6 +144,10 @@ public class AdminGestionUsuariosForm : Form
         {
             btnNuevo.Left = card.Width - btnNuevo.Width - 20;
             grid.Width = card.Width - 40;
+            grid.Height = Math.Max(200, card.Height - 140);
+            lblPaginacion.Top = card.Height - 46;
+            btnPrev.Top = card.Height - 52;
+            btnNext.Top = card.Height - 52;
             btnPrev.Left = card.Width - 180;
             btnNext.Left = card.Width - 60;
         };
@@ -134,6 +155,7 @@ public class AdminGestionUsuariosForm : Form
         panel.Controls.AddRange(new Control[] { titulo, subrayado, card });
         panel.Resize += (s, e) =>
         {
+            if (WindowState == FormWindowState.Minimized) return;
             int w = Math.Max(1000, panel.ClientSize.Width - 72);
             int startX = (panel.ClientSize.Width - w) / 2;
             titulo.Left = startX;
@@ -194,19 +216,33 @@ public class AdminGestionUsuariosForm : Form
 
         var col = grid.Columns[e.ColumnIndex].Name;
         if (col == "Ver")
-            MessageBox.Show($"ID: {u.Id}\nNombre: {u.NombreCompleto}\nCorreo: {u.Correo}\nRol: {u.Rol}\nEstado: {u.Estado}",
-                "Usuario", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        {
+            if (u.Rol.Equals("Usuario", StringComparison.OrdinalIgnoreCase) || u.Rol.Equals("Estudiante", StringComparison.OrdinalIgnoreCase))
+            {
+                var perfil = PerfilUsuarioStore.ObtenerPorControl(u.Id);
+                using var dlg = new AlumnoDetalleForm(perfil);
+                dlg.ShowDialog(this);
+            }
+            else
+            {
+                MessageBox.Show($"ID: {u.Id}\nNombre: {u.NombreCompleto}\nCorreo: {u.Correo}\nRol: {u.Rol}\nEstado: {u.Estado}",
+                    "Ver datos del administrador", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
         else if (col == "Editar")
         {
             using var dlg = new AdminUsuarioEditorForm(u);
             if (dlg.ShowDialog(this) == DialogResult.OK)
                 CargarGrid();
         }
-        else if (col == "Eliminar" && MessageBox.Show($"¿Eliminar usuario {u.Id}?", "Confirmar",
-                     MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+        else if (col == "Eliminar")
         {
-            UsuarioSistemaStore.Eliminar(u.Id);
-            CargarGrid();
+            if (MessageBox.Show($"¿Eliminar usuario {u.Id}?", "Confirmar",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+            {
+                UsuarioSistemaStore.Eliminar(u.Id);
+                CargarGrid();
+            }
         }
     }
 }

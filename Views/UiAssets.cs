@@ -26,6 +26,11 @@ internal static class UiAssets
         return CargarImagen("logo-institucion.jpg") ?? CargarImagenDesdeViews("descargar.jpg");
     }
 
+    public static Image? CargarLogoGalab()
+    {
+        return CargarImagen("logo-galab.png");
+    }
+
     public static Image? CargarImagen(string nombreArchivo)
     {
         string[] rutas =
@@ -65,16 +70,25 @@ internal static class UiAssets
     public static void CerrarSesion(Form actual)
     {
         Services.SesionActual.Cerrar();
-        var login = Application.OpenForms.OfType<LoginForm>().FirstOrDefault() ?? new LoginForm();
+        var login = Application.OpenForms.OfType<LoginForm>().FirstOrDefault();
+        if (login == null || login.IsDisposed)
+        {
+            login = new LoginForm();
+        }
         PrepararPantallaCompleta(login);
         login.Show();
         login.BringToFront();
 
-        foreach (Form form in Application.OpenForms.Cast<Form>().ToList())
+        login.BeginInvoke(new Action(() =>
         {
-            if (form != login)
-                form.Close();
-        }
+            foreach (Form form in Application.OpenForms.Cast<Form>().ToList())
+            {
+                if (form != login && !form.IsDisposed)
+                {
+                    try { form.Close(); } catch { }
+                }
+            }
+        }));
     }
 
     public static void PrepararPantallaCompleta(Form form)

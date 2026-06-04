@@ -39,10 +39,18 @@ public class AdminPerfilForm : Form
 
     private void CrearInterfaz()
     {
-        Controls.Add(CrearContenido());
-        Controls.Add(AdminSidebar.Crear(this, AdminModulo.Perfil));
-        Controls.Add(AdminSidebar.CrearHeader());
-        Controls.Add(new Label
+        Controls.Clear();
+
+        var panelDerecho = new Panel
+        {
+            Dock = DockStyle.Fill,
+            BackColor = UiAssets.Fondo
+        };
+
+        var header = AdminSidebar.CrearHeader();
+        var sidebar = AdminSidebar.Crear(this, AdminModulo.Perfil);
+        var contenido = CrearContenido();
+        var footer = new Label
         {
             Text = "© 2025 GALAB - Panel administrador",
             Dock = DockStyle.Bottom,
@@ -51,15 +59,24 @@ public class AdminPerfilForm : Form
             ForeColor = UiAssets.AzulOscuro,
             TextAlign = ContentAlignment.MiddleCenter,
             Font = new Font("Segoe UI", 9F)
-        });
+        };
+
+        // Nest header and contenido into panelDerecho
+        panelDerecho.Controls.Add(contenido); // Dock.Fill
+        panelDerecho.Controls.Add(header);    // Dock.Top
+
+        // Add controls to main Form in correct docking Z-order
+        Controls.Add(panelDerecho);
+        Controls.Add(sidebar); // Dock.Left
+        Controls.Add(footer);  // Dock.Bottom
     }
 
     private Panel CrearContenido()
     {
         var panel = new Panel { Dock = DockStyle.Fill, BackColor = UiAssets.Fondo, AutoScroll = true };
 
-        var cardGeneral = CrearSeccion("Informacion general", 24, 22, 520, 460);
-        var cardContacto = CrearSeccion("Informacion de contacto", 560, 22, 520, 460);
+        var cardGeneral = CrearSeccion("Informacion general", 24, 22, 520, 560);
+        var cardContacto = CrearSeccion("Informacion de contacto", 560, 22, 520, 560);
 
         picFoto = new PictureBox
         {
@@ -90,17 +107,25 @@ public class AdminPerfilForm : Form
         cardGeneral.Controls.Add(btnCambiarFoto);
 
         txtNombre = CrearFila(cardGeneral, "Nombre", 268);
-        txtCurp = CrearFila(cardGeneral, "CURP", 306);
-        txtFechaNacimiento = CrearFila(cardGeneral, "Fecha de nacimiento", 344);
-        txtGenero = CrearFila(cardGeneral, "Genero", 382);
-        txtTelefono = CrearFila(cardGeneral, "Telefono", 420);
-        txtCorreo = CrearFila(cardGeneral, "Correo electronico", 458);
+        txtCurp = CrearFila(cardGeneral, "CURP", 316);
+        txtFechaNacimiento = CrearFila(cardGeneral, "Fecha de nacimiento", 364);
+        txtGenero = CrearFila(cardGeneral, "Genero", 412);
+        txtTelefono = CrearFila(cardGeneral, "Telefono", 460);
+        txtCorreo = CrearFila(cardGeneral, "Correo electronico", 508);
 
         txtCalle = CrearFila(cardContacto, "Calle y numero", 56);
-        txtColonia = CrearFila(cardContacto, "Colonia", 104);
-        txtCodigoPostal = CrearFila(cardContacto, "Codigo postal", 152);
-        txtMunicipio = CrearFila(cardContacto, "Municipio", 200);
-        txtEstado = CrearFila(cardContacto, "Estado", 248);
+        txtColonia = CrearFila(cardContacto, "Colonia", 126);
+        txtCodigoPostal = CrearFila(cardContacto, "Codigo postal", 196);
+        txtMunicipio = CrearFila(cardContacto, "Municipio", 266);
+        txtEstado = CrearFila(cardContacto, "Estado", 336);
+
+        txtNombre.KeyPress += SoloLetras_KeyPress;
+        txtGenero.KeyPress += SoloLetras_KeyPress;
+        txtMunicipio.KeyPress += SoloLetras_KeyPress;
+        txtEstado.KeyPress += SoloLetras_KeyPress;
+
+        txtTelefono.KeyPress += SoloNumeros_KeyPress;
+        txtCodigoPostal.KeyPress += SoloNumeros_KeyPress;
 
         btnEditar = new Button
         {
@@ -125,16 +150,40 @@ public class AdminPerfilForm : Form
         btnCancelar.Click += (_, _) => Cancelar();
 
         panel.Controls.AddRange(new Control[] { cardGeneral, cardContacto, btnEditar, btnGuardar, btnCancelar });
+
+        cardGeneral.Resize += (s, e) =>
+        {
+            picFoto.Left = (cardGeneral.Width - picFoto.Width) / 2;
+            btnCambiarFoto.Left = (cardGeneral.Width - btnCambiarFoto.Width) / 2;
+        };
+
         panel.Resize += (s, e) =>
         {
-            int w = Math.Max(1060, panel.ClientSize.Width - 48);
-            int startX = (panel.ClientSize.Width - w) / 2;
-            cardGeneral.Left = startX;
-            cardContacto.Left = cardGeneral.Right + 16;
+            if (WindowState == FormWindowState.Minimized) return;
+            int padding = 24;
+            int gap = 16;
+            int availableW = panel.ClientSize.Width - (padding * 2) - gap;
+            if (availableW < 1000) availableW = 1000;
+
+            int cardW = availableW / 2;
+
+            int startX = padding;
+            cardGeneral.Location = new Point(startX, 22);
+            cardGeneral.Size = new Size(cardW, 560);
+
+            cardContacto.Location = new Point(startX + cardW + gap, 22);
+            cardContacto.Size = new Size(cardW, 560);
+
             btnEditar.Left = cardContacto.Right - btnEditar.Width;
+            btnEditar.Top = cardContacto.Bottom + 16;
+
             btnGuardar.Left = btnEditar.Left - btnGuardar.Width - 12;
+            btnGuardar.Top = cardContacto.Bottom + 16;
+
             btnCancelar.Left = cardContacto.Right - btnCancelar.Width;
-            panel.AutoScrollMinSize = new Size(startX + w + 20, 620);
+            btnCancelar.Top = cardContacto.Bottom + 16;
+
+            panel.AutoScrollMinSize = new Size(cardContacto.Right + padding, btnEditar.Bottom + padding);
         };
         return panel;
     }
@@ -181,19 +230,20 @@ public class AdminPerfilForm : Form
         parent.Controls.Add(new Label
         {
             Text = $"{etiqueta}:",
-            Font = new Font("Segoe UI", 11F),
+            Font = new Font("Segoe UI", 12F),
             ForeColor = Color.FromArgb(45, 55, 70),
             Location = new Point(24, y + 2),
-            Size = new Size(200, 28)
+            Size = new Size(200, 30)
         });
         var txt = new TextBox
         {
             ReadOnly = true,
             BorderStyle = BorderStyle.None,
             BackColor = Color.White,
-            Font = new Font("Segoe UI", 11F),
+            Font = new Font("Segoe UI", 12F),
             Location = new Point(230, y + 2),
-            Size = new Size(parent.Width - 260, 28),
+            Size = new Size(parent.Width - 260, 30),
+            Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
             TabStop = true
         };
         parent.Controls.Add(txt);
@@ -231,6 +281,13 @@ public class AdminPerfilForm : Form
 
     private void Guardar()
     {
+        string email = txtCorreo.Text.Trim();
+        if (!System.Text.RegularExpressions.Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+        {
+            MessageBox.Show("El correo electrónico no tiene un formato válido (ejemplo: usuario@dominio.com).", "Error de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
         var p = PerfilAdministradorStore.Obtener();
         p.NombreCompleto = txtNombre.Text.Trim();
         p.Curp = txtCurp.Text.Trim();
@@ -303,6 +360,22 @@ public class AdminPerfilForm : Form
         else
         {
             picFoto.Image = null;
+        }
+    }
+
+    private void SoloNumeros_KeyPress(object? sender, KeyPressEventArgs e)
+    {
+        if (!char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar))
+        {
+            e.Handled = true;
+        }
+    }
+
+    private void SoloLetras_KeyPress(object? sender, KeyPressEventArgs e)
+    {
+        if (!char.IsLetter(e.KeyChar) && !char.IsControl(e.KeyChar) && e.KeyChar != ' ')
+        {
+            e.Handled = true;
         }
     }
 }

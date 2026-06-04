@@ -63,23 +63,13 @@ public partial class AyudaForm : Form
             Padding = new Padding(28, 12, 28, 12)
         };
 
-        var logoIcono = new Label
+        var picLogoGalab = new PictureBox
         {
-            Text = "⚙",
-            Font = new Font("Segoe UI Symbol", 36F, FontStyle.Bold),
-            ForeColor = azulPrincipal,
-            Location = new Point(24, 18),
-            Size = new Size(62, 58),
-            TextAlign = ContentAlignment.MiddleCenter
-        };
-
-        var galab = new Label
-        {
-            Text = "GALAB",
-            Font = new Font("Segoe UI", 24F, FontStyle.Bold),
-            ForeColor = azulOscuro,
-            Location = new Point(96, 16),
-            Size = new Size(180, 34)
+            Image = UiAssets.CargarLogoGalab(),
+            SizeMode = PictureBoxSizeMode.Zoom,
+            Location = new Point(24, 10),
+            Size = new Size(180, 76),
+            BackColor = Color.Transparent
         };
 
         var subtitulo = new Label
@@ -87,8 +77,8 @@ public partial class AyudaForm : Form
             Text = "Sistema de Gestión\nde Incidencias",
             Font = new Font("Segoe UI", 9F, FontStyle.Bold),
             ForeColor = texto,
-            Location = new Point(100, 52),
-            Size = new Size(180, 40)
+            Location = new Point(210, 32),
+            AutoSize = true
         };
 
         var instituto = new Label
@@ -98,7 +88,7 @@ public partial class AyudaForm : Form
             ForeColor = texto,
             Anchor = AnchorStyles.Top | AnchorStyles.Right,
             Location = new Point(760, 30),
-            Size = new Size(290, 42)
+            AutoSize = true
         };
 
         var logoInstituto = new PictureBox
@@ -120,14 +110,18 @@ public partial class AyudaForm : Form
             TextAlign = ContentAlignment.MiddleCenter
         };
 
+        var perfil = Proyecto_GALAB.Services.PerfilUsuarioStore.Obtener();
+        string nombre = !string.IsNullOrWhiteSpace(perfil.NombreCompleto) ? perfil.NombreCompleto : NombreUsuarioActual;
+        string rol = !string.IsNullOrWhiteSpace(perfil.Rol) ? perfil.Rol : RolUsuarioActual;
+
         var usuario = new Label
         {
-            Text = $"👤  {NombreUsuarioActual}\n     {RolUsuarioActual}",
+            Text = $"👤  {nombre}\n     {rol}",
             Font = new Font("Segoe UI", 10F, FontStyle.Bold),
             ForeColor = texto,
             Anchor = AnchorStyles.Top | AnchorStyles.Right,
             Location = new Point(1115, 28),
-            Size = new Size(190, 44)
+            AutoSize = true
         };
 
         header.Resize += (s, e) =>
@@ -136,10 +130,10 @@ public partial class AyudaForm : Form
             logoInstituto.Top = 20;
             instituto.Left = header.Width - 590;
             campana.Left = header.Width - 270;
-            usuario.Left = header.Width - 220;
+            usuario.Left = header.Width - usuario.Width - 20;
         };
 
-        header.Controls.AddRange(new Control[] { logoIcono, galab, subtitulo, logoInstituto, instituto, campana, usuario });
+        header.Controls.AddRange(new Control[] { picLogoGalab, subtitulo, logoInstituto, instituto, campana, usuario });
         return header;
     }
 
@@ -229,7 +223,7 @@ public partial class AyudaForm : Form
             Font = new Font("Segoe UI", 24F, FontStyle.Bold),
             ForeColor = azulPrincipal,
             Location = new Point(116, 30),
-            Size = new Size(240, 44)
+            AutoSize = true
         };
 
         var descripcion = new Label
@@ -238,7 +232,7 @@ public partial class AyudaForm : Form
             Font = new Font("Segoe UI", 11F),
             ForeColor = texto,
             Location = new Point(32, 92),
-            Size = new Size(650, 50)
+            AutoSize = true
         };
 
         var manual = CrearCardManual();
@@ -248,9 +242,10 @@ public partial class AyudaForm : Form
 
         contenedor.Resize += (s, e) =>
         {
+            if (WindowState == FormWindowState.Minimized) return;
             int anchoDisponible;
             int leftMargin;
-            int maxAncho = 1140;
+            int maxAncho = 1600;
 
             if (contenedor.ClientSize.Width > maxAncho + 64)
             {
@@ -267,6 +262,7 @@ public partial class AyudaForm : Form
             icono.Left = leftMargin - 4;
             titulo.Left = leftMargin + 84;
             descripcion.Left = leftMargin;
+            descripcion.Width = anchoDisponible;
 
             if (contenedor.ClientSize.Width < 980)
             {
@@ -528,7 +524,7 @@ public partial class AyudaForm : Form
         var lblIcono = new Label
         {
             Text = icono,
-            Font = new Font("Segoe UI Emoji", 16F, FontStyle.Bold),
+            Font = new Font("Segoe UI Emoji", 16F),
             ForeColor = azulPrincipal,
             BackColor = azulClaro,
             Location = new Point(12, 9),
@@ -539,19 +535,19 @@ public partial class AyudaForm : Form
         var lblTitulo = new Label
         {
             Text = titulo,
-            Font = new Font("Segoe UI", 9.5F, FontStyle.Bold),
+            Font = new Font("Segoe UI", 10F, FontStyle.Bold),
             ForeColor = azulOscuro,
             Location = new Point(64, 6),
-            Size = new Size(310, 22)
+            AutoSize = true
         };
 
         var lblDescripcion = new Label
         {
             Text = descripcion,
-            Font = new Font("Segoe UI", 8.5F),
+            Font = new Font("Segoe UI", 9F),
             ForeColor = texto,
-            Location = new Point(64, 27),
-            Size = new Size(360, 18)
+            Location = new Point(64, 26),
+            AutoSize = true
         };
 
         var flecha = new Label

@@ -27,6 +27,14 @@ public class GestionIncidenciasForm : Form
 
     private void CrearInterfaz()
     {
+        Controls.Clear();
+
+        var panelDerecho = new Panel
+        {
+            Dock = DockStyle.Fill,
+            BackColor = UiAssets.Fondo
+        };
+
         header = CrearHeader();
         sidebar = CrearSidebar();
         contenido = CrearContenido();
@@ -41,10 +49,14 @@ public class GestionIncidenciasForm : Form
             Font = new Font("Segoe UI", 9F)
         };
 
-        Controls.Add(contenido);
-        Controls.Add(sidebar);
-        Controls.Add(header);
-        Controls.Add(footer);
+        // Nest header and contenido into panelDerecho
+        panelDerecho.Controls.Add(contenido); // Dock.Fill
+        panelDerecho.Controls.Add(header);    // Dock.Top
+
+        // Add controls to main Form in correct docking Z-order
+        Controls.Add(panelDerecho);
+        Controls.Add(sidebar); // Dock.Left
+        Controls.Add(footer);  // Dock.Bottom
     }
 
     private Panel CrearHeader()
@@ -56,21 +68,13 @@ public class GestionIncidenciasForm : Form
             BackColor = UiAssets.AzulClaro
         };
 
-        var iconoGalab = new Panel
+        var picLogoGalab = new PictureBox
         {
-            Location = new Point(24, 28),
-            Size = new Size(72, 62),
+            Image = UiAssets.CargarLogoGalab(),
+            SizeMode = PictureBoxSizeMode.Zoom,
+            Location = new Point(24, 16),
+            Size = new Size(220, 92),
             BackColor = Color.Transparent
-        };
-        iconoGalab.Paint += (s, e) => DibujarLogoGalab(e.Graphics, iconoGalab.ClientRectangle);
-
-        var galab = new Label
-        {
-            Text = "GALAB",
-            Font = new Font("Segoe UI", 28F, FontStyle.Bold),
-            ForeColor = UiAssets.AzulOscuro,
-            Location = new Point(110, 22),
-            Size = new Size(210, 42)
         };
 
         var subtitulo = new Label
@@ -78,8 +82,8 @@ public class GestionIncidenciasForm : Form
             Text = "Sistema de Gestión\nde Incidencias",
             Font = new Font("Segoe UI", 10F, FontStyle.Bold),
             ForeColor = UiAssets.AzulOscuro,
-            Location = new Point(114, 66),
-            Size = new Size(230, 54)
+            Location = new Point(254, 38),
+            AutoSize = true
         };
 
         picLogoInstituto = new PictureBox
@@ -98,18 +102,19 @@ public class GestionIncidenciasForm : Form
             ForeColor = UiAssets.AzulOscuro,
             TextAlign = ContentAlignment.MiddleLeft,
             Anchor = AnchorStyles.Top | AnchorStyles.Right,
-            Size = new Size(300, 76)
+            AutoSize = true
         };
 
         panel.Resize += (s, e) =>
         {
+            if (WindowState == FormWindowState.Minimized) return;
             picLogoInstituto.Left = panel.Width - 390;
             picLogoInstituto.Top = 24;
             lblInstituto.Left = panel.Width - 292;
             lblInstituto.Top = 28;
         };
 
-        panel.Controls.AddRange(new Control[] { iconoGalab, galab, subtitulo, picLogoInstituto, lblInstituto });
+        panel.Controls.AddRange(new Control[] { picLogoGalab, subtitulo, picLogoInstituto, lblInstituto });
         return panel;
     }
 
@@ -148,7 +153,11 @@ public class GestionIncidenciasForm : Form
         btnCerrarSesion.FlatAppearance.BorderColor = UiAssets.Borde;
         btnCerrarSesion.FlatAppearance.BorderSize = 1;
         btnCerrarSesion.Click += (s, e) => UiAssets.CerrarSesion(this);
-        panel.Resize += (s, e) => btnCerrarSesion.Top = panel.Height - 78;
+        panel.Resize += (s, e) =>
+        {
+            if (WindowState == FormWindowState.Minimized) return;
+            btnCerrarSesion.Top = panel.Height - 78;
+        };
         panel.Controls.Add(btnCerrarSesion);
 
         return panel;
@@ -170,7 +179,7 @@ public class GestionIncidenciasForm : Form
             ForeColor = UiAssets.AzulOscuro,
             TextAlign = ContentAlignment.MiddleCenter,
             Location = new Point(0, 28),
-            Size = new Size(860, 48),
+            Size = new Size(860, 58),
             Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
         };
 
@@ -180,7 +189,7 @@ public class GestionIncidenciasForm : Form
             Font = new Font("Segoe UI", 22F, FontStyle.Bold),
             ForeColor = UiAssets.AzulPrincipal,
             Location = new Point(48, 115),
-            Size = new Size(260, 42)
+            AutoSize = true
         };
 
         var descripcion = new Label
@@ -190,8 +199,7 @@ public class GestionIncidenciasForm : Form
             ForeColor = UiAssets.AzulOscuro,
             BackColor = Color.White,
             Location = new Point(52, 172),
-            Size = new Size(520, 86),
-            AutoSize = false,
+            AutoSize = true,
             TextAlign = ContentAlignment.TopLeft
         };
 
@@ -205,9 +213,9 @@ public class GestionIncidenciasForm : Form
         computadora.Paint += (s, e) => DibujarComputadoraGalab(e.Graphics, computadora.ClientRectangle);
 
         var resumen = new IncidenciaEstadisticasService().ObtenerResumen();
-        var cardActivas = CrearCardEstado("Incidencias activas", resumen.Activas.ToString(), Color.FromArgb(210, 30, 55), "▯", 76, 340);
-        var cardProceso = CrearCardEstado("En proceso", resumen.EnProceso.ToString(), Color.FromArgb(235, 145, 12), "◷", 382, 340);
-        var cardResueltas = CrearCardEstado("Resueltas", resumen.Resueltas.ToString(), Color.FromArgb(10, 170, 55), "✓", 686, 340);
+        var cardActivas = CrearCardEstado("Incidencias activas", resumen.Activas.ToString(), Color.FromArgb(210, 30, 55), "🚨", 76, 340);
+        var cardProceso = CrearCardEstado("En proceso", resumen.EnProceso.ToString(), Color.FromArgb(235, 145, 12), "⏳", 382, 340);
+        var cardResueltas = CrearCardEstado("Resueltas", resumen.Resueltas.ToString(), Color.FromArgb(10, 170, 55), "✅", 686, 340);
 
         var registrar = new Button
         {
@@ -246,6 +254,7 @@ public class GestionIncidenciasForm : Form
 
         panel.Resize += (s, e) =>
         {
+            if (WindowState == FormWindowState.Minimized) return;
             int clientW = panel.ClientSize.Width;
             int clientH = panel.ClientSize.Height;
 
@@ -362,18 +371,16 @@ public class GestionIncidenciasForm : Form
             Font = new Font("Segoe UI", 28F, FontStyle.Bold),
             ForeColor = color,
             Location = new Point(56, 52),
-            Size = new Size(90, 48),
-            TextAlign = ContentAlignment.MiddleCenter,
+            AutoSize = true,
             Tag = "total"
         });
         panel.Controls.Add(new Label
         {
             Text = icono,
-            Font = new Font("Segoe UI Symbol", 38F, FontStyle.Bold),
+            Font = new Font("Segoe UI Emoji", 28F),
             ForeColor = color == Color.FromArgb(235, 145, 12) ? Color.Black : color,
             Location = new Point(190, 44),
-            Size = new Size(78, 58),
-            TextAlign = ContentAlignment.MiddleCenter,
+            AutoSize = true,
             Tag = "icono"
         });
 
@@ -390,17 +397,15 @@ public class GestionIncidenciasForm : Form
                 }
                 else if (control.Tag?.ToString() == "total")
                 {
+                    control.AutoSize = true;
                     control.Left = 36;
-                    control.Top = panel.Height - 68;
-                    control.Width = 100;
-                    control.Height = 52;
+                    control.Top = panel.Height - control.Height - 12;
                 }
                 else if (control.Tag?.ToString() == "icono")
                 {
-                    control.Left = panel.Width - 92;
-                    control.Top = panel.Height - 74;
-                    control.Width = 76;
-                    control.Height = 62;
+                    control.AutoSize = true;
+                    control.Left = panel.Width - control.Width - 22;
+                    control.Top = panel.Height - control.Height - 10;
                 }
             }
         };
@@ -425,8 +430,8 @@ public class GestionIncidenciasForm : Form
         using var azulOscuro = new Pen(UiAssets.AzulOscuro, 4);
         g.FillRectangle(Brushes.White, 34, 16, 170, 96);
         g.DrawRectangle(azulOscuro, 34, 16, 170, 96);
-        g.DrawString("GALAB", new Font("Segoe UI", 20F, FontStyle.Bold), new SolidBrush(UiAssets.AzulOscuro), 82, 48);
-        g.FillEllipse(azul, 58, 48, 38, 38);
+        g.DrawString("GALAB", new Font("Segoe UI", 16F, FontStyle.Bold), new SolidBrush(UiAssets.AzulOscuro), 94, 50);
+        g.FillEllipse(azul, 46, 45, 38, 38);
         g.FillRectangle(azul, 106, 115, 28, 20);
         g.FillRectangle(azul, 70, 136, 110, 18);
         g.FillEllipse(azul, 202, 138, 32, 30);

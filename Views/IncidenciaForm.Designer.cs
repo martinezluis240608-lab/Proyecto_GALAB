@@ -11,7 +11,7 @@ partial class IncidenciaForm
     private Label lblInstituto;
     private PictureBox picLogoInstituto;
     private Button btnMenu;
-    private TextBox txtTitulo;
+    private Label txtTitulo;
     private TextBox txtQuienReporta;
     private ComboBox cmbTipo;
     private TextBox txtNombreEquipo;
@@ -90,7 +90,7 @@ partial class IncidenciaForm
             ForeColor = UiAssets.AzulOscuro,
             TextAlign = ContentAlignment.MiddleLeft,
             Anchor = AnchorStyles.Top | AnchorStyles.Right,
-            Size = new Size(285, 76)
+            AutoSize = true
         };
 
         var campana = new Button
@@ -170,13 +170,14 @@ partial class IncidenciaForm
             AutoScroll = true
         };
 
-        txtTitulo = new TextBox
+        txtTitulo = new Label
         {
             Text = "REGISTRAR INCIDENCIA",
             Font = new Font("Segoe UI", 19F, FontStyle.Bold),
             ForeColor = UiAssets.AzulPrincipal,
             Location = new Point(340, 24),
-            Size = new Size(430, 42)
+            Size = new Size(430, 42),
+            TextAlign = ContentAlignment.MiddleLeft
         };
 
         var subrayado = new Panel
