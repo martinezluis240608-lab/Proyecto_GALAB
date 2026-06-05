@@ -1,4 +1,5 @@
 using System.Drawing.Drawing2D;
+using Proyecto_GALAB.Services;
 
 namespace Proyecto_GALAB.Views;
 
@@ -247,7 +248,7 @@ public class HistorialIncidenciasForm : Form
         grid.Columns["Fecha"]!.FillWeight = 95;
         grid.Columns["Acciones"]!.FillWeight = 90;
 
-        grid.Rows.Add("Sin incidencias", "-", "No hay incidencias registradas", "-", "-", "—");
+        CargarIncidencias();
 
         card.Controls.Add(grid);
         card.Controls.Add(encabezado);
@@ -267,6 +268,30 @@ public class HistorialIncidenciasForm : Form
         };
 
         return panel;
+    }
+
+    private void CargarIncidencias()
+    {
+        grid.Rows.Clear();
+
+        var incidencias = IncidenciaListadoStore.ObtenerTodas();
+        if (incidencias.Count == 0)
+        {
+            grid.Rows.Add("Sin incidencias", "-", "No hay incidencias registradas", "-", "-", "-");
+            return;
+        }
+
+        foreach (var incidencia in incidencias)
+        {
+            grid.Rows.Add(
+                incidencia.Folio,
+                incidencia.Equipo,
+                incidencia.Descripcion,
+                incidencia.Estado,
+                incidencia.Fecha.ToString("dd/MM/yyyy"),
+                "Ver"
+            );
+        }
     }
 
     private static void DibujarLogoGalab(Graphics g)

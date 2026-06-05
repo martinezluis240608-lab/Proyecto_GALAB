@@ -1,9 +1,15 @@
 using Proyecto_GALAB.Models;
 using Npgsql;
-using System;
 
 namespace Proyecto_GALAB.Services;
 
+/// <summary>
+/// Lee y guarda el perfil de alumno usando la estructura real de la BD:
+///   tabla alumnos: id_alumno (PK), numero_control (bigint), nombre, primer_apellido,
+///                  segundo_apellido, semestre, grupo, correo, telefono, rol, contrasena,
+///                  activo, fecha_registro, usuario
+/// El login usa SesionActual.NombreUsuario que contiene el numero_control como string.
+/// </summary>
 internal static class PerfilUsuarioStore
 {
     private static PerfilUsuario _perfilMemoria = new()
@@ -11,6 +17,8 @@ internal static class PerfilUsuarioStore
         NombreCompleto = "Nombre del usuario",
         Correo = "correo@institucion.edu.mx"
     };
+
+    // ── Obtener ──────────────────────────────────────────────────────────────
 
     public static PerfilUsuario Obtener()
     {
@@ -23,135 +31,131 @@ internal static class PerfilUsuarioStore
             using var conexion = DatabaseService.GetConnection();
             conexion.Open();
 
+            // Buscar por numero_control (el valor que se usa como username en el login)
+            // o por usuario (campo alternativo de login)
             const string sql = """
-                SELECT nombre_completo, curp, fecha_nacimiento, genero, telefono, correo, 
-                       estatus, semestre, carrera, grupo, calle, colonia, codigo_postal, 
-                       municipio, estado, ruta_foto_perfil
+                SELECT id_alumno, numero_control, nombre, primer_apellido, segundo_apellido,
+                       semestre, grupo, correo, telefono, rol, activo
                 FROM alumnos
-                WHERE num_control = @control;
+                WHERE numero_control::text = @control
+                   OR usuario = @control
+                LIMIT 1;
                 """;
 
             using var cmd = new NpgsqlCommand(sql, conexion);
             cmd.Parameters.AddWithValue("control", control);
-            using var reader = cmd.ExecuteReader();
 
+            using var reader = cmd.ExecuteReader();
             if (reader.Read())
             {
+                string nombre = reader.IsDBNull(2) ? "" : reader.GetString(2);
+                string apellido1 = reader.IsDBNull(3) ? "" : reader.GetString(3);
+                string apellido2 = reader.IsDBNull(4) ? "" : reader.GetString(4);
+                string nombreCompleto = string.Join(" ",
+                    new[] { nombre, apellido1, apellido2 }
+                    .Where(s => !string.IsNullOrWhiteSpace(s)));
+
+                bool activo = !reader.IsDBNull(10) && reader.GetBoolean(10);
+
                 return new PerfilUsuario
                 {
-                    ControlNumber = control,
-                    NombreCompleto = reader.IsDBNull(0) ? "" : reader.GetString(0),
-                    Curp = reader.IsDBNull(1) ? "" : reader.GetString(1),
-                    FechaNacimiento = reader.IsDBNull(2) ? "" : reader.GetString(2),
-                    Genero = reader.IsDBNull(3) ? "" : reader.GetString(3),
-                    Telefono = reader.IsDBNull(4) ? "" : reader.GetString(4),
-                    Correo = reader.IsDBNull(5) ? "" : reader.GetString(5),
-                    Rol = reader.IsDBNull(6) ? "Estudiante" : reader.GetString(6),
-                    Semestre = reader.IsDBNull(7) ? "" : reader.GetString(7),
-                    Carrera = reader.IsDBNull(8) ? "" : reader.GetString(8),
-                    Grupo = reader.IsDBNull(9) ? "" : reader.GetString(9),
-                    Calle = reader.IsDBNull(10) ? "" : reader.GetString(10),
-                    Colonia = reader.IsDBNull(11) ? "" : reader.GetString(11),
-                    CodigoPostal = reader.IsDBNull(12) ? "" : reader.GetString(12),
-                    Municipio = reader.IsDBNull(13) ? "" : reader.GetString(13),
-                    Estado = reader.IsDBNull(14) ? "" : reader.GetString(14),
-                    RutaFotoPerfil = reader.IsDBNull(15) ? "" : reader.GetString(15)
+                    ControlNumber = reader.IsDBNull(1) ? control : reader.GetInt64(1).ToString(),
+                    NombreCompleto = nombreCompleto,
+                    Correo = reader.IsDBNull(7) ? "" : reader.GetString(7),
+                    Telefono = reader.IsDBNull(8) ? "" : reader.GetString(8),
+                    Rol = reader.IsDBNull(9) ? "Estudiante" : reader.GetString(9),
+                    Semestre = reader.IsDBNull(5) ? "" : reader.GetString(5),
+                    Grupo = reader.IsDBNull(6) ? "" : reader.GetString(6),
+                    // Campos no presentes en la BD original → vacíos
+                    Curp = "",
+                    FechaNacimiento = "",
+                    Genero = "",
+                    Carrera = "",
+                    Calle = "",
+                    Colonia = "",
+                    CodigoPostal = "",
+                    Municipio = "",
+                    Estado = activo ? "Activo" : "Inactivo",
+                    RutaFotoPerfil = ""
                 };
             }
         }
         catch
         {
-            // Ignorar error y volver al perfil temporal
+            // Ignorar y devolver memoria
         }
 
         // Fallback en memoria
         return new PerfilUsuario
         {
             ControlNumber = control,
-            NombreCompleto = string.IsNullOrWhiteSpace(_perfilMemoria.NombreCompleto) || _perfilMemoria.NombreCompleto == "Nombre del usuario" ? control : _perfilMemoria.NombreCompleto,
+            NombreCompleto = string.IsNullOrWhiteSpace(_perfilMemoria.NombreCompleto) ||
+                             _perfilMemoria.NombreCompleto == "Nombre del usuario"
+                                ? control : _perfilMemoria.NombreCompleto,
             Correo = _perfilMemoria.Correo,
             Rol = _perfilMemoria.Rol,
-            Carrera = _perfilMemoria.Carrera,
-            RutaFotoPerfil = _perfilMemoria.RutaFotoPerfil,
-            Curp = _perfilMemoria.Curp,
-            FechaNacimiento = _perfilMemoria.FechaNacimiento,
-            Genero = _perfilMemoria.Genero,
-            Telefono = _perfilMemoria.Telefono,
             Semestre = _perfilMemoria.Semestre,
             Grupo = _perfilMemoria.Grupo,
-            Calle = _perfilMemoria.Calle,
-            Colonia = _perfilMemoria.Colonia,
-            CodigoPostal = _perfilMemoria.CodigoPostal,
-            Municipio = _perfilMemoria.Municipio,
-            Estado = _perfilMemoria.Estado
+            Telefono = _perfilMemoria.Telefono,
+            RutaFotoPerfil = _perfilMemoria.RutaFotoPerfil
         };
     }
 
+    // ── Guardar ──────────────────────────────────────────────────────────────
+
     public static void Guardar(PerfilUsuario perfil)
     {
-        string control = string.IsNullOrWhiteSpace(perfil.ControlNumber) ? SesionActual.NombreUsuario : perfil.ControlNumber;
-        if (string.IsNullOrWhiteSpace(control))
-        {
-            _perfilMemoria = perfil;
-            return;
-        }
+        string control = string.IsNullOrWhiteSpace(perfil.ControlNumber)
+            ? SesionActual.NombreUsuario
+            : perfil.ControlNumber;
 
-        // Respaldar localmente
         _perfilMemoria = perfil;
+
+        if (string.IsNullOrWhiteSpace(control))
+            return;
 
         try
         {
             using var conexion = DatabaseService.GetConnection();
             conexion.Open();
 
-            // Guardar directamente en la tabla alumnos (Upsert) con todos sus campos
-            const string sqlAlumno = """
-                INSERT INTO alumnos (num_control, nombre_completo, curp, fecha_nacimiento, genero, telefono, correo, 
-                                     estatus, semestre, carrera, grupo, calle, colonia, codigo_postal, municipio, estado, ruta_foto_perfil)
-                VALUES (@control, @nombre_c, @curp, @fecha_nac, @genero, @tel, @correo, 
-                        @estatus, @semestre, @carrera, @grupo, @calle, @colonia, @cp, @mun, @est, @foto)
-                ON CONFLICT (num_control) DO UPDATE
-                SET nombre_completo = EXCLUDED.nombre_completo,
-                    curp = EXCLUDED.curp,
-                    fecha_nacimiento = EXCLUDED.fecha_nacimiento,
-                    genero = EXCLUDED.genero,
-                    telefono = EXCLUDED.telefono,
-                    correo = EXCLUDED.correo,
-                    estatus = EXCLUDED.estatus,
-                    semestre = EXCLUDED.semestre,
-                    carrera = EXCLUDED.carrera,
-                    grupo = EXCLUDED.grupo,
-                    calle = EXCLUDED.calle,
-                    colonia = EXCLUDED.colonia,
-                    codigo_postal = EXCLUDED.codigo_postal,
-                    municipio = EXCLUDED.municipio,
-                    estado = EXCLUDED.estado,
-                    ruta_foto_perfil = EXCLUDED.ruta_foto_perfil;
+            // Separar nombre completo en partes para guardar en las columnas reales
+            var partes = (perfil.NombreCompleto ?? "").Split(' ',
+                StringSplitOptions.RemoveEmptyEntries);
+            string nombre = partes.Length > 0 ? partes[0] : "";
+            string apellido1 = partes.Length > 1 ? partes[1] : "";
+            string apellido2 = partes.Length > 2
+                ? string.Join(" ", partes.Skip(2))
+                : "";
+
+            // Actualizar los campos que sí existen en la tabla alumnos
+            const string sql = """
+                UPDATE alumnos
+                SET nombre           = @nombre,
+                    primer_apellido  = @apellido1,
+                    segundo_apellido = @apellido2,
+                    correo           = @correo,
+                    telefono         = @telefono,
+                    semestre         = @semestre,
+                    grupo            = @grupo
+                WHERE numero_control::text = @control
+                   OR usuario = @control;
                 """;
 
-            using var cmdA = new NpgsqlCommand(sqlAlumno, conexion);
-            cmdA.Parameters.AddWithValue("control", control);
-            cmdA.Parameters.AddWithValue("nombre_c", perfil.NombreCompleto ?? "");
-            cmdA.Parameters.AddWithValue("curp", perfil.Curp ?? "");
-            cmdA.Parameters.AddWithValue("fecha_nac", perfil.FechaNacimiento ?? "");
-            cmdA.Parameters.AddWithValue("genero", perfil.Genero ?? "");
-            cmdA.Parameters.AddWithValue("tel", perfil.Telefono ?? "");
-            cmdA.Parameters.AddWithValue("correo", perfil.Correo ?? "");
-            cmdA.Parameters.AddWithValue("estatus", perfil.Rol ?? "Estudiante");
-            cmdA.Parameters.AddWithValue("semestre", perfil.Semestre ?? "");
-            cmdA.Parameters.AddWithValue("carrera", perfil.Carrera ?? "");
-            cmdA.Parameters.AddWithValue("grupo", perfil.Grupo ?? "");
-            cmdA.Parameters.AddWithValue("calle", perfil.Calle ?? "");
-            cmdA.Parameters.AddWithValue("colonia", perfil.Colonia ?? "");
-            cmdA.Parameters.AddWithValue("cp", perfil.CodigoPostal ?? "");
-            cmdA.Parameters.AddWithValue("mun", perfil.Municipio ?? "");
-            cmdA.Parameters.AddWithValue("est", perfil.Estado ?? "");
-            cmdA.Parameters.AddWithValue("foto", perfil.RutaFotoPerfil ?? "");
-            cmdA.ExecuteNonQuery();
+            using var cmd = new NpgsqlCommand(sql, conexion);
+            cmd.Parameters.AddWithValue("nombre", nombre);
+            cmd.Parameters.AddWithValue("apellido1", apellido1);
+            cmd.Parameters.AddWithValue("apellido2", apellido2);
+            cmd.Parameters.AddWithValue("correo", perfil.Correo ?? "");
+            cmd.Parameters.AddWithValue("telefono", perfil.Telefono ?? "");
+            cmd.Parameters.AddWithValue("semestre", perfil.Semestre ?? "");
+            cmd.Parameters.AddWithValue("grupo", perfil.Grupo ?? "");
+            cmd.Parameters.AddWithValue("control", control);
+            cmd.ExecuteNonQuery();
         }
         catch
         {
-            // Ignorar errores
+            // Ignorar errores de BD
         }
     }
 

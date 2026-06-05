@@ -1,9 +1,15 @@
 using Proyecto_GALAB.Models;
 using Npgsql;
-using System;
 
 namespace Proyecto_GALAB.Services;
 
+/// <summary>
+/// Lee y guarda el perfil del administrador usando la estructura real de la BD:
+///   tabla administradores: id_administrador (PK varchar), nombre, primer_apellido,
+///                          segundo_apellido, correo, telefono, usuario, contrasena,
+///                          rol, activo, fecha_registro
+/// SesionActual.NombreUsuario contiene el campo "usuario" con el que inició sesión.
+/// </summary>
 internal static class PerfilAdministradorStore
 {
     private static PerfilAdministrador _perfilMemoria = new()
@@ -12,10 +18,12 @@ internal static class PerfilAdministradorStore
         Correo = "admin@itsmg.edu.mx"
     };
 
+    // ── Obtener ──────────────────────────────────────────────────────────────
+
     public static PerfilAdministrador Obtener()
     {
-        string control = SesionActual.NombreUsuario;
-        if (string.IsNullOrWhiteSpace(control))
+        string usuarioSesion = SesionActual.NombreUsuario;
+        if (string.IsNullOrWhiteSpace(usuarioSesion))
             return _perfilMemoria;
 
         try
@@ -23,115 +31,109 @@ internal static class PerfilAdministradorStore
             using var conexion = DatabaseService.GetConnection();
             conexion.Open();
 
+            // La tabla usa "usuario" como campo de login, id_administrador como PK propia
             const string sql = """
-                SELECT nombre_completo, curp, fecha_nacimiento, genero, telefono, correo, 
-                       calle, colonia, codigo_postal, municipio, estado, ruta_foto_perfil
+                SELECT id_administrador, nombre, primer_apellido, segundo_apellido,
+                       correo, telefono, usuario, activo
                 FROM administradores
-                WHERE id_administrador = @control;
+                WHERE usuario = @usuario
+                LIMIT 1;
                 """;
 
             using var cmd = new NpgsqlCommand(sql, conexion);
-            cmd.Parameters.AddWithValue("control", control);
-            using var reader = cmd.ExecuteReader();
+            cmd.Parameters.AddWithValue("usuario", usuarioSesion);
 
+            using var reader = cmd.ExecuteReader();
             if (reader.Read())
             {
+                string nombre = reader.IsDBNull(1) ? "" : reader.GetString(1);
+                string apellido1 = reader.IsDBNull(2) ? "" : reader.GetString(2);
+                string apellido2 = reader.IsDBNull(3) ? "" : reader.GetString(3);
+                string nombreCompleto = string.Join(" ",
+                    new[] { nombre, apellido1, apellido2 }
+                    .Where(s => !string.IsNullOrWhiteSpace(s)));
+
                 return new PerfilAdministrador
                 {
-                    NombreCompleto = reader.IsDBNull(0) ? "" : reader.GetString(0),
-                    Curp = reader.IsDBNull(1) ? "" : reader.GetString(1),
-                    FechaNacimiento = reader.IsDBNull(2) ? "" : reader.GetString(2),
-                    Genero = reader.IsDBNull(3) ? "" : reader.GetString(3),
-                    Telefono = reader.IsDBNull(4) ? "" : reader.GetString(4),
-                    Correo = reader.IsDBNull(5) ? "" : reader.GetString(5),
-                    Calle = reader.IsDBNull(6) ? "" : reader.GetString(6),
-                    Colonia = reader.IsDBNull(7) ? "" : reader.GetString(7),
-                    CodigoPostal = reader.IsDBNull(8) ? "" : reader.GetString(8),
-                    Municipio = reader.IsDBNull(9) ? "" : reader.GetString(9),
-                    Estado = reader.IsDBNull(10) ? "" : reader.GetString(10),
-                    RutaFotoPerfil = reader.IsDBNull(11) ? "" : reader.GetString(11)
+                    NombreCompleto = nombreCompleto,
+                    Correo = reader.IsDBNull(4) ? "" : reader.GetString(4),
+                    Telefono = reader.IsDBNull(5) ? "" : reader.GetString(5),
+                    // Campos que no existen en la tabla original → vacíos
+                    Curp = "",
+                    FechaNacimiento = "",
+                    Genero = "",
+                    Calle = "",
+                    Colonia = "",
+                    CodigoPostal = "",
+                    Municipio = "",
+                    Estado = "",
+                    RutaFotoPerfil = ""
                 };
             }
         }
         catch
         {
-            // Ignorar error y volver al perfil temporal
+            // Ignorar y usar memoria
         }
 
         // Fallback
         return new PerfilAdministrador
         {
-            NombreCompleto = string.IsNullOrWhiteSpace(_perfilMemoria.NombreCompleto) || _perfilMemoria.NombreCompleto == "Administrador del sistema" ? control : _perfilMemoria.NombreCompleto,
+            NombreCompleto = string.IsNullOrWhiteSpace(_perfilMemoria.NombreCompleto) ||
+                             _perfilMemoria.NombreCompleto == "Administrador del sistema"
+                                ? usuarioSesion : _perfilMemoria.NombreCompleto,
             Correo = _perfilMemoria.Correo,
-            Curp = _perfilMemoria.Curp,
-            FechaNacimiento = _perfilMemoria.FechaNacimiento,
-            Genero = _perfilMemoria.Genero,
             Telefono = _perfilMemoria.Telefono,
-            Calle = _perfilMemoria.Calle,
-            Colonia = _perfilMemoria.Colonia,
-            CodigoPostal = _perfilMemoria.CodigoPostal,
-            Municipio = _perfilMemoria.Municipio,
-            Estado = _perfilMemoria.Estado,
             RutaFotoPerfil = _perfilMemoria.RutaFotoPerfil
         };
     }
 
+    // ── Guardar ──────────────────────────────────────────────────────────────
+
     public static void Guardar(PerfilAdministrador perfil)
     {
-        string control = SesionActual.NombreUsuario;
-        if (string.IsNullOrWhiteSpace(control))
-        {
-            _perfilMemoria = perfil;
-            return;
-        }
-
+        string usuarioSesion = SesionActual.NombreUsuario;
         _perfilMemoria = perfil;
+
+        if (string.IsNullOrWhiteSpace(usuarioSesion))
+            return;
 
         try
         {
             using var conexion = DatabaseService.GetConnection();
             conexion.Open();
 
-            // Guardar directamente en la tabla administradores (Upsert)
+            // Separar nombre en partes para las columnas reales
+            var partes = (perfil.NombreCompleto ?? "").Split(' ',
+                StringSplitOptions.RemoveEmptyEntries);
+            string nombre = partes.Length > 0 ? partes[0] : "";
+            string apellido1 = partes.Length > 1 ? partes[1] : "";
+            string apellido2 = partes.Length > 2
+                ? string.Join(" ", partes.Skip(2))
+                : "";
+
             const string sql = """
-                INSERT INTO administradores (id_administrador, nombre_completo, curp, fecha_nacimiento, genero, 
-                                             telefono, correo, calle, colonia, codigo_postal, municipio, estado, ruta_foto_perfil)
-                VALUES (@control, @nombre_c, @curp, @fecha_nac, @genero, 
-                        @tel, @correo, @calle, @colonia, @cp, @mun, @est, @foto)
-                ON CONFLICT (id_administrador) DO UPDATE
-                SET nombre_completo = EXCLUDED.nombre_completo,
-                    curp = EXCLUDED.curp,
-                    fecha_nacimiento = EXCLUDED.fecha_nacimiento,
-                    genero = EXCLUDED.genero,
-                    telefono = EXCLUDED.telefono,
-                    correo = EXCLUDED.correo,
-                    calle = EXCLUDED.calle,
-                    colonia = EXCLUDED.colonia,
-                    codigo_postal = EXCLUDED.codigo_postal,
-                    municipio = EXCLUDED.municipio,
-                    estado = EXCLUDED.estado,
-                    ruta_foto_perfil = EXCLUDED.ruta_foto_perfil;
+                UPDATE administradores
+                SET nombre           = @nombre,
+                    primer_apellido  = @apellido1,
+                    segundo_apellido = @apellido2,
+                    correo           = @correo,
+                    telefono         = @telefono
+                WHERE usuario = @usuario;
                 """;
 
             using var cmd = new NpgsqlCommand(sql, conexion);
-            cmd.Parameters.AddWithValue("control", control);
-            cmd.Parameters.AddWithValue("nombre_c", perfil.NombreCompleto ?? "");
-            cmd.Parameters.AddWithValue("curp", perfil.Curp ?? "");
-            cmd.Parameters.AddWithValue("fecha_nac", perfil.FechaNacimiento ?? "");
-            cmd.Parameters.AddWithValue("genero", perfil.Genero ?? "");
-            cmd.Parameters.AddWithValue("tel", perfil.Telefono ?? "");
+            cmd.Parameters.AddWithValue("nombre", nombre);
+            cmd.Parameters.AddWithValue("apellido1", apellido1);
+            cmd.Parameters.AddWithValue("apellido2", apellido2);
             cmd.Parameters.AddWithValue("correo", perfil.Correo ?? "");
-            cmd.Parameters.AddWithValue("calle", perfil.Calle ?? "");
-            cmd.Parameters.AddWithValue("colonia", perfil.Colonia ?? "");
-            cmd.Parameters.AddWithValue("cp", perfil.CodigoPostal ?? "");
-            cmd.Parameters.AddWithValue("mun", perfil.Municipio ?? "");
-            cmd.Parameters.AddWithValue("est", perfil.Estado ?? "");
-            cmd.Parameters.AddWithValue("foto", perfil.RutaFotoPerfil ?? "");
+            cmd.Parameters.AddWithValue("telefono", perfil.Telefono ?? "");
+            cmd.Parameters.AddWithValue("usuario", usuarioSesion);
             cmd.ExecuteNonQuery();
         }
         catch
         {
-            // Ignorar errores
+            // Ignorar errores de BD
         }
     }
 }

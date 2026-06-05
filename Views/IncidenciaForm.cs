@@ -43,7 +43,6 @@ public partial class IncidenciaForm : Form, IIncidenciaView
 
     public void LimpiarFormulario()
     {
-        txtTitulo.Text = "REGISTRAR INCIDENCIA";
         txtQuienReporta.Clear();
         cmbTipo.SelectedIndex = 0;
         txtNombreEquipo.Clear();

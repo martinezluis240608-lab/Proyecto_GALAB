@@ -66,7 +66,7 @@ public class AdminGestionIncidenciasForm : Form
         var resumen = new IncidenciaEstadisticasService().ObtenerResumen();
         var cardTotal = CrearTarjetaMetrica("Total", resumen.Total, "incidencias", "📋", Color.FromArgb(0, 82, 170), 36, 88);
         lblTotalCard = (Label)cardTotal.Controls[1];
-        var cardActivas = CrearTarjetaMetrica("Activas", resumen.Activas, "incidencias", "👤", Color.FromArgb(210, 30, 55), 280, 88);
+        var cardActivas = CrearTarjetaMetrica("Pendientes", resumen.Activas, "incidencias", "👤", Color.FromArgb(210, 30, 55), 280, 88);
         lblActivasCard = (Label)cardActivas.Controls[1];
         var cardProceso = CrearTarjetaMetrica("En proceso", resumen.EnProceso, "incidencias", "◷", Color.FromArgb(235, 145, 12), 524, 88);
         lblProcesoCard = (Label)cardProceso.Controls[1];
@@ -113,7 +113,7 @@ public class AdminGestionIncidenciasForm : Form
             Location = new Point(320, 52),
             Size = new Size(180, 34)
         };
-        cmbEstado.Items.AddRange(new object[] { "Estado: Todos", "Activa", "En proceso", "Resuelta" });
+        cmbEstado.Items.AddRange(new object[] { "Estado: Todos", "Pendiente", "En proceso", "Resuelta" });
         cmbEstado.SelectedIndex = 0;
         cmbEstado.SelectedIndexChanged += (_, _) => { paginaActual = 1; CargarGrid(); };
 

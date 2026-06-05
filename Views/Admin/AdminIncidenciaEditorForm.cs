@@ -47,7 +47,7 @@ public class AdminIncidenciaEditorForm : Form
             Location = new Point(24, 192),
             Size = new Size(460, 32)
         };
-        cmbEstado.Items.AddRange(new[] { "Activa", "En proceso", "Resuelta" });
+        cmbEstado.Items.AddRange(new[] { "Pendiente", "En proceso", "Resuelta" });
         cmbEstado.SelectedItem = item.Estado;
 
         Controls.AddRange(new Control[]

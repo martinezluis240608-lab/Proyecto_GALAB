@@ -4,29 +4,41 @@ using Npgsql;
 namespace Proyecto_GALAB.Services;
 
 /// <summary>
-/// Listado en memoria de incidencias (admin y reportes).
-/// TODO(BD): reemplazar por repositorio SQL.
+/// Listado de incidencias adaptado a la estructura real de la BD:
+///   tabla incidencias: id_incidencia (PK bigint), id_serie (FK), id_alumno (FK),
+///                      id_administrador (FK nullable), titulo, descripcion, estado,
+///                      fecha_reporte (date), hora_reporte (time), fecha_atencion,
+///                      fecha_cierre, solucion, evidencia_foto
+///   tabla alumnos: id_alumno, numero_control, nombre, primer_apellido
+///   tabla equipamientos: id_serie, nombre
+///
+/// Folio interno se construye como: INC-{año}-{id_incidencia:D4}
+/// Estado de la BD: 'pendiente' | 'en_proceso' | 'resuelto'
+///   → se mapea a: 'Activa' | 'En proceso' | 'Resuelta'
 /// </summary>
 internal static class IncidenciaListadoStore
 {
+    // Fallback en memoria si no hay BD
     private static readonly List<IncidenciaListadoItem> Items = new();
-    private static int _contador;
 
-    static IncidenciaListadoStore()
+    // ── Mapeos de estado BD ↔ UI ─────────────────────────────────────────────
+    private static string EstadoBdAUi(string estadoBd) => estadoBd.ToLowerInvariant() switch
     {
-        try
-        {
-            using var conexion = DatabaseService.GetConnection();
-            conexion.Open();
-            const string sql = "SELECT COALESCE(MAX(id_incidencia), 0) FROM incidencias";
-            using var cmd = new NpgsqlCommand(sql, conexion);
-            _contador = Convert.ToInt32(cmd.ExecuteScalar());
-        }
-        catch
-        {
-            _contador = 0;
-        }
-    }
+        "pendiente" => "Activa",
+        "en_proceso" => "En proceso",
+        "resuelto" => "Resuelta",
+        _ => "Activa"
+    };
+
+    private static string EstadoUiABd(string estadoUi) => estadoUi switch
+    {
+        "Activa" => "pendiente",
+        "En proceso" => "en_proceso",
+        "Resuelta" => "resuelto",
+        _ => "pendiente"
+    };
+
+    // ── ObtenerTodas ─────────────────────────────────────────────────────────
 
     public static IReadOnlyList<IncidenciaListadoItem> ObtenerTodas()
     {
@@ -34,30 +46,49 @@ internal static class IncidenciaListadoStore
         {
             using var conexion = DatabaseService.GetConnection();
             conexion.Open();
+
             const string sql = """
-                SELECT folio, titulo, quien_reporta, tipo_incidencia, estado, fecha_hora, descripcion, nombre_equipo
-                FROM incidencias
-                ORDER BY fecha_hora DESC, id_incidencia DESC;
+                SELECT i.id_incidencia,
+                       i.titulo,
+                       a.nombre || ' ' || a.primer_apellido AS quien_reporta,
+                       e.nombre AS nombre_equipo,
+                       i.estado,
+                       i.fecha_reporte,
+                       i.hora_reporte,
+                       i.descripcion,
+                       i.evidencia_foto
+                FROM incidencias i
+                LEFT JOIN alumnos       a ON a.id_alumno = i.id_alumno
+                LEFT JOIN equipamientos e ON e.id_serie  = i.id_serie
+                ORDER BY i.fecha_reporte DESC, i.id_incidencia DESC;
                 """;
+
             using var cmd = new NpgsqlCommand(sql, conexion);
             using var reader = cmd.ExecuteReader();
-            var incidencias = new List<IncidenciaListadoItem>();
+
+            var lista = new List<IncidenciaListadoItem>();
             while (reader.Read())
             {
-                incidencias.Add(new IncidenciaListadoItem
+                long id = reader.GetInt64(0);
+                var fecha = reader.GetDateTime(5);
+                TimeSpan hora = reader.IsDBNull(6)
+                    ? TimeSpan.Zero
+                    : reader.GetTimeSpan(6);
+
+                lista.Add(new IncidenciaListadoItem
                 {
-                    Folio = reader.GetString(0),
-                    Titulo = reader.IsDBNull(1) ? string.Empty : reader.GetString(1),
-                    QuienReporta = reader.IsDBNull(2) ? string.Empty : reader.GetString(2),
-                    TipoIncidencia = reader.IsDBNull(3) ? string.Empty : reader.GetString(3),
-                    Estado = reader.IsDBNull(4) ? "Activa" : reader.GetString(4),
-                    Fecha = reader.GetDateTime(5),
-                    Descripcion = reader.IsDBNull(6) ? string.Empty : reader.GetString(6),
-                    Equipo = reader.IsDBNull(7) ? string.Empty : reader.GetString(7)
+                    Folio = $"INC-{fecha.Year}-{id:D4}",
+                    Titulo = reader.IsDBNull(1) ? "" : reader.GetString(1),
+                    QuienReporta = reader.IsDBNull(2) ? "" : reader.GetString(2),
+                    // Tipo de incidencia no existe en la BD → se deja vacío
+                    TipoIncidencia = "",
+                    Equipo = reader.IsDBNull(3) ? "" : reader.GetString(3),
+                    Estado = reader.IsDBNull(4) ? "Activa" : EstadoBdAUi(reader.GetString(4)),
+                    Fecha = fecha.Add(hora),
+                    Descripcion = reader.IsDBNull(7) ? "" : reader.GetString(7)
                 });
             }
-
-            return incidencias;
+            return lista;
         }
         catch
         {
@@ -65,90 +96,179 @@ internal static class IncidenciaListadoStore
         }
     }
 
+    // ── Registrar nueva incidencia ────────────────────────────────────────────
+
     public static void RegistrarDesdeIncidencia(Incidencia incidencia)
     {
-        _contador++;
-        var item = new IncidenciaListadoItem
+        // Para insertar necesitamos el id_alumno y el id_serie reales
+        string? idAlumno = ObtenerIdAlumno();
+        long? idSerie = ObtenerIdSerie(incidencia.NombreEquipo);
+
+        if (idAlumno == null || idSerie == null)
         {
-            Folio = $"INC-{DateTime.Now.Year}-{_contador:D4}",
-            Titulo = incidencia.Titulo,
-            QuienReporta = incidencia.QuienReporta,
-            TipoIncidencia = incidencia.TipoIncidencia,
-            Estado = "Activa",
-            Fecha = incidencia.FechaHora,
-            Descripcion = incidencia.Descripcion,
-            Equipo = incidencia.NombreEquipo
-        };
-
-        if (GuardarEnBaseDeDatos(item, incidencia.RutaEvidencia))
+            // Fallback en memoria si no hay datos relacionales
+            Items.Add(new IncidenciaListadoItem
+            {
+                Folio = $"INC-{DateTime.Now.Year}-{Items.Count + 1:D4}",
+                Titulo = incidencia.Titulo,
+                QuienReporta = incidencia.QuienReporta,
+                TipoIncidencia = incidencia.TipoIncidencia,
+                Estado = "Activa",
+                Fecha = incidencia.FechaHora,
+                Descripcion = incidencia.Descripcion,
+                Equipo = incidencia.NombreEquipo
+            });
             return;
+        }
 
-        Items.Add(item);
-    }
-
-    public static bool Eliminar(string folio)
-    {
         try
         {
             using var conexion = DatabaseService.GetConnection();
             conexion.Open();
-            using var cmd = new NpgsqlCommand("DELETE FROM incidencias WHERE folio = @folio", conexion);
-            cmd.Parameters.AddWithValue("folio", folio);
-            if (cmd.ExecuteNonQuery() > 0)
-                return true;
+
+            const string sql = """
+                INSERT INTO incidencias
+                    (id_serie, id_alumno, titulo, descripcion, estado,
+                     fecha_reporte, hora_reporte, evidencia_foto)
+                VALUES
+                    (@serie, @alumno, @titulo, @descripcion, @estado,
+                     @fecha, @hora, @evidencia);
+                """;
+
+            using var cmd = new NpgsqlCommand(sql, conexion);
+            cmd.Parameters.AddWithValue("serie", idSerie.Value);
+            cmd.Parameters.AddWithValue("alumno", idAlumno);
+            cmd.Parameters.AddWithValue("titulo", incidencia.Titulo);
+            cmd.Parameters.AddWithValue("descripcion", incidencia.Descripcion);
+            cmd.Parameters.AddWithValue("estado", EstadoUiABd("Activa"));
+            cmd.Parameters.AddWithValue("fecha", incidencia.FechaHora.Date);
+            cmd.Parameters.AddWithValue("hora", incidencia.FechaHora.TimeOfDay);
+            cmd.Parameters.AddWithValue("evidencia",
+                string.IsNullOrWhiteSpace(incidencia.RutaEvidencia)
+                    ? (object)DBNull.Value
+                    : incidencia.RutaEvidencia);
+            cmd.ExecuteNonQuery();
         }
         catch
         {
-            // Si no hay base disponible, se intenta eliminar de la lista local.
+            // Guardar en memoria como respaldo
+            Items.Add(new IncidenciaListadoItem
+            {
+                Folio = $"INC-{DateTime.Now.Year}-{Items.Count + 1:D4}",
+                Titulo = incidencia.Titulo,
+                QuienReporta = incidencia.QuienReporta,
+                TipoIncidencia = incidencia.TipoIncidencia,
+                Estado = "Activa",
+                Fecha = incidencia.FechaHora,
+                Descripcion = incidencia.Descripcion,
+                Equipo = incidencia.NombreEquipo
+            });
+        }
+    }
+
+    // ── Eliminar ─────────────────────────────────────────────────────────────
+
+    public static bool Eliminar(string folio)
+    {
+        // El folio tiene formato INC-YYYY-NNNN; extraemos el ID
+        long id = ExtraerIdDeFolio(folio);
+
+        if (id > 0)
+        {
+            try
+            {
+                using var conexion = DatabaseService.GetConnection();
+                conexion.Open();
+                using var cmd = new NpgsqlCommand(
+                    "DELETE FROM incidencias WHERE id_incidencia = @id", conexion);
+                cmd.Parameters.AddWithValue("id", id);
+                if (cmd.ExecuteNonQuery() > 0)
+                    return true;
+            }
+            catch { }
         }
 
+        // Fallback en memoria
         var item = Items.FirstOrDefault(i => i.Folio == folio);
         if (item == null) return false;
         Items.Remove(item);
         return true;
     }
 
+    // ── Actualizar ───────────────────────────────────────────────────────────
+
     public static void Actualizar(IncidenciaListadoItem actualizado)
     {
-        try
+        long id = ExtraerIdDeFolio(actualizado.Folio);
+
+        if (id > 0)
         {
-            using var conexion = DatabaseService.GetConnection();
-            conexion.Open();
-            const string sql = """
-                UPDATE incidencias
-                SET titulo = @titulo,
-                    tipo_incidencia = @tipo,
-                    estado = @estado,
-                    fecha_hora = @fecha,
-                    descripcion = @descripcion,
-                    nombre_equipo = @equipo,
-                    actualizado_en = NOW()
-                WHERE folio = @folio;
-                """;
-            using var cmd = new NpgsqlCommand(sql, conexion);
-            cmd.Parameters.AddWithValue("folio", actualizado.Folio);
-            cmd.Parameters.AddWithValue("titulo", actualizado.Titulo);
-            cmd.Parameters.AddWithValue("tipo", actualizado.TipoIncidencia);
-            cmd.Parameters.AddWithValue("estado", actualizado.Estado);
-            cmd.Parameters.AddWithValue("fecha", actualizado.Fecha);
-            cmd.Parameters.AddWithValue("descripcion", actualizado.Descripcion);
-            cmd.Parameters.AddWithValue("equipo", actualizado.Equipo);
-            if (cmd.ExecuteNonQuery() > 0)
-                return;
-        }
-        catch
-        {
-            // Respaldo en memoria.
+            try
+            {
+                using var conexion = DatabaseService.GetConnection();
+                conexion.Open();
+
+                const string sql = """
+                    UPDATE incidencias
+                    SET titulo      = @titulo,
+                        descripcion = @descripcion,
+                        estado      = @estado
+                    WHERE id_incidencia = @id;
+                    """;
+
+                using var cmd = new NpgsqlCommand(sql, conexion);
+                cmd.Parameters.AddWithValue("id", id);
+                cmd.Parameters.AddWithValue("titulo", actualizado.Titulo);
+                cmd.Parameters.AddWithValue("descripcion", actualizado.Descripcion);
+                cmd.Parameters.AddWithValue("estado", EstadoUiABd(actualizado.Estado));
+                if (cmd.ExecuteNonQuery() > 0)
+                    return;
+            }
+            catch { }
         }
 
+        // Fallback en memoria
         var idx = Items.FindIndex(i => i.Folio == actualizado.Folio);
         if (idx >= 0)
             Items[idx] = actualizado;
     }
 
+    // ── Resumen estadísticas ─────────────────────────────────────────────────
+
     public static IncidenciaResumenEstadisticas ObtenerResumen()
     {
-        var items = ObtenerTodas();
+        try
+        {
+            using var conexion = DatabaseService.GetConnection();
+            conexion.Open();
+
+            const string sql = """
+                SELECT
+                    COUNT(*)                                           AS total,
+                    COUNT(*) FILTER (WHERE estado = 'pendiente')      AS activas,
+                    COUNT(*) FILTER (WHERE estado = 'en_proceso')     AS en_proceso,
+                    COUNT(*) FILTER (WHERE estado = 'resuelto')       AS resueltas
+                FROM incidencias;
+                """;
+
+            using var cmd = new NpgsqlCommand(sql, conexion);
+            using var reader = cmd.ExecuteReader();
+
+            if (reader.Read())
+            {
+                return new IncidenciaResumenEstadisticas
+                {
+                    Total = reader.GetInt32(0),
+                    Activas = reader.GetInt32(1),
+                    EnProceso = reader.GetInt32(2),
+                    Resueltas = reader.GetInt32(3)
+                };
+            }
+        }
+        catch { }
+
+        // Fallback calculado desde la lista en memoria
+        var items = Items.ToList();
         return new IncidenciaResumenEstadisticas
         {
             Total = items.Count,
@@ -158,34 +278,79 @@ internal static class IncidenciaListadoStore
         };
     }
 
-    private static bool GuardarEnBaseDeDatos(IncidenciaListadoItem item, string rutaEvidencia)
+    // ── Helpers privados ─────────────────────────────────────────────────────
+
+    /// <summary>Extrae el número de incidencia del folio "INC-YYYY-NNNN".</summary>
+    private static long ExtraerIdDeFolio(string folio)
     {
+        var partes = folio.Split('-');
+        if (partes.Length == 3 && long.TryParse(partes[2], out long id))
+            return id;
+        return 0;
+    }
+
+    /// <summary>Devuelve el id_alumno del alumno actualmente en sesión.</summary>
+    private static string? ObtenerIdAlumno()
+    {
+        string control = SesionActual.NombreUsuario;
+        if (string.IsNullOrWhiteSpace(control))
+            return null;
         try
         {
             using var conexion = DatabaseService.GetConnection();
             conexion.Open();
             const string sql = """
-                INSERT INTO incidencias
-                    (folio, titulo, quien_reporta, tipo_incidencia, nombre_equipo, fecha_hora, descripcion, ruta_evidencia, estado)
-                VALUES
-                    (@folio, @titulo, @quien_reporta, @tipo, @equipo, @fecha, @descripcion, @ruta, @estado);
+                SELECT id_alumno FROM alumnos
+                WHERE numero_control::text = @control OR usuario = @control
+                LIMIT 1;
                 """;
             using var cmd = new NpgsqlCommand(sql, conexion);
-            cmd.Parameters.AddWithValue("folio", item.Folio);
-            cmd.Parameters.AddWithValue("titulo", item.Titulo);
-            cmd.Parameters.AddWithValue("quien_reporta", item.QuienReporta);
-            cmd.Parameters.AddWithValue("tipo", item.TipoIncidencia);
-            cmd.Parameters.AddWithValue("equipo", item.Equipo);
-            cmd.Parameters.AddWithValue("fecha", item.Fecha);
-            cmd.Parameters.AddWithValue("descripcion", item.Descripcion);
-            cmd.Parameters.AddWithValue("ruta", string.IsNullOrWhiteSpace(rutaEvidencia) ? DBNull.Value : rutaEvidencia);
-            cmd.Parameters.AddWithValue("estado", item.Estado);
-            cmd.ExecuteNonQuery();
-            return true;
+            cmd.Parameters.AddWithValue("control", control);
+            var result = cmd.ExecuteScalar();
+            return result is null ? null : result.ToString();
         }
-        catch
+        catch { return null; }
+    }
+
+    /// <summary>Devuelve el id_serie del equipo por nombre (primera coincidencia).</summary>
+    private static long? ObtenerIdSerie(string nombreEquipo)
+    {
+        if (string.IsNullOrWhiteSpace(nombreEquipo))
         {
-            return false;
+            // Si no hay nombre, usar el primer equipo disponible
+            try
+            {
+                using var conexion = DatabaseService.GetConnection();
+                conexion.Open();
+                using var cmd = new NpgsqlCommand(
+                    "SELECT id_serie FROM equipamientos ORDER BY id_serie LIMIT 1", conexion);
+                var r = cmd.ExecuteScalar();
+                return r is null ? null : Convert.ToInt64(r);
+            }
+            catch { return null; }
         }
+
+        try
+        {
+            using var conexion = DatabaseService.GetConnection();
+            conexion.Open();
+            const string sql = """
+                SELECT id_serie FROM equipamientos
+                WHERE LOWER(nombre) LIKE LOWER(@nombre)
+                ORDER BY id_serie LIMIT 1;
+                """;
+            using var cmd = new NpgsqlCommand(sql, conexion);
+            cmd.Parameters.AddWithValue("nombre", $"%{nombreEquipo}%");
+            var result = cmd.ExecuteScalar();
+            if (result is not null)
+                return Convert.ToInt64(result);
+
+            // Si no encontró por nombre, usar el primero disponible
+            using var cmd2 = new NpgsqlCommand(
+                "SELECT id_serie FROM equipamientos ORDER BY id_serie LIMIT 1", conexion);
+            var r2 = cmd2.ExecuteScalar();
+            return r2 is null ? null : Convert.ToInt64(r2);
+        }
+        catch { return null; }
     }
 }

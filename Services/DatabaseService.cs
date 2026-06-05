@@ -5,7 +5,7 @@ namespace Proyecto_GALAB.Services
     public static class DatabaseService
     {
         private const string CadenaConexionDefault =
-            "Host=localhost;Port=5432;Username=postgres;Password=postgres;Database=proyecto_galab";
+            "Host=localhost;Port=5432;Username=postgres;Password=postgres;Database=galab";
 
         public static string CadenaConexion =>
             Environment.GetEnvironmentVariable("GALAB_DB_CONNECTION") ?? CadenaConexionDefault;
