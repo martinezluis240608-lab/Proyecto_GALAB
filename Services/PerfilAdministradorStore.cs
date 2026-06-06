@@ -8,28 +8,10 @@ internal static class PerfilAdministradorStore
 {
     private static PerfilAdministrador _perfilMemoria = new()
     {
-        NombreCompleto = "Administrador del sistema",
-        Correo = "admin@itsmg.edu.mx"
+        Nombre = "Administrador",
+        PrimerApellido = "",
+        SegundoApellido = ""
     };
-
-    private static (string Nombre, string PrimerApellido, string SegundoApellido) DividirNombreCompleto(string nombreCompleto)
-    {
-        if (string.IsNullOrWhiteSpace(nombreCompleto))
-            return ("", "", "");
-
-        var partes = nombreCompleto.Trim().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-        if (partes.Length == 0)
-            return ("", "", "");
-        if (partes.Length == 1)
-            return (partes[0], "", "");
-        if (partes.Length == 2)
-            return (partes[0], partes[1], "");
-
-        string segundo = partes[partes.Length - 1];
-        string primer = partes[partes.Length - 2];
-        string nombre = string.Join(" ", partes.Take(partes.Length - 2));
-        return (nombre, primer, segundo);
-    }
 
     public static PerfilAdministrador Obtener()
     {
@@ -37,93 +19,127 @@ internal static class PerfilAdministradorStore
         if (string.IsNullOrWhiteSpace(control))
             return _perfilMemoria;
 
+        return ObtenerPorId(control);
+    }
+
+    public static PerfilAdministrador ObtenerPorId(string id)
+    {
+        if (string.IsNullOrWhiteSpace(id))
+            return new PerfilAdministrador();
+
         try
         {
             using var conexion = DatabaseService.GetConnection();
             conexion.Open();
 
+            // Columnas reales de la tabla administradores del respaldo:
+            // id_administrador, nombre, primer_apellido, segundo_apellido,
+            // correo, telefono, usuario, contrasena, rol, activo, fecha_registro
             const string sql = """
-                SELECT nombre, primer_apellido, segundo_apellido, telefono, correo
+                SELECT id_administrador, nombre, primer_apellido, segundo_apellido,
+                       correo, telefono, usuario, rol, activo, fecha_registro
                 FROM administradores
-                WHERE id_administrador = @control;
+                WHERE id_administrador = @id
+                   OR LOWER(usuario) = LOWER(@id)
+                   OR LOWER(correo)  = LOWER(@id)
+                LIMIT 1;
                 """;
 
             using var cmd = new NpgsqlCommand(sql, conexion);
-            cmd.Parameters.AddWithValue("control", control);
+            cmd.Parameters.AddWithValue("id", id.Trim());
             using var reader = cmd.ExecuteReader();
 
             if (reader.Read())
             {
-                string nom = reader.IsDBNull(0) ? "" : reader.GetString(0);
-                string ape1 = reader.IsDBNull(1) ? "" : reader.GetString(1);
-                string ape2 = reader.IsDBNull(2) ? "" : reader.GetString(2);
+                string idAdmin  = reader.IsDBNull(0) ? "" : reader.GetString(0);
+                string nombre   = reader.IsDBNull(1) ? "" : reader.GetString(1);
+                string ape1     = reader.IsDBNull(2) ? "" : reader.GetString(2);
+                string ape2     = reader.IsDBNull(3) ? "" : reader.GetString(3);
+                string correo   = reader.IsDBNull(4) ? "" : reader.GetString(4);
+                string telefono = reader.IsDBNull(5) ? "" : reader.GetString(5);
+                string usuario  = reader.IsDBNull(6) ? "" : reader.GetString(6);
+                string rol      = reader.IsDBNull(7) ? "Administrador" : reader.GetString(7);
+                bool activo     = !reader.IsDBNull(8) && reader.GetBoolean(8);
+                DateTime fecha  = reader.IsDBNull(9) ? DateTime.Now : reader.GetDateTime(9);
 
                 return new PerfilAdministrador
                 {
-                    NombreCompleto = $"{nom} {ape1} {ape2}".Trim(),
-                    Telefono = reader.IsDBNull(3) ? "" : reader.GetString(3),
-                    Correo = reader.IsDBNull(4) ? "" : reader.GetString(4)
+                    IdAdministrador = idAdmin,
+                    Nombre          = nombre,
+                    PrimerApellido  = ape1,
+                    SegundoApellido = ape2,
+                    NombreCompleto  = $"{nombre} {ape1} {ape2}".Trim(),
+                    Correo          = correo,
+                    Telefono        = telefono,
+                    Usuario         = usuario,
+                    Rol             = rol,
+                    Activo          = activo,
+                    FechaRegistro   = fecha
                 };
             }
         }
-        catch
+        catch (Exception ex)
         {
-            // Ignorar error y volver al perfil temporal
+            System.Diagnostics.Debug.WriteLine("Error al obtener perfil administrador: " + ex.Message);
         }
 
-        // Fallback
-        return new PerfilAdministrador
-        {
-            NombreCompleto = string.IsNullOrWhiteSpace(_perfilMemoria.NombreCompleto) || _perfilMemoria.NombreCompleto == "Administrador del sistema" ? control : _perfilMemoria.NombreCompleto,
-            Correo = _perfilMemoria.Correo,
-            Telefono = _perfilMemoria.Telefono
-        };
+        return new PerfilAdministrador { IdAdministrador = id };
     }
 
     public static void Guardar(PerfilAdministrador perfil)
     {
-        string control = SesionActual.NombreUsuario;
-        if (string.IsNullOrWhiteSpace(control))
-        {
-            _perfilMemoria = perfil;
-            return;
-        }
-
-        _perfilMemoria = perfil;
-
         try
         {
             using var conexion = DatabaseService.GetConnection();
             conexion.Open();
 
-            var (nom, ape1, ape2) = DividirNombreCompleto(perfil.NombreCompleto);
+            if (string.IsNullOrWhiteSpace(perfil.IdAdministrador))
+                perfil.IdAdministrador = UsuarioSistemaStore.GenerarNuevoIdAdmin(conexion);
 
-            // Guardar directamente en la tabla administradores (Upsert)
+            _perfilMemoria = perfil;
+
+            // La contraseña NO se modifica desde el perfil (seguridad).
+            // Solo se inserta vacía en registros nuevos.
             const string sql = """
-                INSERT INTO administradores (id_administrador, nombre, primer_apellido, segundo_apellido, 
-                                             telefono, correo, activo)
-                VALUES (@control, @nombre, @primer, @segundo, 
-                        @tel, @correo, true)
+                INSERT INTO administradores (
+                    id_administrador, nombre, primer_apellido, segundo_apellido,
+                    correo, telefono, usuario, contrasena, rol, activo, fecha_registro
+                )
+                VALUES (
+                    @id, @nombre, @primer_apellido, @segundo_apellido,
+                    @correo, @telefono, @usuario, '', @rol, @activo, NOW()
+                )
                 ON CONFLICT (id_administrador) DO UPDATE
-                SET nombre = EXCLUDED.nombre,
-                    primer_apellido = EXCLUDED.primer_apellido,
+                SET nombre           = EXCLUDED.nombre,
+                    primer_apellido  = EXCLUDED.primer_apellido,
                     segundo_apellido = EXCLUDED.segundo_apellido,
-                    telefono = EXCLUDED.telefono,
-                    correo = EXCLUDED.correo;
+                    correo           = EXCLUDED.correo,
+                    telefono         = EXCLUDED.telefono,
+                    usuario          = EXCLUDED.usuario,
+                    rol              = EXCLUDED.rol,
+                    activo           = EXCLUDED.activo;
+                    -- contrasena NO se actualiza desde el perfil
                 """;
 
             using var cmd = new NpgsqlCommand(sql, conexion);
-            cmd.Parameters.AddWithValue("control", control);
-            cmd.Parameters.AddWithValue("nombre", nom);
-            cmd.Parameters.AddWithValue("primer", ape1);
-            cmd.Parameters.AddWithValue("segundo", ape2);
-            cmd.Parameters.AddWithValue("tel", perfil.Telefono ?? "");
-            cmd.Parameters.AddWithValue("correo", perfil.Correo ?? "");
+            cmd.Parameters.AddWithValue("id",               perfil.IdAdministrador.Trim());
+            cmd.Parameters.AddWithValue("nombre",           perfil.Nombre ?? "");
+            cmd.Parameters.AddWithValue("primer_apellido",  perfil.PrimerApellido ?? "");
+            cmd.Parameters.AddWithValue("segundo_apellido", perfil.SegundoApellido ?? "");
+            cmd.Parameters.AddWithValue("correo",           perfil.Correo ?? "");
+            cmd.Parameters.AddWithValue("telefono",         perfil.Telefono ?? "");
+            cmd.Parameters.AddWithValue("usuario",          string.IsNullOrWhiteSpace(perfil.Usuario) ? perfil.Correo ?? "" : perfil.Usuario);
+            cmd.Parameters.AddWithValue("rol",              perfil.Rol ?? "Administrador");
+            cmd.Parameters.AddWithValue("activo",           perfil.Activo);
             cmd.ExecuteNonQuery();
         }
-        catch
+        catch (Exception ex)
         {
-            // Ignorar errores
+            System.Windows.Forms.MessageBox.Show(
+                "Error al guardar administrador en la base de datos:\n\n" + ex.Message,
+                "Error de Base de Datos",
+                System.Windows.Forms.MessageBoxButtons.OK,
+                System.Windows.Forms.MessageBoxIcon.Error);
         }
     }
 }

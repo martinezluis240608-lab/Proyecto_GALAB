@@ -217,17 +217,8 @@ public class AdminGestionUsuariosForm : Form
         var col = grid.Columns[e.ColumnIndex].Name;
         if (col == "Ver")
         {
-            if (u.Rol.Equals("Usuario", StringComparison.OrdinalIgnoreCase) || u.Rol.Equals("Estudiante", StringComparison.OrdinalIgnoreCase))
-            {
-                var perfil = PerfilUsuarioStore.ObtenerPorControl(u.Id);
-                using var dlg = new AlumnoDetalleForm(perfil);
-                dlg.ShowDialog(this);
-            }
-            else
-            {
-                MessageBox.Show($"ID: {u.Id}\nNombre: {u.NombreCompleto}\nCorreo: {u.Correo}\nRol: {u.Rol}\nEstado: {u.Estado}",
-                    "Ver datos del administrador", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
+            using var dlg = new UsuarioDetalleForm(u.Id, u.Rol);
+            dlg.ShowDialog(this);
         }
         else if (col == "Editar")
         {
@@ -240,8 +231,15 @@ public class AdminGestionUsuariosForm : Form
             if (MessageBox.Show($"¿Eliminar usuario {u.Id}?", "Confirmar",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
             {
-                UsuarioSistemaStore.Eliminar(u.Id);
-                CargarGrid();
+                if (UsuarioSistemaStore.Eliminar(u.Id, u.Rol))
+                {
+                    CargarGrid();
+                    MessageBox.Show("Usuario eliminado exitosamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    MessageBox.Show("No se pudo eliminar el usuario debido a un error en la base de datos.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
     }

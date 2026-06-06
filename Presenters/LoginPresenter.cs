@@ -25,7 +25,8 @@ public class LoginPresenter
             return;
         }
 
-        if (!_model.Autenticar(_view.Usuario, _view.Contrasena, _view.RolSeleccionado))
+        string? resolvedId = _model.Autenticar(_view.Usuario, _view.Contrasena, _view.RolSeleccionado);
+        if (resolvedId == null)
         {
             _view.MostrarError(_view.RolSeleccionado == RolUsuario.Administrador
                 ? "Usuario o contraseña de administrador incorrectos."
@@ -33,7 +34,7 @@ public class LoginPresenter
             return;
         }
 
-        SesionActual.Iniciar(_view.Usuario.Trim(), _view.RolSeleccionado);
+        SesionActual.Iniciar(resolvedId, _view.RolSeleccionado);
 
         if (_view.RolSeleccionado == RolUsuario.Estudiante)
             _view.NavegarComoEstudiante();

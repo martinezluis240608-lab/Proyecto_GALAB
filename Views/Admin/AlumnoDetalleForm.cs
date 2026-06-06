@@ -53,32 +53,24 @@ public class AlumnoDetalleForm : Form
         Controls.Add(container);
 
         int currentY = 16;
-        currentY = AgregarSeccion(container, "INFORMACIÓN ACADÉMICA", currentY, new[]
+        currentY = AgregarSeccion(container, "INFORMACIÓN ACADÉMICA Y DE CUENTA", currentY, new[]
         {
-            ("Número de Control", perfil.ControlNumber),
-            ("Nombre Completo", perfil.NombreCompleto),
-            ("Carrera", perfil.Carrera),
+            ("ID Alumno (Matrícula)", perfil.ControlNumber),
+            ("Número de Control", perfil.NumeroControl.ToString()),
             ("Semestre", perfil.Semestre),
             ("Grupo", perfil.Grupo),
             ("Correo Institucional", perfil.Correo),
-            ("Estatus", perfil.Rol)
+            ("Rol de Sistema", perfil.Rol),
+            ("Nombre de Usuario", perfil.Usuario)
         });
 
-        currentY = AgregarSeccion(container, "INFORMACIÓN PERSONAL", currentY, new[]
+        currentY = AgregarSeccion(container, "INFORMACIÓN PERSONAL Y DE CONTACTO", currentY, new[]
         {
-            ("CURP", perfil.Curp),
-            ("Fecha de Nacimiento", perfil.FechaNacimiento),
-            ("Género", perfil.Genero),
-            ("Teléfono", perfil.Telefono)
-        });
-
-        currentY = AgregarSeccion(container, "DIRECCIÓN Y UBICACIÓN", currentY, new[]
-        {
-            ("Calle y Número", perfil.Calle),
-            ("Colonia", perfil.Colonia),
-            ("Código Postal", perfil.CodigoPostal),
-            ("Municipio", perfil.Municipio),
-            ("Estado", perfil.Estado)
+            ("Nombre Completo", perfil.NombreCompleto),
+            ("Teléfono", perfil.Telefono),
+            ("Número de Asiento", perfil.NumeroAsiento?.ToString() ?? "No especificado"),
+            ("Estado de Cuenta", perfil.Activo ? "Activo" : "Inactivo"),
+            ("Fecha de Registro", perfil.FechaRegistro.ToString("g"))
         });
 
         // Bottom panel with Close button
@@ -146,7 +138,7 @@ public class AlumnoDetalleForm : Form
                 Font = new Font("Segoe UI", 9.5F, FontStyle.Bold),
                 ForeColor = UiAssets.AzulOscuro,
                 Location = new Point(16, y),
-                Size = new Size(160, 20),
+                Size = new Size(220, 20),
                 TextAlign = ContentAlignment.MiddleLeft
             });
 
@@ -155,8 +147,8 @@ public class AlumnoDetalleForm : Form
                 Text = string.IsNullOrWhiteSpace(item.Value) ? "No especificado" : item.Value,
                 Font = new Font("Segoe UI", 9.5F, FontStyle.Regular),
                 ForeColor = Color.FromArgb(50, 60, 80),
-                Location = new Point(180, y),
-                Size = new Size(270, 20),
+                Location = new Point(240, y),
+                Size = new Size(210, 20),
                 TextAlign = ContentAlignment.MiddleLeft
             });
             y += 24;

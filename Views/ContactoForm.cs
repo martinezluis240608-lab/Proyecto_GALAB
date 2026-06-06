@@ -114,41 +114,15 @@ public partial class ContactoForm : Form
             Size = new Size(64, 58)
         };
 
-        var campana = new Label
-        {
-            Text = "🔔",
-            Font = new Font("Segoe UI Emoji", 20F),
-            Anchor = AnchorStyles.Top | AnchorStyles.Right,
-            Location = new Point(700, 28),
-            Size = new Size(44, 40),
-            TextAlign = ContentAlignment.MiddleCenter
-        };
-
-        var perfil = Proyecto_GALAB.Services.PerfilUsuarioStore.Obtener();
-        string nombre = !string.IsNullOrWhiteSpace(perfil.NombreCompleto) ? perfil.NombreCompleto : NombreUsuarioActual;
-        string rol = !string.IsNullOrWhiteSpace(perfil.Rol) ? perfil.Rol : RolUsuarioActual;
-
-        var usuario = new Label
-        {
-            Text = $"👤  {nombre}\n     {rol}",
-            Font = new Font("Segoe UI", 10F, FontStyle.Bold),
-            ForeColor = texto,
-            Anchor = AnchorStyles.Top | AnchorStyles.Right,
-            Location = new Point(760, 28),
-            AutoSize = true
-        };
-
         header.Resize += (s, e) =>
         {
             if (WindowState == FormWindowState.Minimized) return;
             logoInstituto.Left = header.Width - 665;
             logoInstituto.Top = 20;
             instituto.Left = header.Width - 590;
-            campana.Left = header.Width - 270;
-            usuario.Left = header.Width - usuario.Width - 20;
         };
 
-        header.Controls.AddRange(new Control[] { picLogoGalab, subtitulo, logoInstituto, instituto, campana, usuario });
+        header.Controls.AddRange(new Control[] { picLogoGalab, subtitulo, logoInstituto, instituto });
         return header;
     }
 

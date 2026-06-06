@@ -175,24 +175,51 @@ partial class LoginForm
         Load += (s, e) => AjustarLayout();
     }
 
+    private Image ObtenImagenPortada()
+    {
+        try
+        {
+            return UiAssets.CargarImagen("login-portada.png") ?? Properties.Resources.ima_L;
+        }
+        catch
+        {
+            return Properties.Resources.ima_L;
+        }
+    }
+
     private void AjustarLayout()
     {
         int margen = 14;
         int alto = ClientSize.Height - margen * 2;
         int anchoImagen = Math.Max(420, ClientSize.Width / 2);
+        Color backColor = Color.FromArgb(235, 238, 242);
         try
         {
-            var img = Properties.Resources.ima_L;
+            var img = ObtenImagenPortada();
             if (img != null)
             {
                 anchoImagen = (int)(alto * ((float)img.Width / img.Height));
                 int maxAncho = (int)(ClientSize.Width * 0.55f);
                 int minAncho = 360;
                 anchoImagen = Math.Max(minAncho, Math.Min(maxAncho, anchoImagen));
+
+                if (img is Bitmap bmp)
+                {
+                    try
+                    {
+                        var cornerPixel = bmp.GetPixel(0, 0);
+                        if (cornerPixel.A == 255)
+                        {
+                            backColor = cornerPixel;
+                        }
+                    }
+                    catch {}
+                }
             }
         }
         catch {}
 
+        panelImagen.BackColor = backColor;
         panelImagen.Left = margen;
         panelImagen.Top = margen;
         panelImagen.Width = anchoImagen;
@@ -346,7 +373,7 @@ partial class LoginForm
 
         try
         {
-            var img = Properties.Resources.ima_L;
+            var img = ObtenImagenPortada();
             if (img != null)
             {
                 float escala = Math.Min(

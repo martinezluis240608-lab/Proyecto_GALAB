@@ -7,44 +7,32 @@ using System.Linq;
 namespace Proyecto_GALAB.Services;
 
 /// <summary>
-/// Usuarios del sistema (personal de soporte, admins y alumnos). Usa PostgreSQL.
+/// Gestión de usuarios del sistema usando las tablas reales: alumnos y administradores.
 /// </summary>
 internal static class UsuarioSistemaStore
 {
     private static readonly List<UsuarioSistema> Usuarios = new();
     private static int _contador;
 
-    private static (string Nombre, string PrimerApellido, string SegundoApellido) DividirNombreCompleto(string nombreCompleto)
+    internal static (string Nombre, string PrimerApellido, string SegundoApellido) DividirNombreCompleto(string nombreCompleto)
     {
         if (string.IsNullOrWhiteSpace(nombreCompleto))
             return ("", "", "");
 
         var partes = nombreCompleto.Trim().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-        if (partes.Length == 0)
-            return ("", "", "");
-        if (partes.Length == 1)
-            return (partes[0], "", "");
-        if (partes.Length == 2)
-            return (partes[0], partes[1], "");
+        if (partes.Length == 0) return ("", "", "");
+        if (partes.Length == 1) return (partes[0], "", "");
+        if (partes.Length == 2) return (partes[0], partes[1], "");
 
         string segundo = partes[partes.Length - 1];
-        string primer = partes[partes.Length - 2];
-        string nombre = string.Join(" ", partes.Take(partes.Length - 2));
+        string primer  = partes[partes.Length - 2];
+        string nombre  = string.Join(" ", partes.Take(partes.Length - 2));
         return (nombre, primer, segundo);
     }
 
-    private static long ExtraerNumeroControl(string id)
+    internal static string GenerarNuevoIdAdmin(NpgsqlConnection conexion)
     {
-        if (string.IsNullOrWhiteSpace(id)) return 0;
-        var digits = new string(id.Where(char.IsDigit).ToArray());
-        if (long.TryParse(digits, out long val))
-            return val;
-        return 0;
-    }
-
-    private static string GenerarNuevoIdAdmin(NpgsqlConnection conexion)
-    {
-        const string sql = "SELECT id_administrador FROM administradores WHERE id_administrador LIKE 'USR-%'";
+        const string sql = "SELECT id_administrador FROM administradores";
         var ids = new List<int>();
         using (var cmd = new NpgsqlCommand(sql, conexion))
         using (var reader = cmd.ExecuteReader())
@@ -52,14 +40,33 @@ internal static class UsuarioSistemaStore
             while (reader.Read())
             {
                 string idStr = reader.GetString(0);
-                if (idStr.Length > 4 && int.TryParse(idStr.Substring(4), out int num))
-                {
+                if (int.TryParse(idStr, out int num))
                     ids.Add(num);
+            }
+        }
+        int nextNum = ids.Any() ? ids.Max() + 1 : 1;
+        return nextNum.ToString();
+    }
+
+    internal static string GenerarNuevoIdAlumno(NpgsqlConnection conexion)
+    {
+        const string sql = "SELECT id_alumno FROM alumnos";
+        var ids = new List<int>();
+        using (var cmd = new NpgsqlCommand(sql, conexion))
+        using (var reader = cmd.ExecuteReader())
+        {
+            while (reader.Read())
+            {
+                if (!reader.IsDBNull(0))
+                {
+                    string idStr = reader.GetString(0);
+                    if (int.TryParse(idStr, out int num))
+                        ids.Add(num);
                 }
             }
         }
         int nextNum = ids.Any() ? ids.Max() + 1 : 1;
-        return $"USR-{nextNum:D3}";
+        return nextNum.ToString();
     }
 
     public static IReadOnlyList<UsuarioSistema> ObtenerTodos()
@@ -71,52 +78,98 @@ internal static class UsuarioSistemaStore
 
             var usuarios = new List<UsuarioSistema>();
 
-            // 1. Obtener usuarios administrativos de la tabla administradores
-            const string sqlSys = "SELECT id_administrador, nombre, primer_apellido, segundo_apellido, correo, rol, activo FROM administradores ORDER BY nombre";
-            using (var cmdSys = new NpgsqlCommand(sqlSys, conexion))
-            using (var readerSys = cmdSys.ExecuteReader())
+            // 1. Administradores — columnas reales de la tabla administradores
+            const string sqlAdmin = """
+                SELECT id_administrador, nombre, primer_apellido, segundo_apellido,
+                       correo, telefono, usuario, contrasena, rol, activo
+                FROM administradores
+                ORDER BY primer_apellido, nombre;
+                """;
+            using (var cmd = new NpgsqlCommand(sqlAdmin, conexion))
+            using (var reader = cmd.ExecuteReader())
             {
-                while (readerSys.Read())
+                while (reader.Read())
                 {
-                    string nom = readerSys.IsDBNull(1) ? "" : readerSys.GetString(1);
-                    string ape1 = readerSys.IsDBNull(2) ? "" : readerSys.GetString(2);
-                    string ape2 = readerSys.IsDBNull(3) ? "" : readerSys.GetString(3);
+                    string id     = reader.IsDBNull(0) ? "" : reader.GetString(0);
+                    string nom    = reader.IsDBNull(1) ? "" : reader.GetString(1);
+                    string ape1   = reader.IsDBNull(2) ? "" : reader.GetString(2);
+                    string ape2   = reader.IsDBNull(3) ? "" : reader.GetString(3);
+                    string correo = reader.IsDBNull(4) ? "" : reader.GetString(4);
+                    string tel    = reader.IsDBNull(5) ? "" : reader.GetString(5);
+                    string usr    = reader.IsDBNull(6) ? "" : reader.GetString(6);
+                    string pass   = reader.IsDBNull(7) ? "" : reader.GetString(7);
+                    string rol    = reader.IsDBNull(8) ? "Administrador" : reader.GetString(8);
+                    bool activo   = !reader.IsDBNull(9) && reader.GetBoolean(9);
+
                     usuarios.Add(new UsuarioSistema
                     {
-                        Id = readerSys.GetString(0),
-                        NombreCompleto = $"{nom} {ape1} {ape2}".Trim(),
-                        Correo = readerSys.IsDBNull(4) ? "" : readerSys.GetString(4),
-                        Rol = readerSys.IsDBNull(5) ? "Administrador" : readerSys.GetString(5),
-                        Estado = readerSys.IsDBNull(6) || readerSys.GetBoolean(6) ? "Activo" : "Inactivo"
+                        Id              = id,
+                        Nombre          = nom,
+                        PrimerApellido  = ape1,
+                        SegundoApellido = ape2,
+                        NombreCompleto  = $"{nom} {ape1} {ape2}".Trim(),
+                        Correo          = correo,
+                        Telefono        = tel,
+                        Usuario         = usr,
+                        Contrasena      = pass,
+                        Rol             = rol,
+                        Estado          = activo ? "Activo" : "Inactivo"
                     });
                 }
             }
 
-            // 2. Obtener alumnos de la tabla alumnos
-            const string sqlAlu = "SELECT id_alumno, nombre, primer_apellido, segundo_apellido, correo, rol, activo FROM alumnos ORDER BY nombre";
+            // 2. Alumnos — columnas reales de la tabla alumnos
+            const string sqlAlu = """
+                SELECT id_alumno, numero_control, nombre, primer_apellido, segundo_apellido,
+                       correo, telefono, semestre, grupo, numero_asiento,
+                       contrasena, activo
+                FROM alumnos
+                ORDER BY primer_apellido, nombre;
+                """;
             using (var cmdAlu = new NpgsqlCommand(sqlAlu, conexion))
             using (var readerAlu = cmdAlu.ExecuteReader())
             {
                 while (readerAlu.Read())
                 {
-                    string nom = readerAlu.IsDBNull(1) ? "" : readerAlu.GetString(1);
-                    string ape1 = readerAlu.IsDBNull(2) ? "" : readerAlu.GetString(2);
-                    string ape2 = readerAlu.IsDBNull(3) ? "" : readerAlu.GetString(3);
+                    string id      = readerAlu.IsDBNull(0) ? "" : readerAlu.GetString(0);
+                    long numCtrl   = readerAlu.IsDBNull(1) ? 0 : readerAlu.GetInt64(1);
+                    string nom     = readerAlu.IsDBNull(2) ? "" : readerAlu.GetString(2);
+                    string ape1    = readerAlu.IsDBNull(3) ? "" : readerAlu.GetString(3);
+                    string ape2    = readerAlu.IsDBNull(4) ? "" : readerAlu.GetString(4);
+                    string correo  = readerAlu.IsDBNull(5) ? "" : readerAlu.GetString(5);
+                    string tel     = readerAlu.IsDBNull(6) ? "" : readerAlu.GetString(6);
+                    string sem     = readerAlu.IsDBNull(7) ? "" : readerAlu.GetString(7);
+                    string grp     = readerAlu.IsDBNull(8) ? "" : readerAlu.GetString(8);
+                    int? asiento   = readerAlu.IsDBNull(9) ? (int?)null : readerAlu.GetInt32(9);
+                    string pass    = readerAlu.IsDBNull(10) ? "" : readerAlu.GetString(10);
+                    bool activo    = !readerAlu.IsDBNull(11) && readerAlu.GetBoolean(11);
+
                     usuarios.Add(new UsuarioSistema
                     {
-                        Id = readerAlu.GetString(0),
-                        NombreCompleto = $"{nom} {ape1} {ape2}".Trim(),
-                        Correo = readerAlu.IsDBNull(4) ? "" : readerAlu.GetString(4),
-                        Rol = "Usuario",
-                        Estado = readerAlu.IsDBNull(6) || readerAlu.GetBoolean(6) ? "Activo" : "Inactivo"
+                        Id              = id,
+                        NumeroControl   = numCtrl,
+                        Nombre          = nom,
+                        PrimerApellido  = ape1,
+                        SegundoApellido = ape2,
+                        NombreCompleto  = $"{nom} {ape1} {ape2}".Trim(),
+                        Correo          = correo,
+                        Telefono        = tel,
+                        Semestre        = sem,
+                        Grupo           = grp,
+                        NumeroAsiento   = asiento,
+                        Contrasena      = pass,
+                        Usuario         = id, // id_alumno como usuario
+                        Rol             = "Usuario",
+                        Estado          = activo ? "Activo" : "Inactivo"
                     });
                 }
             }
 
             return usuarios;
         }
-        catch
+        catch (Exception ex)
         {
+            System.Diagnostics.Debug.WriteLine("Error al obtener usuarios: " + ex.Message);
             return Usuarios.ToList();
         }
     }
@@ -129,7 +182,7 @@ internal static class UsuarioSistemaStore
         if (esNuevo)
         {
             _contador++;
-            usuario.Id = usuario.Rol == "Usuario" ? $"ALU-{_contador:D3}" : $"USR-{_contador:D3}";
+            usuario.Id = _contador.ToString();
             Usuarios.Add(usuario);
             return;
         }
@@ -139,42 +192,56 @@ internal static class UsuarioSistemaStore
             Usuarios[idx] = usuario;
     }
 
-    public static bool Eliminar(string id)
+    public static bool Eliminar(string id, string rol)
     {
         try
         {
             using var conexion = DatabaseService.GetConnection();
             conexion.Open();
 
-            // Intentar eliminar de alumnos si existe
-            using (var cmdA = new NpgsqlCommand("DELETE FROM alumnos WHERE id_alumno = @id", conexion))
+            if (rol == "Usuario") // Es un alumno
             {
-                cmdA.Parameters.AddWithValue("id", id);
-                if (cmdA.ExecuteNonQuery() > 0)
+                // 1. Eliminar todas las incidencias reportadas por este alumno (Cascade delete)
+                using (var cmdInc = new NpgsqlCommand("DELETE FROM incidencias WHERE id_alumno = @id", conexion))
                 {
-                    return true;
+                    cmdInc.Parameters.AddWithValue("id", id);
+                    cmdInc.ExecuteNonQuery();
+                }
+
+                // 2. Eliminar de alumnos
+                using (var cmdA = new NpgsqlCommand("DELETE FROM alumnos WHERE id_alumno = @id", conexion))
+                {
+                    cmdA.Parameters.AddWithValue("id", id);
+                    cmdA.ExecuteNonQuery();
+                }
+            }
+            else // Es un administrador u otro rol de sistema
+            {
+                // 1. Quitar referencia de las incidencias donde este administrador haya resuelto algo
+                using (var cmdUnlink = new NpgsqlCommand("UPDATE incidencias SET id_administrador = NULL WHERE id_administrador = @id", conexion))
+                {
+                    cmdUnlink.Parameters.AddWithValue("id", id);
+                    cmdUnlink.ExecuteNonQuery();
+                }
+
+                // 2. Eliminar de administradores
+                using (var cmdAdmin = new NpgsqlCommand("DELETE FROM administradores WHERE id_administrador = @id", conexion))
+                {
+                    cmdAdmin.Parameters.AddWithValue("id", id);
+                    cmdAdmin.ExecuteNonQuery();
                 }
             }
 
-            // Intentar eliminar de administradores
-            using (var cmd = new NpgsqlCommand("DELETE FROM administradores WHERE id_administrador = @id", conexion))
-            {
-                cmd.Parameters.AddWithValue("id", id);
-                if (cmd.ExecuteNonQuery() > 0)
-                {
-                    return true;
-                }
-            }
+            var u = Usuarios.FirstOrDefault(x => x.Id == id && x.Rol == rol);
+            if (u != null) Usuarios.Remove(u);
+
+            return true;
         }
-        catch
+        catch (Exception ex)
         {
-            // Respaldo local
+            System.Diagnostics.Debug.WriteLine("Error al eliminar usuario: " + ex.Message);
+            return false;
         }
-
-        var u = Usuarios.FirstOrDefault(x => x.Id == id);
-        if (u == null) return false;
-        Usuarios.Remove(u);
-        return true;
     }
 
     private static bool GuardarEnBaseDeDatos(UsuarioSistema usuario, bool esNuevo)
@@ -184,82 +251,109 @@ internal static class UsuarioSistemaStore
             using var conexion = DatabaseService.GetConnection();
             conexion.Open();
 
-            var (nom, ape1, ape2) = DividirNombreCompleto(usuario.NombreCompleto);
             bool isActivo = usuario.Estado == "Activo";
 
-            if (usuario.Rol == "Usuario")
+            if (usuario.Rol == "Usuario") // Alumno
             {
-                long numControl = ExtraerNumeroControl(usuario.Id);
-                const string sqlAlumno = """
-                    INSERT INTO alumnos (id_alumno, numero_control, nombre, primer_apellido, segundo_apellido, correo, rol, contrasena, activo)
-                    VALUES (@id, @num_control, @nombre, @primer, @segundo, @correo, 'Estudiante', @pass, @activo)
-                    ON CONFLICT (id_alumno) DO UPDATE
-                    SET nombre = EXCLUDED.nombre,
-                        primer_apellido = EXCLUDED.primer_apellido,
-                        segundo_apellido = EXCLUDED.segundo_apellido,
-                        correo = EXCLUDED.correo,
-                        activo = EXCLUDED.activo;
-                    """;
-                using (var cmd = new NpgsqlCommand(sqlAlumno, conexion))
+                if (esNuevo || string.IsNullOrWhiteSpace(usuario.Id) ||
+                    usuario.Id.Equals("Autogenerado", StringComparison.OrdinalIgnoreCase))
                 {
-                    cmd.Parameters.AddWithValue("id", usuario.Id);
-                    cmd.Parameters.AddWithValue("num_control", numControl);
-                    cmd.Parameters.AddWithValue("nombre", nom);
-                    cmd.Parameters.AddWithValue("primer", ape1);
-                    cmd.Parameters.AddWithValue("segundo", ape2);
-                    cmd.Parameters.AddWithValue("correo", usuario.Correo);
-                    cmd.Parameters.AddWithValue("pass", usuario.Id); // Por defecto es su número de control/ID
-                    cmd.Parameters.AddWithValue("activo", isActivo);
+                    usuario.Id = GenerarNuevoIdAlumno(conexion);
+                }
+
+                const string sql = """
+                    INSERT INTO alumnos (
+                        id_alumno, numero_control, nombre,
+                        primer_apellido, segundo_apellido,
+                        semestre, grupo, correo, numero_asiento, telefono,
+                        rol, contrasena, activo, fecha_registro
+                    )
+                    VALUES (
+                        @id_alumno, @numero_control, @nombre,
+                        @primer_apellido, @segundo_apellido,
+                        @semestre, @grupo, @correo, @numero_asiento, @telefono,
+                        'Estudiante', @contrasena, @activo, NOW()
+                    )
+                    ON CONFLICT (id_alumno) DO UPDATE
+                    SET numero_control   = EXCLUDED.numero_control,
+                        nombre           = EXCLUDED.nombre,
+                        primer_apellido  = EXCLUDED.primer_apellido,
+                        segundo_apellido = EXCLUDED.segundo_apellido,
+                        semestre         = EXCLUDED.semestre,
+                        grupo            = EXCLUDED.grupo,
+                        correo           = EXCLUDED.correo,
+                        numero_asiento   = EXCLUDED.numero_asiento,
+                        telefono         = EXCLUDED.telefono,
+                        contrasena       = EXCLUDED.contrasena,
+                        activo           = EXCLUDED.activo;
+                    """;
+                using (var cmd = new NpgsqlCommand(sql, conexion))
+                {
+                    cmd.Parameters.AddWithValue("id_alumno",        usuario.Id);
+                    cmd.Parameters.AddWithValue("numero_control",    usuario.NumeroControl);
+                    cmd.Parameters.AddWithValue("nombre",            usuario.Nombre ?? "");
+                    cmd.Parameters.AddWithValue("primer_apellido",   usuario.PrimerApellido ?? "");
+                    cmd.Parameters.AddWithValue("segundo_apellido",  usuario.SegundoApellido ?? "");
+                    cmd.Parameters.AddWithValue("semestre",          string.IsNullOrWhiteSpace(usuario.Semestre) ? "1" : usuario.Semestre);
+                    cmd.Parameters.AddWithValue("grupo",             string.IsNullOrWhiteSpace(usuario.Grupo) ? "A" : usuario.Grupo);
+                    cmd.Parameters.AddWithValue("correo",            usuario.Correo ?? "");
+                    cmd.Parameters.AddWithValue("numero_asiento",    (object?)usuario.NumeroAsiento ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("telefono",          usuario.Telefono ?? "");
+                    cmd.Parameters.AddWithValue("contrasena",        usuario.Contrasena ?? "");
+                    cmd.Parameters.AddWithValue("activo",            isActivo);
                     cmd.ExecuteNonQuery();
                 }
-
                 return true;
             }
-            else
+            else // Administrador
             {
                 if (esNuevo || string.IsNullOrWhiteSpace(usuario.Id))
-                {
                     usuario.Id = GenerarNuevoIdAdmin(conexion);
-                }
 
-                const string sqlAdmin = """
-                    INSERT INTO administradores (id_administrador, usuario, contrasena, nombre, primer_apellido, segundo_apellido, correo, rol, activo)
-                    VALUES (@id, @usuario, @pass, @nombre, @primer, @segundo, @correo, @rol, @activo)
+                const string sql = """
+                    INSERT INTO administradores (
+                        id_administrador, nombre, primer_apellido, segundo_apellido,
+                        correo, telefono, usuario, contrasena, rol, activo, fecha_registro
+                    )
+                    VALUES (
+                        @id, @nombre, @primer_apellido, @segundo_apellido,
+                        @correo, @telefono, @usuario, @contrasena, 'Administrador', @activo, NOW()
+                    )
                     ON CONFLICT (id_administrador) DO UPDATE
-                    SET usuario = EXCLUDED.usuario,
-                        nombre = EXCLUDED.nombre,
-                        primer_apellido = EXCLUDED.primer_apellido,
+                    SET nombre           = EXCLUDED.nombre,
+                        primer_apellido  = EXCLUDED.primer_apellido,
                         segundo_apellido = EXCLUDED.segundo_apellido,
-                        correo = EXCLUDED.correo,
-                        rol = EXCLUDED.rol,
-                        activo = EXCLUDED.activo;
+                        correo           = EXCLUDED.correo,
+                        telefono         = EXCLUDED.telefono,
+                        usuario          = EXCLUDED.usuario,
+                        contrasena       = EXCLUDED.contrasena,
+                        activo           = EXCLUDED.activo;
                     """;
-                using (var cmdAdmin = new NpgsqlCommand(sqlAdmin, conexion))
+                using (var cmd = new NpgsqlCommand(sql, conexion))
                 {
-                    cmdAdmin.Parameters.AddWithValue("id", usuario.Id);
-                    cmdAdmin.Parameters.AddWithValue("usuario", usuario.Correo); // Correo sirve como nombre de usuario de login
-                    cmdAdmin.Parameters.AddWithValue("pass", "admin"); // Contraseña por defecto
-                    cmdAdmin.Parameters.AddWithValue("nombre", nom);
-                    cmdAdmin.Parameters.AddWithValue("primer", ape1);
-                    cmdAdmin.Parameters.AddWithValue("segundo", ape2);
-                    cmdAdmin.Parameters.AddWithValue("correo", usuario.Correo);
-                    cmdAdmin.Parameters.AddWithValue("rol", usuario.Rol);
-                    cmdAdmin.Parameters.AddWithValue("activo", isActivo);
-                    cmdAdmin.ExecuteNonQuery();
+                    cmd.Parameters.AddWithValue("id",               usuario.Id);
+                    cmd.Parameters.AddWithValue("nombre",           usuario.Nombre ?? "");
+                    cmd.Parameters.AddWithValue("primer_apellido",  usuario.PrimerApellido ?? "");
+                    cmd.Parameters.AddWithValue("segundo_apellido", usuario.SegundoApellido ?? "");
+                    cmd.Parameters.AddWithValue("correo",           usuario.Correo ?? "");
+                    cmd.Parameters.AddWithValue("telefono",         usuario.Telefono ?? "");
+                    cmd.Parameters.AddWithValue("usuario",          string.IsNullOrWhiteSpace(usuario.Usuario) ? usuario.Correo ?? "" : usuario.Usuario);
+                    cmd.Parameters.AddWithValue("contrasena",       string.IsNullOrWhiteSpace(usuario.Contrasena) ? "admin" : usuario.Contrasena);
+                    cmd.Parameters.AddWithValue("activo",           isActivo);
+                    cmd.ExecuteNonQuery();
                 }
-
                 return true;
             }
         }
-        catch
+        catch (Exception)
         {
-            return false;
+            throw;
         }
     }
 
     public static bool ObtenerDatosVerificacion(string nombreUsuario, out string rol, out string datoEsperado, out string tipoPregunta)
     {
-        rol = "";
+        rol          = "";
         datoEsperado = "";
         tipoPregunta = "";
 
@@ -271,44 +365,47 @@ internal static class UsuarioSistemaStore
             using var conexion = DatabaseService.GetConnection();
             conexion.Open();
 
-            // 1. Buscar en alumnos (estudiantes usan su ID de alumno)
-            const string sqlAlumno = "SELECT correo FROM alumnos WHERE id_alumno = @usuario LIMIT 1";
+            // Buscar en alumnos por numero_control o correo
+            const string sqlAlumno = """
+                SELECT correo FROM alumnos 
+                WHERE CAST(numero_control AS TEXT) = @usuario OR LOWER(correo) = LOWER(@usuario)
+                LIMIT 1
+                """;
             using (var cmd = new NpgsqlCommand(sqlAlumno, conexion))
             {
                 cmd.Parameters.AddWithValue("usuario", nombreUsuario.Trim());
                 var res = cmd.ExecuteScalar();
                 if (res != null)
                 {
-                    rol = "Estudiante";
+                    rol          = "Estudiante";
                     datoEsperado = res.ToString() ?? "";
                     tipoPregunta = "Escriba el correo electrónico registrado de la cuenta:";
                     return true;
                 }
             }
 
-            // 2. Buscar en administradores (personal/administradores usan su usuario o correo)
-            const string sqlSys = "SELECT nombre, primer_apellido, segundo_apellido, rol FROM administradores WHERE usuario = @usuario OR correo = @usuario OR id_administrador = @usuario LIMIT 1";
-            using (var cmd = new NpgsqlCommand(sqlSys, conexion))
+            // Buscar en administradores por usuario o correo
+            const string sqlAdmin = """
+                SELECT correo FROM administradores 
+                WHERE LOWER(usuario) = LOWER(@usuario) OR LOWER(correo) = LOWER(@usuario)
+                LIMIT 1
+                """;
+            using (var cmd = new NpgsqlCommand(sqlAdmin, conexion))
             {
                 cmd.Parameters.AddWithValue("usuario", nombreUsuario.Trim());
-                using (var reader = cmd.ExecuteReader())
+                var res = cmd.ExecuteScalar();
+                if (res != null)
                 {
-                    if (reader.Read())
-                    {
-                        string nom = reader.IsDBNull(0) ? "" : reader.GetString(0);
-                        string ape1 = reader.IsDBNull(1) ? "" : reader.GetString(1);
-                        string ape2 = reader.IsDBNull(2) ? "" : reader.GetString(2);
-                        rol = reader.IsDBNull(3) ? "Administrador" : reader.GetString(3);
-                        datoEsperado = $"{nom} {ape1} {ape2}".Trim();
-                        tipoPregunta = "Escriba el nombre completo del administrador/usuario:";
-                        return true;
-                    }
+                    rol          = "Administrador";
+                    datoEsperado = res.ToString() ?? "";
+                    tipoPregunta = "Escriba el correo electrónico del administrador:";
+                    return true;
                 }
             }
         }
-        catch
+        catch (Exception ex)
         {
-            // Fallback local
+            System.Diagnostics.Debug.WriteLine("Error en ObtenerDatosVerificacion: " + ex.Message);
         }
 
         return false;
@@ -324,32 +421,32 @@ internal static class UsuarioSistemaStore
             using var conexion = DatabaseService.GetConnection();
             conexion.Open();
 
-            if (rol == "Administrador" || rol == "Soporte")
+            if (rol == "Estudiante")
             {
-                const string sqlUpdate = "UPDATE administradores SET contrasena = @pass WHERE usuario = @nombre OR correo = @nombre OR id_administrador = @nombre";
-                using (var cmd = new NpgsqlCommand(sqlUpdate, conexion))
-                {
-                    cmd.Parameters.AddWithValue("pass", nuevaContrasena.Trim());
-                    cmd.Parameters.AddWithValue("nombre", nombreUsuario.Trim());
-                    if (cmd.ExecuteNonQuery() > 0)
-                        return true;
-                }
+                const string sql = """
+                    UPDATE alumnos SET contrasena = @pass 
+                    WHERE CAST(numero_control AS TEXT) = @usuario OR LOWER(correo) = LOWER(@usuario)
+                    """;
+                using var cmd = new NpgsqlCommand(sql, conexion);
+                cmd.Parameters.AddWithValue("pass",    nuevaContrasena.Trim());
+                cmd.Parameters.AddWithValue("usuario", nombreUsuario.Trim());
+                return cmd.ExecuteNonQuery() > 0;
             }
             else
             {
-                const string sqlUpdate = "UPDATE alumnos SET contrasena = @pass WHERE id_alumno = @nombre OR correo = @nombre";
-                using (var cmd = new NpgsqlCommand(sqlUpdate, conexion))
-                {
-                    cmd.Parameters.AddWithValue("pass", nuevaContrasena.Trim());
-                    cmd.Parameters.AddWithValue("nombre", nombreUsuario.Trim());
-                    if (cmd.ExecuteNonQuery() > 0)
-                        return true;
-                }
+                const string sql = """
+                    UPDATE administradores SET contrasena = @pass 
+                    WHERE LOWER(usuario) = LOWER(@usuario) OR LOWER(correo) = LOWER(@usuario)
+                    """;
+                using var cmd = new NpgsqlCommand(sql, conexion);
+                cmd.Parameters.AddWithValue("pass",    nuevaContrasena.Trim());
+                cmd.Parameters.AddWithValue("usuario", nombreUsuario.Trim());
+                return cmd.ExecuteNonQuery() > 0;
             }
         }
-        catch
+        catch (Exception ex)
         {
-            // Ignorar errores
+            System.Diagnostics.Debug.WriteLine("Error al actualizar contraseña: " + ex.Message);
         }
 
         return false;

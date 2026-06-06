@@ -16,7 +16,7 @@ public class AdminGestionIncidenciasForm : Form
     private Label lblResueltasCard = null!;
     private int paginaActual = 1;
     private const int FilasPorPagina = 5;
-
+        
     public AdminGestionIncidenciasForm()
     {
         Text = "GALAB - Gestión de incidencias";

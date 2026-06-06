@@ -8,7 +8,7 @@ public class IncidenciaDetalleForm : Form
     public IncidenciaDetalleForm(IncidenciaListadoItem item)
     {
         Text = "Detalle de incidencia - " + item.Folio;
-        Size = new Size(540, 620);
+        Size = new Size(560, 720);
         FormBorderStyle = FormBorderStyle.FixedDialog;
         StartPosition = FormStartPosition.CenterParent;
         MaximizeBox = false;
@@ -64,7 +64,7 @@ public class IncidenciaDetalleForm : Form
         var panelReporte = new Panel
         {
             Location = new Point(12, 16),
-            Size = new Size(470, 240),
+            Size = new Size(490, 290),
             BackColor = Color.White
         };
         panelReporte.Paint += (s, e) =>
@@ -83,9 +83,9 @@ public class IncidenciaDetalleForm : Form
             AutoSize = true
         });
 
-        string[] labels = { "Título", "Tipo", "Pc/portátil afectado", "Fecha de reporte" };
-        string[] values = { item.Titulo, item.TipoIncidencia, item.Equipo, item.Fecha.ToString("dd/MM/yyyy HH:mm") };
-        int y = 32;
+        string[] labels = { "ID Incidencia", "Título", "Tipo", "Equipo afectado", "Fecha de reporte" };
+        string[] values = { item.IdReal, item.Titulo, item.TipoIncidencia, item.Equipo, item.Fecha.ToString("dd/MM/yyyy HH:mm") };
+        int y = 40;
         for (int i = 0; i < labels.Length; i++)
         {
             panelReporte.Controls.Add(new Label
@@ -93,32 +93,31 @@ public class IncidenciaDetalleForm : Form
                 Text = $"{labels[i]}:",
                 Font = new Font("Segoe UI", 9.5F, FontStyle.Bold),
                 ForeColor = UiAssets.AzulOscuro,
-                Location = new Point(16, y),
-                Size = new Size(150, 20),
-                TextAlign = ContentAlignment.MiddleLeft
+                Location = new Point(20, y),
+                AutoSize = true
             });
             panelReporte.Controls.Add(new Label
             {
                 Text = values[i],
-                Font = new Font("Segoe UI", 9.5F, FontStyle.Regular),
-                ForeColor = Color.FromArgb(50, 60, 80),
-                Location = new Point(170, y),
-                Size = new Size(280, 20),
-                TextAlign = ContentAlignment.MiddleLeft
+                Font = new Font("Segoe UI", 10F, FontStyle.Regular),
+                ForeColor = Color.FromArgb(40, 50, 70),
+                Location = new Point(200, y),
+                AutoSize = true
             });
-            y += 24;
+            y += 30;
         }
 
         // Descripcion Textbox multiline
+        y += 10;
         panelReporte.Controls.Add(new Label
         {
             Text = "Descripción del problema:",
             Font = new Font("Segoe UI", 9.5F, FontStyle.Bold),
             ForeColor = UiAssets.AzulOscuro,
-            Location = new Point(16, y),
-            Size = new Size(400, 20)
+            Location = new Point(20, y),
+            AutoSize = true
         });
-        y += 22;
+        y += 24;
         
         var txtDesc = new TextBox
         {
@@ -127,8 +126,8 @@ public class IncidenciaDetalleForm : Form
             ReadOnly = true,
             ScrollBars = ScrollBars.Vertical,
             BorderStyle = BorderStyle.FixedSingle,
-            Location = new Point(16, y),
-            Size = new Size(434, 70),
+            Location = new Point(20, y),
+            Size = new Size(450, 60),
             BackColor = Color.FromArgb(248, 250, 252)
         };
         panelReporte.Controls.Add(txtDesc);
@@ -137,8 +136,8 @@ public class IncidenciaDetalleForm : Form
         // Card 3: Student Details
         var panelUsuario = new Panel
         {
-            Location = new Point(12, 272),
-            Size = new Size(470, 180),
+            Location = new Point(12, 320),
+            Size = new Size(490, 190),
             BackColor = Color.White
         };
         panelUsuario.Paint += (s, e) =>
@@ -157,18 +156,16 @@ public class IncidenciaDetalleForm : Form
             AutoSize = true
         });
 
-        var perfilRep = Proyecto_GALAB.Services.PerfilUsuarioStore.ObtenerPorNombre(item.QuienReporta);
-        string[] uLabels = { "Nombre", "Nº control", "Carrera", "Semestre / Grupo", "Correo", "Teléfono" };
+        string[] uLabels = { "Nombre", "Nº control", "Semestre / Grupo", "Correo", "Teléfono" };
         string[] uValues = { 
-            perfilRep.NombreCompleto, 
-            string.IsNullOrWhiteSpace(perfilRep.ControlNumber) ? "N/A" : perfilRep.ControlNumber, 
-            string.IsNullOrWhiteSpace(perfilRep.Carrera) ? "N/A" : perfilRep.Carrera, 
-            $"{(string.IsNullOrWhiteSpace(perfilRep.Semestre) ? "N/A" : perfilRep.Semestre)}º - {(string.IsNullOrWhiteSpace(perfilRep.Grupo) ? "N/A" : perfilRep.Grupo)}",
-            string.IsNullOrWhiteSpace(perfilRep.Correo) ? "N/A" : perfilRep.Correo, 
-            string.IsNullOrWhiteSpace(perfilRep.Telefono) ? "N/A" : perfilRep.Telefono 
+            item.QuienReporta, 
+            item.NumeroControl, 
+            $"{item.Semestre}º - {item.Grupo}",
+            item.Correo, 
+            item.Telefono
         };
 
-        int uy = 32;
+        int uy = 40;
         for (int i = 0; i < uLabels.Length; i++)
         {
             panelUsuario.Controls.Add(new Label
@@ -176,28 +173,26 @@ public class IncidenciaDetalleForm : Form
                 Text = $"{uLabels[i]}:",
                 Font = new Font("Segoe UI", 9.5F, FontStyle.Bold),
                 ForeColor = UiAssets.AzulOscuro,
-                Location = new Point(16, uy),
-                Size = new Size(150, 20),
-                TextAlign = ContentAlignment.MiddleLeft
+                Location = new Point(20, uy),
+                AutoSize = true
             });
             panelUsuario.Controls.Add(new Label
             {
                 Text = uValues[i],
-                Font = new Font("Segoe UI", 9.5F, FontStyle.Regular),
-                ForeColor = Color.FromArgb(50, 60, 80),
-                Location = new Point(170, uy),
-                Size = new Size(280, 20),
-                TextAlign = ContentAlignment.MiddleLeft
+                Font = new Font("Segoe UI", 10F, FontStyle.Regular),
+                ForeColor = Color.FromArgb(40, 50, 70),
+                Location = new Point(200, uy),
+                AutoSize = true
             });
-            uy += 24;
+            uy += 28;
         }
         container.Controls.Add(panelUsuario);
 
         // Card 2: Solution details
         var panelSolucion = new Panel
         {
-            Location = new Point(12, 468),
-            Size = new Size(470, 160),
+            Location = new Point(12, 526),
+            Size = new Size(490, 160),
             BackColor = Color.White
         };
         panelSolucion.Paint += (s, e) =>
@@ -216,18 +211,20 @@ public class IncidenciaDetalleForm : Form
             AutoSize = true
         });
 
+        bool esAdmin = Proyecto_GALAB.Services.SesionActual.EsAdministrador;
+
         bool resuelta = !string.IsNullOrWhiteSpace(item.DescripcionSolucion);
         var txtSol = new TextBox
         {
-            Text = resuelta ? item.DescripcionSolucion : "Pendiente de revisión por el administrador.",
+            Text = resuelta ? item.DescripcionSolucion : (esAdmin ? "" : "Pendiente de revisión por el administrador."),
             Multiline = true,
-            ReadOnly = true,
+            ReadOnly = !esAdmin,
             ScrollBars = ScrollBars.Vertical,
             BorderStyle = BorderStyle.FixedSingle,
-            Location = new Point(16, 32),
-            Size = new Size(434, 110),
-            BackColor = resuelta ? Color.FromArgb(244, 253, 247) : Color.FromArgb(254, 250, 242),
-            ForeColor = resuelta ? Color.FromArgb(30, 80, 45) : Color.FromArgb(120, 75, 10)
+            Location = new Point(20, 36),
+            Size = new Size(450, 105),
+            BackColor = esAdmin ? Color.White : (resuelta ? Color.FromArgb(244, 253, 247) : Color.FromArgb(254, 250, 242)),
+            ForeColor = esAdmin ? Color.Black : (resuelta ? Color.FromArgb(30, 80, 45) : Color.FromArgb(120, 75, 10))
         };
         panelSolucion.Controls.Add(txtSol);
         container.Controls.Add(panelSolucion);
@@ -246,15 +243,57 @@ public class IncidenciaDetalleForm : Form
         var btnCerrar = new Button
         {
             Text = "Cerrar",
-            DialogResult = DialogResult.OK,
+            DialogResult = DialogResult.Cancel,
             Size = new Size(120, 36),
-            Location = new Point(380, 12),
+            Location = new Point(410, 12),
             BackColor = UiAssets.AzulPrincipal,
             ForeColor = Color.White,
             FlatStyle = FlatStyle.Flat
         };
         btnCerrar.FlatAppearance.BorderSize = 0;
         bottom.Controls.Add(btnCerrar);
+
+        if (esAdmin)
+        {
+            var btnGuardar = new Button
+            {
+                Text = "Guardar respuesta",
+                Size = new Size(140, 36),
+                Location = new Point(260, 12),
+                BackColor = Color.FromArgb(34, 166, 88),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat
+            };
+            btnGuardar.FlatAppearance.BorderSize = 0;
+            btnGuardar.Click += (s, e) => 
+            {
+                if (string.IsNullOrWhiteSpace(txtSol.Text))
+                {
+                    MessageBox.Show("Escribe una solución o mensaje antes de guardar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                try 
+                {
+                    using var con = Proyecto_GALAB.Services.DatabaseService.GetConnection();
+                    con.Open();
+                    using var cmd = new Npgsql.NpgsqlCommand("UPDATE incidencias SET solucion = @sol WHERE id_incidencia = @id", con);
+                    cmd.Parameters.AddWithValue("sol", txtSol.Text);
+                    cmd.Parameters.AddWithValue("id", long.Parse(item.IdReal));
+                    cmd.ExecuteNonQuery();
+                    
+                    MessageBox.Show("Mensaje guardado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    item.DescripcionSolucion = txtSol.Text;
+                    this.DialogResult = DialogResult.OK;
+                    this.Close();
+                } 
+                catch(Exception ex) 
+                {
+                    MessageBox.Show("Error al guardar: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            };
+            bottom.Controls.Add(btnGuardar);
+        }
+
         Controls.Add(bottom);
         AcceptButton = btnCerrar;
 

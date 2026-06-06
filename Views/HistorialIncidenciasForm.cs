@@ -286,8 +286,8 @@ public class HistorialIncidenciasForm : Form
 
         var todas = IncidenciaListadoStore.ObtenerTodas();
         var filtradas = todas.Where(i => 
-            (!string.IsNullOrEmpty(nombreUsuario) && i.QuienReporta.Equals(nombreUsuario, StringComparison.OrdinalIgnoreCase)) ||
-            (!string.IsNullOrEmpty(control) && i.QuienReporta.Equals(control, StringComparison.OrdinalIgnoreCase))
+            (!string.IsNullOrEmpty(control) && i.IdAlumno.Equals(control, StringComparison.OrdinalIgnoreCase)) ||
+            (!string.IsNullOrEmpty(nombreUsuario) && i.QuienReporta.Equals(nombreUsuario, StringComparison.OrdinalIgnoreCase))
         ).ToList();
 
         grid.Rows.Clear();

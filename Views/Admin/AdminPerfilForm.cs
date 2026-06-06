@@ -4,26 +4,24 @@ using Proyecto_GALAB.Services;
 namespace Proyecto_GALAB.Views.Admin;
 
 /// <summary>
-/// Perfil del administrador, sin datos escolares ni campos personales no necesarios.
+/// Perfil del administrador, estructurado exactamente con el esquema de la base de datos.
 /// </summary>
 public class AdminPerfilForm : Form
 {
-    private PictureBox picFoto = null!;
+    private TextBox txtIdAdministrador = null!;
+    private TextBox txtUsuario = null!;
     private TextBox txtNombre = null!;
-    private TextBox txtCurp = null!;
-    private TextBox txtFechaNacimiento = null!;
-    private TextBox txtGenero = null!;
-    private TextBox txtTelefono = null!;
+    private TextBox txtPrimerApellido = null!;
+    private TextBox txtSegundoApellido = null!;
     private TextBox txtCorreo = null!;
-    private TextBox txtCalle = null!;
-    private TextBox txtColonia = null!;
-    private TextBox txtCodigoPostal = null!;
-    private TextBox txtMunicipio = null!;
-    private TextBox txtEstado = null!;
+    private TextBox txtTelefono = null!;
+    private TextBox txtRol = null!;
+    private TextBox txtActivo = null!;
+    private TextBox txtFechaRegistro = null!;
+
     private Button btnEditar = null!;
     private Button btnGuardar = null!;
     private Button btnCancelar = null!;
-    private Button btnCambiarFoto = null!;
     private bool modoEdicion;
     private PerfilAdministrador? respaldo;
 
@@ -61,11 +59,9 @@ public class AdminPerfilForm : Form
             Font = new Font("Segoe UI", 9F)
         };
 
-        // Nest header and contenido into panelDerecho
         panelDerecho.Controls.Add(contenido); // Dock.Fill
         panelDerecho.Controls.Add(header);    // Dock.Top
 
-        // Add controls to main Form in correct docking Z-order
         Controls.Add(panelDerecho);
         Controls.Add(sidebar); // Dock.Left
         Controls.Add(footer);  // Dock.Bottom
@@ -75,57 +71,26 @@ public class AdminPerfilForm : Form
     {
         var panel = new Panel { Dock = DockStyle.Fill, BackColor = UiAssets.Fondo, AutoScroll = true };
 
-        var cardGeneral = CrearSeccion("Informacion general", 24, 22, 520, 560);
-        var cardContacto = CrearSeccion("Informacion de contacto", 560, 22, 520, 560);
+        var cardPersonales = CrearSeccion("Información personal", 24, 22, 520, 360);
+        var cardCuenta = CrearSeccion("Detalles de la cuenta", 560, 22, 520, 360);
 
-        picFoto = new PictureBox
-        {
-            Size = new Size(140, 140),
-            Location = new Point(190, 62),
-            BackColor = Color.FromArgb(227, 238, 255),
-            BorderStyle = BorderStyle.FixedSingle,
-            SizeMode = PictureBoxSizeMode.Zoom
-        };
-        UiAssets.RedondearControl(picFoto, 70);
-        cardGeneral.Controls.Add(picFoto);
+        txtNombre = CrearFila(cardPersonales, "Nombre", 56);
+        txtPrimerApellido = CrearFila(cardPersonales, "Primer apellido", 112);
+        txtSegundoApellido = CrearFila(cardPersonales, "Segundo apellido", 168);
+        txtTelefono = CrearFila(cardPersonales, "Teléfono", 224);
+        txtTelefono.MaxLength = 10;
+        txtCorreo = CrearFila(cardPersonales, "Correo electrónico", 280);
 
-        btnCambiarFoto = new Button
-        {
-            Text = "Cambiar foto",
-            Font = new Font("Segoe UI", 9.5F, FontStyle.Bold),
-            ForeColor = UiAssets.AzulPrincipal,
-            BackColor = Color.White,
-            FlatStyle = FlatStyle.Flat,
-            Size = new Size(140, 34),
-            Location = new Point(190, 210),
-            Cursor = Cursors.Hand,
-            Visible = false
-        };
-        btnCambiarFoto.FlatAppearance.BorderColor = UiAssets.Borde;
-        btnCambiarFoto.FlatAppearance.BorderSize = 1;
-        btnCambiarFoto.Click += (_, _) => CambiarFoto();
-        cardGeneral.Controls.Add(btnCambiarFoto);
-
-        txtNombre = CrearFila(cardGeneral, "Nombre", 268);
-        txtCurp = CrearFila(cardGeneral, "CURP", 316);
-        txtFechaNacimiento = CrearFila(cardGeneral, "Fecha de nacimiento", 364);
-        txtGenero = CrearFila(cardGeneral, "Genero", 412);
-        txtTelefono = CrearFila(cardGeneral, "Telefono", 460);
-        txtCorreo = CrearFila(cardGeneral, "Correo electronico", 508);
-
-        txtCalle = CrearFila(cardContacto, "Calle y numero", 56);
-        txtColonia = CrearFila(cardContacto, "Colonia", 126);
-        txtCodigoPostal = CrearFila(cardContacto, "Codigo postal", 196);
-        txtMunicipio = CrearFila(cardContacto, "Municipio", 266);
-        txtEstado = CrearFila(cardContacto, "Estado", 336);
+        txtIdAdministrador = CrearFila(cardCuenta, "ID Administrador", 56);
+        txtUsuario = CrearFila(cardCuenta, "Usuario", 112);
+        txtRol = CrearFila(cardCuenta, "Rol de sistema", 168);
+        txtActivo = CrearFila(cardCuenta, "Estado de cuenta", 224);
+        txtFechaRegistro = CrearFila(cardCuenta, "Fecha de registro de ingreso", 280);
 
         txtNombre.KeyPress += SoloLetras_KeyPress;
-        txtGenero.KeyPress += SoloLetras_KeyPress;
-        txtMunicipio.KeyPress += SoloLetras_KeyPress;
-        txtEstado.KeyPress += SoloLetras_KeyPress;
-
+        txtPrimerApellido.KeyPress += SoloLetras_KeyPress;
+        txtSegundoApellido.KeyPress += SoloLetras_KeyPress;
         txtTelefono.KeyPress += SoloNumeros_KeyPress;
-        txtCodigoPostal.KeyPress += SoloNumeros_KeyPress;
 
         btnEditar = new Button
         {
@@ -135,27 +100,21 @@ public class AdminPerfilForm : Form
             BackColor = UiAssets.AzulPrincipal,
             FlatStyle = FlatStyle.Flat,
             Cursor = Cursors.Hand,
-            Size = new Size(210, 50),
-            Location = new Point(870, 500)
+            Size = new Size(210, 50)
         };
         btnEditar.FlatAppearance.BorderSize = 0;
         btnEditar.Click += (_, _) => ActivarEdicion();
         UiAssets.RedondearControl(btnEditar, 10);
 
-        btnGuardar = BotonAccion("Guardar", Color.FromArgb(34, 166, 88), Color.White, 650, false);
+        btnGuardar = BotonAccion("Guardar", Color.FromArgb(34, 166, 88), Color.White, false);
         btnGuardar.Click += (_, _) => Guardar();
-        btnCancelar = BotonAccion("Cancelar", Color.White, UiAssets.AzulPrincipal, 820, false);
+
+        btnCancelar = BotonAccion("Cancelar", Color.White, UiAssets.AzulPrincipal, false);
         btnCancelar.FlatAppearance.BorderColor = UiAssets.Borde;
         btnCancelar.FlatAppearance.BorderSize = 1;
         btnCancelar.Click += (_, _) => Cancelar();
 
-        panel.Controls.AddRange(new Control[] { cardGeneral, cardContacto, btnEditar, btnGuardar, btnCancelar });
-
-        cardGeneral.Resize += (s, e) =>
-        {
-            picFoto.Left = (cardGeneral.Width - picFoto.Width) / 2;
-            btnCambiarFoto.Left = (cardGeneral.Width - btnCambiarFoto.Width) / 2;
-        };
+        panel.Controls.AddRange(new Control[] { cardPersonales, cardCuenta, btnEditar, btnGuardar, btnCancelar });
 
         panel.Resize += (s, e) =>
         {
@@ -168,27 +127,29 @@ public class AdminPerfilForm : Form
             int cardW = availableW / 2;
 
             int startX = padding;
-            cardGeneral.Location = new Point(startX, 22);
-            cardGeneral.Size = new Size(cardW, 560);
+            cardPersonales.Location = new Point(startX, 22);
+            cardPersonales.Size = new Size(cardW, 360);
 
-            cardContacto.Location = new Point(startX + cardW + gap, 22);
-            cardContacto.Size = new Size(cardW, 560);
+            cardCuenta.Location = new Point(startX + cardW + gap, 22);
+            cardCuenta.Size = new Size(cardW, 360);
 
-            btnEditar.Left = cardContacto.Right - btnEditar.Width;
-            btnEditar.Top = cardContacto.Bottom + 16;
+            // Position buttons dynamically below the cards
+            btnEditar.Left = cardCuenta.Right - btnEditar.Width;
+            btnEditar.Top = cardCuenta.Bottom + 20;
 
             btnGuardar.Left = btnEditar.Left - btnGuardar.Width - 12;
-            btnGuardar.Top = cardContacto.Bottom + 16;
+            btnGuardar.Top = cardCuenta.Bottom + 20;
 
-            btnCancelar.Left = cardContacto.Right - btnCancelar.Width;
-            btnCancelar.Top = cardContacto.Bottom + 16;
+            btnCancelar.Left = cardCuenta.Right - btnCancelar.Width;
+            btnCancelar.Top = cardCuenta.Bottom + 20;
 
-            panel.AutoScrollMinSize = new Size(cardContacto.Right + padding, btnEditar.Bottom + padding);
+            panel.AutoScrollMinSize = new Size(cardCuenta.Right + padding, btnEditar.Bottom + padding);
         };
+
         return panel;
     }
 
-    private Button BotonAccion(string texto, Color fondo, Color textoColor, int x, bool visible)
+    private Button BotonAccion(string texto, Color fondo, Color textoColor, bool visible)
     {
         var b = new Button
         {
@@ -199,7 +160,6 @@ public class AdminPerfilForm : Form
             FlatStyle = FlatStyle.Flat,
             Cursor = Cursors.Hand,
             Size = new Size(160, 50),
-            Location = new Point(x, 500),
             Visible = visible
         };
         b.FlatAppearance.BorderSize = 0;
@@ -233,7 +193,7 @@ public class AdminPerfilForm : Form
             Font = new Font("Segoe UI", 12F),
             ForeColor = Color.FromArgb(45, 55, 70),
             Location = new Point(24, y + 2),
-            Size = new Size(200, 30)
+            Size = new Size(240, 30)
         });
         var txt = new TextBox
         {
@@ -241,8 +201,8 @@ public class AdminPerfilForm : Form
             BorderStyle = BorderStyle.None,
             BackColor = Color.White,
             Font = new Font("Segoe UI", 12F),
-            Location = new Point(230, y + 2),
-            Size = new Size(parent.Width - 260, 30),
+            Location = new Point(270, y + 2),
+            Size = new Size(parent.Width - 300, 30),
             Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
             TabStop = true
         };
@@ -250,20 +210,33 @@ public class AdminPerfilForm : Form
         return txt;
     }
 
-    private IEnumerable<TextBox> Campos() => new[]
+    private IEnumerable<TextBox> CamposEdicion() => new[]
     {
-        txtNombre, txtCurp, txtFechaNacimiento, txtGenero, txtTelefono, txtCorreo,
-        txtCalle, txtColonia, txtCodigoPostal, txtMunicipio, txtEstado
+        txtNombre, txtPrimerApellido, txtSegundoApellido, txtTelefono, txtCorreo, txtUsuario
+    };
+
+    private IEnumerable<TextBox> TodosLosCampos() => new[]
+    {
+        txtNombre, txtPrimerApellido, txtSegundoApellido, txtTelefono, txtCorreo,
+        txtIdAdministrador, txtUsuario, txtRol, txtActivo, txtFechaRegistro
     };
 
     private void SetEdicion(bool editar)
     {
-        foreach (var t in Campos())
+        foreach (var t in CamposEdicion())
         {
             t.ReadOnly = !editar;
             t.BorderStyle = editar ? BorderStyle.FixedSingle : BorderStyle.None;
             t.BackColor = editar ? Color.FromArgb(250, 252, 255) : Color.White;
             t.TabStop = editar;
+        }
+
+        foreach (var t in TodosLosCampos().Except(CamposEdicion()))
+        {
+            t.ReadOnly = true;
+            t.BorderStyle = BorderStyle.None;
+            t.BackColor = Color.White;
+            t.TabStop = false;
         }
     }
 
@@ -276,7 +249,6 @@ public class AdminPerfilForm : Form
         btnEditar.Visible = false;
         btnGuardar.Visible = true;
         btnCancelar.Visible = true;
-        btnCambiarFoto.Visible = true;
     }
 
     private void Guardar()
@@ -288,20 +260,40 @@ public class AdminPerfilForm : Form
             return;
         }
 
+        string tel = txtTelefono.Text.Trim();
+        if (tel.Length != 10)
+        {
+            MessageBox.Show("El número de teléfono debe tener exactamente 10 dígitos.", "Error de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(txtUsuario.Text.Trim()))
+        {
+            MessageBox.Show("El nombre de usuario es obligatorio.", "Error de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(txtNombre.Text.Trim()))
+        {
+            MessageBox.Show("El nombre es obligatorio.", "Error de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(txtPrimerApellido.Text.Trim()))
+        {
+            MessageBox.Show("El primer apellido es obligatorio.", "Error de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
         var p = PerfilAdministradorStore.Obtener();
-        p.NombreCompleto = txtNombre.Text.Trim();
-        p.Curp = txtCurp.Text.Trim();
-        p.FechaNacimiento = txtFechaNacimiento.Text.Trim();
-        p.Genero = txtGenero.Text.Trim();
-        p.Telefono = txtTelefono.Text.Trim();
+        p.Usuario = txtUsuario.Text.Trim();
+        p.Nombre = txtNombre.Text.Trim();
+        p.PrimerApellido = txtPrimerApellido.Text.Trim();
+        p.SegundoApellido = txtSegundoApellido.Text.Trim();
         p.Correo = txtCorreo.Text.Trim();
-        p.Calle = txtCalle.Text.Trim();
-        p.Colonia = txtColonia.Text.Trim();
-        p.CodigoPostal = txtCodigoPostal.Text.Trim();
-        p.Municipio = txtMunicipio.Text.Trim();
-        p.Estado = txtEstado.Text.Trim();
+        p.Telefono = txtTelefono.Text.Trim();
+
         PerfilAdministradorStore.Guardar(p);
         FinalizarEdicion();
+        CargarVista();
     }
 
     private void Cancelar()
@@ -319,48 +311,22 @@ public class AdminPerfilForm : Form
         btnEditar.Visible = true;
         btnGuardar.Visible = false;
         btnCancelar.Visible = false;
-        btnCambiarFoto.Visible = false;
     }
 
     private void CargarVista()
     {
         var p = PerfilAdministradorStore.Obtener();
-        txtNombre.Text = p.NombreCompleto;
-        txtCurp.Text = p.Curp;
-        txtFechaNacimiento.Text = p.FechaNacimiento;
-        txtGenero.Text = p.Genero;
-        txtTelefono.Text = p.Telefono;
+        txtIdAdministrador.Text = p.IdAdministrador;
+        txtUsuario.Text = p.Usuario;
+        txtNombre.Text = p.Nombre;
+        txtPrimerApellido.Text = p.PrimerApellido;
+        txtSegundoApellido.Text = p.SegundoApellido;
         txtCorreo.Text = p.Correo;
-        txtCalle.Text = p.Calle;
-        txtColonia.Text = p.Colonia;
-        txtCodigoPostal.Text = p.CodigoPostal;
-        txtMunicipio.Text = p.Municipio;
-        txtEstado.Text = p.Estado;
+        txtTelefono.Text = p.Telefono;
+        txtRol.Text = p.Rol;
+        txtActivo.Text = p.Activo ? "Activo" : "Inactivo";
+        txtFechaRegistro.Text = p.FechaRegistro.ToString("g");
         SetEdicion(false);
-        CargarFoto(p.RutaFotoPerfil);
-    }
-
-    private void CambiarFoto()
-    {
-        using var dlg = new OpenFileDialog { Filter = "Imagenes|*.jpg;*.jpeg;*.png;*.bmp;*.webp" };
-        if (dlg.ShowDialog(this) != DialogResult.OK) return;
-        var p = PerfilAdministradorStore.Obtener();
-        p.RutaFotoPerfil = dlg.FileName;
-        PerfilAdministradorStore.Guardar(p);
-        CargarFoto(p.RutaFotoPerfil);
-    }
-
-    private void CargarFoto(string ruta)
-    {
-        if (!string.IsNullOrWhiteSpace(ruta) && File.Exists(ruta))
-        {
-            using var img = Image.FromFile(ruta);
-            picFoto.Image = new Bitmap(img);
-        }
-        else
-        {
-            picFoto.Image = null;
-        }
     }
 
     private void SoloNumeros_KeyPress(object? sender, KeyPressEventArgs e)

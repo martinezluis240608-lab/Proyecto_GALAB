@@ -9,6 +9,7 @@ public class Incidencia
     public DateTime FechaHora { get; set; } = DateTime.Now;
     public string Descripcion { get; set; } = string.Empty;
     public string RutaEvidencia { get; set; } = string.Empty;
+    public string NumeroSerie { get; set; } = string.Empty;
 
     public (bool valido, string mensaje) Validar()
     {

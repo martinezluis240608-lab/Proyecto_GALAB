@@ -36,18 +36,27 @@ public class IncidenciaPresenter
             NombreEquipo   = _view.NombreEquipo,
             FechaHora      = _view.FechaHora,
             Descripcion    = _view.Descripcion,
-            RutaEvidencia  = _view.RutaEvidencia
+            RutaEvidencia  = _view.RutaEvidencia,
+            NumeroSerie    = _view.NumeroSerie
         };
 
         var (valido, mensaje) = incidencia.Validar();
         if (!valido)
         {
-            _view.MostrarMensaje(mensaje);
+            _view.MostrarError(mensaje);
             return;
         }
 
-        IncidenciaListadoStore.RegistrarDesdeIncidencia(incidencia);
-        _view.MostrarMensaje("✅ Reporte enviado correctamente.");
-        _view.LimpiarFormulario();
+        var (exito, mensajeDb) = IncidenciaListadoStore.RegistrarDesdeIncidencia(incidencia);
+        if (exito)
+        {
+            _view.MostrarExito(mensajeDb);
+            _view.LimpiarFormulario();
+        }
+        else
+        {
+            _view.MostrarError($"No se pudo guardar en la base de datos física, pero se guardó temporalmente en la memoria.\n\nDetalle del error:\n{mensajeDb}");
+            _view.LimpiarFormulario();
+        }
     }
 }

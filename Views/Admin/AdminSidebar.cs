@@ -87,22 +87,7 @@ internal static class AdminSidebar
             AutoSize = true
         };
 
-        var usuario = new Label
-        {
-            Text = $"Usuario: {SesionActual.NombreUsuario}",
-            Font = new Font("Segoe UI", 11F, FontStyle.Bold),
-            ForeColor = UiAssets.AzulPrincipal,
-            Anchor = AnchorStyles.Top | AnchorStyles.Right,
-            AutoSize = true
-        };
-        panel.Resize += (_, _) =>
-        {
-            if (panel.FindForm()?.WindowState == FormWindowState.Minimized) return;
-            usuario.Left = panel.Width - usuario.Width - 30;
-            usuario.Top = 48;
-        };
-
-        panel.Controls.AddRange(new Control[] { picLogoGalab, titulo, usuario });
+        panel.Controls.AddRange(new Control[] { picLogoGalab, titulo });
         return panel;
     }
 

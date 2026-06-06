@@ -9,6 +9,9 @@ public interface IIncidenciaView
     DateTime FechaHora { get; }
     string Descripcion { get; }
     string RutaEvidencia { get; set; }
+    string NumeroSerie { get; }
+    void MostrarExito(string mensaje);
+    void MostrarError(string mensaje);
     void MostrarMensaje(string mensaje);
     void LimpiarFormulario();
     event EventHandler OnEnviarReporte;
