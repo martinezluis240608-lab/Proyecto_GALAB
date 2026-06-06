@@ -8,22 +8,17 @@ namespace Proyecto_GALAB.Views.Admin;
 /// </summary>
 public class AdminPerfilForm : Form
 {
-    private PictureBox picFoto = null!;
+    private TextBox txtIdAdministrador = null!;
     private TextBox txtNombre = null!;
-    private TextBox txtCurp = null!;
-    private TextBox txtFechaNacimiento = null!;
-    private TextBox txtGenero = null!;
     private TextBox txtTelefono = null!;
     private TextBox txtCorreo = null!;
-    private TextBox txtCalle = null!;
-    private TextBox txtColonia = null!;
-    private TextBox txtCodigoPostal = null!;
-    private TextBox txtMunicipio = null!;
+    private TextBox txtUsuario = null!;
+    private TextBox txtRol = null!;
     private TextBox txtEstado = null!;
+    private TextBox txtFechaRegistro = null!;
     private Button btnEditar = null!;
     private Button btnGuardar = null!;
     private Button btnCancelar = null!;
-    private Button btnCambiarFoto = null!;
     private bool modoEdicion;
     private PerfilAdministrador? respaldo;
 
@@ -58,49 +53,18 @@ public class AdminPerfilForm : Form
     {
         var panel = new Panel { Dock = DockStyle.Fill, BackColor = UiAssets.Fondo, AutoScroll = true };
 
-        var cardGeneral = CrearSeccion("Informacion general", 24, 22, 520, 460);
-        var cardContacto = CrearSeccion("Informacion de contacto", 560, 22, 520, 460);
+        var cardGeneral = CrearSeccion("Informacion general", 24, 22, 520, 220);
+        var cardCuenta = CrearSeccion("Informacion de cuenta", 560, 22, 520, 260);
 
-        picFoto = new PictureBox
-        {
-            Size = new Size(140, 140),
-            Location = new Point(190, 62),
-            BackColor = Color.FromArgb(227, 238, 255),
-            BorderStyle = BorderStyle.FixedSingle,
-            SizeMode = PictureBoxSizeMode.Zoom
-        };
-        UiAssets.RedondearControl(picFoto, 70);
-        cardGeneral.Controls.Add(picFoto);
+        txtNombre = CrearFila(cardGeneral, "Nombre", 62);
+        txtCorreo = CrearFila(cardGeneral, "Correo electronico", 100);
+        txtTelefono = CrearFila(cardGeneral, "Telefono", 138);
 
-        btnCambiarFoto = new Button
-        {
-            Text = "Cambiar foto",
-            Font = new Font("Segoe UI", 9.5F, FontStyle.Bold),
-            ForeColor = UiAssets.AzulPrincipal,
-            BackColor = Color.White,
-            FlatStyle = FlatStyle.Flat,
-            Size = new Size(140, 34),
-            Location = new Point(190, 210),
-            Cursor = Cursors.Hand,
-            Visible = false
-        };
-        btnCambiarFoto.FlatAppearance.BorderColor = UiAssets.Borde;
-        btnCambiarFoto.FlatAppearance.BorderSize = 1;
-        btnCambiarFoto.Click += (_, _) => CambiarFoto();
-        cardGeneral.Controls.Add(btnCambiarFoto);
-
-        txtNombre = CrearFila(cardGeneral, "Nombre", 268);
-        txtCurp = CrearFila(cardGeneral, "CURP", 306);
-        txtFechaNacimiento = CrearFila(cardGeneral, "Fecha de nacimiento", 344);
-        txtGenero = CrearFila(cardGeneral, "Genero", 382);
-        txtTelefono = CrearFila(cardGeneral, "Telefono", 420);
-        txtCorreo = CrearFila(cardGeneral, "Correo electronico", 458);
-
-        txtCalle = CrearFila(cardContacto, "Calle y numero", 56);
-        txtColonia = CrearFila(cardContacto, "Colonia", 104);
-        txtCodigoPostal = CrearFila(cardContacto, "Codigo postal", 152);
-        txtMunicipio = CrearFila(cardContacto, "Municipio", 200);
-        txtEstado = CrearFila(cardContacto, "Estado", 248);
+        txtIdAdministrador = CrearFila(cardCuenta, "ID administrador", 56);
+        txtUsuario = CrearFila(cardCuenta, "Usuario", 92);
+        txtRol = CrearFila(cardCuenta, "Rol", 128);
+        txtEstado = CrearFila(cardCuenta, "Estado", 164);
+        txtFechaRegistro = CrearFila(cardCuenta, "Fecha de registro", 200);
 
         btnEditar = new Button
         {
@@ -111,7 +75,7 @@ public class AdminPerfilForm : Form
             FlatStyle = FlatStyle.Flat,
             Cursor = Cursors.Hand,
             Size = new Size(210, 50),
-            Location = new Point(870, 500)
+            Location = new Point(870, 360)
         };
         btnEditar.FlatAppearance.BorderSize = 0;
         btnEditar.Click += (_, _) => ActivarEdicion();
@@ -124,17 +88,17 @@ public class AdminPerfilForm : Form
         btnCancelar.FlatAppearance.BorderSize = 1;
         btnCancelar.Click += (_, _) => Cancelar();
 
-        panel.Controls.AddRange(new Control[] { cardGeneral, cardContacto, btnEditar, btnGuardar, btnCancelar });
+        panel.Controls.AddRange(new Control[] { cardGeneral, cardCuenta, btnEditar, btnGuardar, btnCancelar });
         panel.Resize += (s, e) =>
         {
             int w = Math.Max(1060, panel.ClientSize.Width - 48);
             int startX = (panel.ClientSize.Width - w) / 2;
             cardGeneral.Left = startX;
-            cardContacto.Left = cardGeneral.Right + 16;
-            btnEditar.Left = cardContacto.Right - btnEditar.Width;
+            cardCuenta.Left = cardGeneral.Right + 16;
+            btnEditar.Left = cardCuenta.Right - btnEditar.Width;
             btnGuardar.Left = btnEditar.Left - btnGuardar.Width - 12;
-            btnCancelar.Left = cardContacto.Right - btnCancelar.Width;
-            panel.AutoScrollMinSize = new Size(startX + w + 20, 620);
+            btnCancelar.Left = cardCuenta.Right - btnCancelar.Width;
+            panel.AutoScrollMinSize = new Size(startX + w + 20, 520);
         };
         return panel;
     }
@@ -150,7 +114,7 @@ public class AdminPerfilForm : Form
             FlatStyle = FlatStyle.Flat,
             Cursor = Cursors.Hand,
             Size = new Size(160, 50),
-            Location = new Point(x, 500),
+            Location = new Point(x, 360),
             Visible = visible
         };
         b.FlatAppearance.BorderSize = 0;
@@ -202,8 +166,7 @@ public class AdminPerfilForm : Form
 
     private IEnumerable<TextBox> Campos() => new[]
     {
-        txtNombre, txtCurp, txtFechaNacimiento, txtGenero, txtTelefono, txtCorreo,
-        txtCalle, txtColonia, txtCodigoPostal, txtMunicipio, txtEstado
+        txtNombre, txtTelefono, txtCorreo
     };
 
     private void SetEdicion(bool editar)
@@ -226,23 +189,14 @@ public class AdminPerfilForm : Form
         btnEditar.Visible = false;
         btnGuardar.Visible = true;
         btnCancelar.Visible = true;
-        btnCambiarFoto.Visible = true;
     }
 
     private void Guardar()
     {
         var p = PerfilAdministradorStore.Obtener();
         p.NombreCompleto = txtNombre.Text.Trim();
-        p.Curp = txtCurp.Text.Trim();
-        p.FechaNacimiento = txtFechaNacimiento.Text.Trim();
-        p.Genero = txtGenero.Text.Trim();
         p.Telefono = txtTelefono.Text.Trim();
         p.Correo = txtCorreo.Text.Trim();
-        p.Calle = txtCalle.Text.Trim();
-        p.Colonia = txtColonia.Text.Trim();
-        p.CodigoPostal = txtCodigoPostal.Text.Trim();
-        p.Municipio = txtMunicipio.Text.Trim();
-        p.Estado = txtEstado.Text.Trim();
         PerfilAdministradorStore.Guardar(p);
         FinalizarEdicion();
     }
@@ -262,47 +216,19 @@ public class AdminPerfilForm : Form
         btnEditar.Visible = true;
         btnGuardar.Visible = false;
         btnCancelar.Visible = false;
-        btnCambiarFoto.Visible = false;
     }
 
     private void CargarVista()
     {
         var p = PerfilAdministradorStore.Obtener();
         txtNombre.Text = p.NombreCompleto;
-        txtCurp.Text = p.Curp;
-        txtFechaNacimiento.Text = p.FechaNacimiento;
-        txtGenero.Text = p.Genero;
         txtTelefono.Text = p.Telefono;
         txtCorreo.Text = p.Correo;
-        txtCalle.Text = p.Calle;
-        txtColonia.Text = p.Colonia;
-        txtCodigoPostal.Text = p.CodigoPostal;
-        txtMunicipio.Text = p.Municipio;
+        txtIdAdministrador.Text = p.IdAdministrador;
+        txtUsuario.Text = string.IsNullOrWhiteSpace(p.Usuario) ? SesionActual.NombreUsuario : p.Usuario;
+        txtRol.Text = p.Rol;
         txtEstado.Text = p.Estado;
+        txtFechaRegistro.Text = p.FechaRegistro;
         SetEdicion(false);
-        CargarFoto(p.RutaFotoPerfil);
-    }
-
-    private void CambiarFoto()
-    {
-        using var dlg = new OpenFileDialog { Filter = "Imagenes|*.jpg;*.jpeg;*.png;*.bmp;*.webp" };
-        if (dlg.ShowDialog(this) != DialogResult.OK) return;
-        var p = PerfilAdministradorStore.Obtener();
-        p.RutaFotoPerfil = dlg.FileName;
-        PerfilAdministradorStore.Guardar(p);
-        CargarFoto(p.RutaFotoPerfil);
-    }
-
-    private void CargarFoto(string ruta)
-    {
-        if (!string.IsNullOrWhiteSpace(ruta) && File.Exists(ruta))
-        {
-            using var img = Image.FromFile(ruta);
-            picFoto.Image = new Bitmap(img);
-        }
-        else
-        {
-            picFoto.Image = null;
-        }
     }
 }

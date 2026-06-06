@@ -5,27 +5,21 @@ namespace Proyecto_GALAB.Views;
 
 public partial class PerfilForm : Form
 {
-    private PictureBox picFoto = null!;
+    private TextBox txtIdAlumno = null!;
     private TextBox txtNombre = null!;
-    private TextBox txtCurp = null!;
-    private TextBox txtFechaNacimiento = null!;
-    private TextBox txtGenero = null!;
     private TextBox txtTelefono = null!;
     private TextBox txtCorreo = null!;
     private TextBox txtControl = null!;
+    private TextBox txtUsuario = null!;
     private TextBox txtEstatus = null!;
     private TextBox txtSemestre = null!;
-    private TextBox txtCarrera = null!;
     private TextBox txtGrupo = null!;
-    private TextBox txtCalle = null!;
-    private TextBox txtColonia = null!;
-    private TextBox txtCodigoPostal = null!;
-    private TextBox txtMunicipio = null!;
+    private TextBox txtNumeroAsiento = null!;
     private TextBox txtEstado = null!;
+    private TextBox txtFechaRegistro = null!;
     private Button btnEditar = null!;
     private Button btnGuardar = null!;
     private Button btnCancelar = null!;
-    private Button btnCambiarFoto = null!;
     private bool modoEdicion;
     private PerfilUsuario? respaldoPerfil;
 
@@ -160,59 +154,26 @@ public partial class PerfilForm : Form
             AutoScroll = true
         };
 
-        var cardGeneral = CrearSeccion("Informacion general", 24, 22, 380, 542);
-        var cardEscolar = CrearSeccion("Informacion escolar", 426, 22, 716, 244);
-        var cardContacto = CrearSeccion("Informacion de contacto", 426, 280, 716, 302);
+        var cardGeneral = CrearSeccion("Informacion general", 24, 22, 520, 220);
+        var cardEscolar = CrearSeccion("Informacion escolar", 560, 22, 520, 220);
+        var cardCuenta = CrearSeccion("Informacion de cuenta", 24, 260, 520, 260);
 
-        picFoto = new PictureBox
-        {
-            Size = new Size(140, 140),
-            Location = new Point(120, 62),
-            BackColor = Color.FromArgb(227, 238, 255),
-            BorderStyle = BorderStyle.FixedSingle,
-            SizeMode = PictureBoxSizeMode.Zoom
-        };
-        UiAssets.RedondearControl(picFoto, 70);
-        cardGeneral.Controls.Add(picFoto);
-
-        btnCambiarFoto = new Button
-        {
-            Text = "Cambiar foto",
-            Font = new Font("Segoe UI", 9.5F, FontStyle.Bold),
-            ForeColor = UiAssets.AzulPrincipal,
-            BackColor = Color.White,
-            FlatStyle = FlatStyle.Flat,
-            Size = new Size(140, 34),
-            Location = new Point(120, 210),
-            Cursor = Cursors.Hand,
-            Visible = false
-        };
-        btnCambiarFoto.FlatAppearance.BorderColor = UiAssets.Borde;
-        btnCambiarFoto.FlatAppearance.BorderSize = 1;
-        btnCambiarFoto.Click += (_, _) => CambiarFoto();
-        UiAssets.RedondearControl(btnCambiarFoto, 8);
-        cardGeneral.Controls.Add(btnCambiarFoto);
-
-        txtNombre = CrearFila(cardGeneral, "Nombre", 268);
-        txtCurp = CrearFila(cardGeneral, "CURP", 306);
-        txtFechaNacimiento = CrearFila(cardGeneral, "Fecha de nacimiento", 344);
-        txtGenero = CrearFila(cardGeneral, "Genero", 382);
-        txtTelefono = CrearFila(cardGeneral, "Telefono", 420);
-        txtCorreo = CrearFila(cardGeneral, "Correo electronico", 458);
+        txtNombre = CrearFila(cardGeneral, "Nombre", 62);
+        txtCorreo = CrearFila(cardGeneral, "Correo electronico", 100);
+        txtTelefono = CrearFila(cardGeneral, "Telefono", 138);
 
         txtControl = CrearFila(cardEscolar, "No. de control", 56);
         txtEstatus = CrearFila(cardEscolar, "Estatus", 92);
         txtSemestre = CrearFila(cardEscolar, "Semestre", 128);
-        txtCarrera = CrearFila(cardEscolar, "Carrera", 164);
-        txtGrupo = CrearFila(cardEscolar, "Grupo", 200);
+        txtGrupo = CrearFila(cardEscolar, "Grupo", 164);
 
-        txtCalle = CrearFila(cardContacto, "Calle y numero", 56);
-        txtColonia = CrearFila(cardContacto, "Colonia", 92);
-        txtCodigoPostal = CrearFila(cardContacto, "Codigo postal", 128);
-        txtMunicipio = CrearFila(cardContacto, "Municipio", 164);
-        txtEstado = CrearFila(cardContacto, "Estado", 200);
+        txtIdAlumno = CrearFila(cardCuenta, "ID alumno", 56);
+        txtUsuario = CrearFila(cardCuenta, "Usuario", 92);
+        txtNumeroAsiento = CrearFila(cardCuenta, "Numero de asiento", 128);
+        txtEstado = CrearFila(cardCuenta, "Estado", 164);
+        txtFechaRegistro = CrearFila(cardCuenta, "Fecha de registro", 200);
 
-        panel.Controls.AddRange(new Control[] { cardGeneral, cardEscolar, cardContacto });
+        panel.Controls.AddRange(new Control[] { cardGeneral, cardEscolar, cardCuenta });
 
         btnEditar = new Button
         {
@@ -223,7 +184,7 @@ public partial class PerfilForm : Form
             FlatStyle = FlatStyle.Flat,
             Cursor = Cursors.Hand,
             Size = new Size(210, 50),
-            Location = new Point(930, 656)
+            Location = new Point(870, 560)
         };
         btnEditar.FlatAppearance.BorderSize = 0;
         btnEditar.Click += (_, _) => ActivarEdicion();
@@ -238,7 +199,7 @@ public partial class PerfilForm : Form
             FlatStyle = FlatStyle.Flat,
             Cursor = Cursors.Hand,
             Size = new Size(160, 50),
-            Location = new Point(824, 656),
+            Location = new Point(650, 560),
             Visible = false
         };
         btnGuardar.FlatAppearance.BorderSize = 0;
@@ -254,7 +215,7 @@ public partial class PerfilForm : Form
             FlatStyle = FlatStyle.Flat,
             Cursor = Cursors.Hand,
             Size = new Size(160, 50),
-            Location = new Point(992, 656),
+            Location = new Point(820, 560),
             Visible = false
         };
         btnCancelar.FlatAppearance.BorderColor = UiAssets.Borde;
@@ -271,11 +232,11 @@ public partial class PerfilForm : Form
 
             cardGeneral.Left = startX;
             cardEscolar.Left = cardGeneral.Right + 22;
-            cardContacto.Left = cardEscolar.Left;
-            btnEditar.Left = cardContacto.Right - btnEditar.Width;
-            btnGuardar.Left = cardContacto.Right - (btnGuardar.Width * 2 + 10);
-            btnCancelar.Left = cardContacto.Right - btnCancelar.Width;
-            panel.AutoScrollMinSize = new Size(startX + 1148 + 30, 760);
+            cardCuenta.Left = startX;
+            btnEditar.Left = cardEscolar.Right - btnEditar.Width;
+            btnGuardar.Left = btnEditar.Left - btnGuardar.Width - 12;
+            btnCancelar.Left = cardEscolar.Right - btnCancelar.Width;
+            panel.AutoScrollMinSize = new Size(startX + 1148 + 30, 700);
         };
 
         return panel;
@@ -350,28 +311,18 @@ public partial class PerfilForm : Form
         btnEditar.Visible = false;
         btnGuardar.Visible = true;
         btnCancelar.Visible = true;
-        btnCambiarFoto.Visible = true;
     }
 
     private void GuardarEdicion()
     {
         var perfil = PerfilUsuarioStore.Obtener();
         perfil.NombreCompleto = txtNombre.Text.Trim();
-        perfil.Curp = txtCurp.Text.Trim();
-        perfil.FechaNacimiento = txtFechaNacimiento.Text.Trim();
-        perfil.Genero = txtGenero.Text.Trim();
         perfil.Telefono = txtTelefono.Text.Trim();
         perfil.Correo = txtCorreo.Text.Trim();
         perfil.ControlNumber = txtControl.Text.Trim();
         perfil.Rol = txtEstatus.Text.Trim();
         perfil.Semestre = txtSemestre.Text.Trim();
-        perfil.Carrera = txtCarrera.Text.Trim();
         perfil.Grupo = txtGrupo.Text.Trim();
-        perfil.Calle = txtCalle.Text.Trim();
-        perfil.Colonia = txtColonia.Text.Trim();
-        perfil.CodigoPostal = txtCodigoPostal.Text.Trim();
-        perfil.Municipio = txtMunicipio.Text.Trim();
-        perfil.Estado = txtEstado.Text.Trim();
         PerfilUsuarioStore.Guardar(perfil);
         FinalizarEdicion();
     }
@@ -391,7 +342,6 @@ public partial class PerfilForm : Form
         btnEditar.Visible = true;
         btnGuardar.Visible = false;
         btnCancelar.Visible = false;
-        btnCambiarFoto.Visible = false;
     }
 
     private void SetReadOnlyCampos(bool readOnly)
@@ -409,9 +359,8 @@ public partial class PerfilForm : Form
     {
         return new[]
         {
-            txtNombre, txtCurp, txtFechaNacimiento, txtGenero, txtTelefono, txtCorreo,
-            txtControl, txtEstatus, txtSemestre, txtCarrera, txtGrupo,
-            txtCalle, txtColonia, txtCodigoPostal, txtMunicipio, txtEstado
+            txtNombre, txtTelefono, txtCorreo,
+            txtControl, txtEstatus, txtSemestre, txtGrupo
         };
     }
 
@@ -419,50 +368,17 @@ public partial class PerfilForm : Form
     {
         var perfil = PerfilUsuarioStore.Obtener();
         txtNombre.Text = perfil.NombreCompleto;
-        txtCurp.Text = perfil.Curp;
-        txtFechaNacimiento.Text = perfil.FechaNacimiento;
-        txtGenero.Text = perfil.Genero;
         txtTelefono.Text = perfil.Telefono;
         txtCorreo.Text = perfil.Correo;
         txtControl.Text = perfil.ControlNumber;
+        txtIdAlumno.Text = perfil.IdAlumno;
+        txtUsuario.Text = string.IsNullOrWhiteSpace(perfil.Usuario) ? SesionActual.NombreUsuario : perfil.Usuario;
         txtEstatus.Text = perfil.Rol;
         txtSemestre.Text = perfil.Semestre;
-        txtCarrera.Text = perfil.Carrera;
         txtGrupo.Text = perfil.Grupo;
-        txtCalle.Text = perfil.Calle;
-        txtColonia.Text = perfil.Colonia;
-        txtCodigoPostal.Text = perfil.CodigoPostal;
-        txtMunicipio.Text = perfil.Municipio;
+        txtNumeroAsiento.Text = perfil.NumeroAsiento;
         txtEstado.Text = perfil.Estado;
+        txtFechaRegistro.Text = perfil.FechaRegistro;
         SetReadOnlyCampos(true);
-        CargarFoto(picFoto, perfil.RutaFotoPerfil);
-    }
-
-    private void CambiarFoto()
-    {
-        using var dialog = new OpenFileDialog
-        {
-            Title = "Seleccionar foto de perfil",
-            Filter = "Imagenes|*.jpg;*.jpeg;*.png;*.bmp;*.webp"
-        };
-        if (dialog.ShowDialog(this) != DialogResult.OK)
-            return;
-
-        var perfil = PerfilUsuarioStore.Obtener();
-        perfil.RutaFotoPerfil = dialog.FileName;
-        PerfilUsuarioStore.Guardar(perfil);
-        CargarFoto(picFoto, perfil.RutaFotoPerfil);
-    }
-
-    private static void CargarFoto(PictureBox pictureBox, string ruta)
-    {
-        if (!string.IsNullOrWhiteSpace(ruta) && File.Exists(ruta))
-        {
-            using var img = Image.FromFile(ruta);
-            pictureBox.Image = new Bitmap(img);
-            return;
-        }
-
-        pictureBox.Image = null;
     }
 }

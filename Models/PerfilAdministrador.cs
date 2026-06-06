@@ -5,12 +5,16 @@ namespace Proyecto_GALAB.Models;
 /// </summary>
 public class PerfilAdministrador
 {
+    public string IdAdministrador { get; set; } = string.Empty;
     public string NombreCompleto { get; set; } = "Administrador";
     public string Curp { get; set; } = string.Empty;
     public string FechaNacimiento { get; set; } = string.Empty;
     public string Genero { get; set; } = string.Empty;
     public string Telefono { get; set; } = string.Empty;
     public string Correo { get; set; } = "admin@itsmg.edu.mx";
+    public string Usuario { get; set; } = string.Empty;
+    public string Rol { get; set; } = string.Empty;
+    public string FechaRegistro { get; set; } = string.Empty;
     public string Calle { get; set; } = string.Empty;
     public string Colonia { get; set; } = string.Empty;
     public string CodigoPostal { get; set; } = string.Empty;

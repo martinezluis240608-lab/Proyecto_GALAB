@@ -47,6 +47,11 @@ internal static class IncidenciaListadoStore
             using var conexion = DatabaseService.GetConnection();
             conexion.Open();
 
+            bool filtrarPorAlumno = !SesionActual.EsAdministrador;
+            string? idAlumnoSesion = filtrarPorAlumno ? ObtenerIdAlumno() : null;
+            if (filtrarPorAlumno && string.IsNullOrWhiteSpace(idAlumnoSesion))
+                return ObtenerItemsMemoriaSegunSesion();
+
             const string sql = """
                 SELECT i.id_incidencia,
                        i.titulo,
@@ -60,10 +65,13 @@ internal static class IncidenciaListadoStore
                 FROM incidencias i
                 LEFT JOIN alumnos       a ON a.id_alumno = i.id_alumno
                 LEFT JOIN equipamientos e ON e.id_serie  = i.id_serie
+                WHERE (@filtrar_alumno = FALSE OR i.id_alumno = @id_alumno)
                 ORDER BY i.fecha_reporte DESC, i.id_incidencia DESC;
                 """;
 
             using var cmd = new NpgsqlCommand(sql, conexion);
+            cmd.Parameters.AddWithValue("filtrar_alumno", filtrarPorAlumno);
+            cmd.Parameters.AddWithValue("id_alumno", (object?)idAlumnoSesion ?? DBNull.Value);
             using var reader = cmd.ExecuteReader();
 
             var lista = new List<IncidenciaListadoItem>();
@@ -92,7 +100,7 @@ internal static class IncidenciaListadoStore
         }
         catch
         {
-            return Items.ToList();
+            return ObtenerItemsMemoriaSegunSesion();
         }
     }
 
@@ -242,16 +250,24 @@ internal static class IncidenciaListadoStore
             using var conexion = DatabaseService.GetConnection();
             conexion.Open();
 
+            bool filtrarPorAlumno = !SesionActual.EsAdministrador;
+            string? idAlumnoSesion = filtrarPorAlumno ? ObtenerIdAlumno() : null;
+            if (filtrarPorAlumno && string.IsNullOrWhiteSpace(idAlumnoSesion))
+                return CrearResumenDesdeItems(ObtenerItemsMemoriaSegunSesion());
+
             const string sql = """
                 SELECT
                     COUNT(*)                                           AS total,
                     COUNT(*) FILTER (WHERE estado = 'pendiente')      AS activas,
                     COUNT(*) FILTER (WHERE estado = 'en_proceso')     AS en_proceso,
                     COUNT(*) FILTER (WHERE estado = 'resuelto')       AS resueltas
-                FROM incidencias;
+                FROM incidencias
+                WHERE (@filtrar_alumno = FALSE OR id_alumno = @id_alumno);
                 """;
 
             using var cmd = new NpgsqlCommand(sql, conexion);
+            cmd.Parameters.AddWithValue("filtrar_alumno", filtrarPorAlumno);
+            cmd.Parameters.AddWithValue("id_alumno", (object?)idAlumnoSesion ?? DBNull.Value);
             using var reader = cmd.ExecuteReader();
 
             if (reader.Read())
@@ -268,7 +284,11 @@ internal static class IncidenciaListadoStore
         catch { }
 
         // Fallback calculado desde la lista en memoria
-        var items = Items.ToList();
+        return CrearResumenDesdeItems(ObtenerItemsMemoriaSegunSesion());
+    }
+
+    private static IncidenciaResumenEstadisticas CrearResumenDesdeItems(IReadOnlyList<IncidenciaListadoItem> items)
+    {
         return new IncidenciaResumenEstadisticas
         {
             Total = items.Count,
@@ -290,6 +310,23 @@ internal static class IncidenciaListadoStore
     }
 
     /// <summary>Devuelve el id_alumno del alumno actualmente en sesión.</summary>
+    private static IReadOnlyList<IncidenciaListadoItem> ObtenerItemsMemoriaSegunSesion()
+    {
+        if (SesionActual.EsAdministrador)
+            return Items.ToList();
+
+        string usuario = SesionActual.NombreUsuario;
+        string nombre = PerfilUsuarioStore.Obtener().NombreCompleto;
+
+        return Items
+            .Where(i =>
+                (!string.IsNullOrWhiteSpace(nombre) &&
+                 i.QuienReporta.Equals(nombre, StringComparison.OrdinalIgnoreCase)) ||
+                (!string.IsNullOrWhiteSpace(usuario) &&
+                 i.QuienReporta.Equals(usuario, StringComparison.OrdinalIgnoreCase)))
+            .ToList();
+    }
+
     private static string? ObtenerIdAlumno()
     {
         string control = SesionActual.NombreUsuario;

@@ -34,7 +34,7 @@ internal static class PerfilAdministradorStore
             // La tabla usa "usuario" como campo de login, id_administrador como PK propia
             const string sql = """
                 SELECT id_administrador, nombre, primer_apellido, segundo_apellido,
-                       correo, telefono, usuario, activo
+                       correo, telefono, usuario, rol, activo, fecha_registro
                 FROM administradores
                 WHERE usuario = @usuario
                 LIMIT 1;
@@ -55,9 +55,14 @@ internal static class PerfilAdministradorStore
 
                 return new PerfilAdministrador
                 {
+                    IdAdministrador = reader.IsDBNull(0) ? "" : reader.GetString(0),
                     NombreCompleto = nombreCompleto,
                     Correo = reader.IsDBNull(4) ? "" : reader.GetString(4),
                     Telefono = reader.IsDBNull(5) ? "" : reader.GetString(5),
+                    Usuario = reader.IsDBNull(6) ? "" : reader.GetString(6),
+                    Rol = reader.IsDBNull(7) ? "" : reader.GetString(7),
+                    Estado = (!reader.IsDBNull(8) && reader.GetBoolean(8)) ? "Activo" : "Inactivo",
+                    FechaRegistro = reader.IsDBNull(9) ? "" : reader.GetDateTime(9).ToString("dd/MM/yyyy HH:mm"),
                     // Campos que no existen en la tabla original → vacíos
                     Curp = "",
                     FechaNacimiento = "",
@@ -66,7 +71,6 @@ internal static class PerfilAdministradorStore
                     Colonia = "",
                     CodigoPostal = "",
                     Municipio = "",
-                    Estado = "",
                     RutaFotoPerfil = ""
                 };
             }
@@ -84,6 +88,11 @@ internal static class PerfilAdministradorStore
                                 ? usuarioSesion : _perfilMemoria.NombreCompleto,
             Correo = _perfilMemoria.Correo,
             Telefono = _perfilMemoria.Telefono,
+            IdAdministrador = _perfilMemoria.IdAdministrador,
+            Usuario = _perfilMemoria.Usuario,
+            Rol = _perfilMemoria.Rol,
+            Estado = _perfilMemoria.Estado,
+            FechaRegistro = _perfilMemoria.FechaRegistro,
             RutaFotoPerfil = _perfilMemoria.RutaFotoPerfil
         };
     }

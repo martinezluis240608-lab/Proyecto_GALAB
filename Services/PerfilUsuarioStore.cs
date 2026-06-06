@@ -35,7 +35,8 @@ internal static class PerfilUsuarioStore
             // o por usuario (campo alternativo de login)
             const string sql = """
                 SELECT id_alumno, numero_control, nombre, primer_apellido, segundo_apellido,
-                       semestre, grupo, correo, telefono, rol, activo
+                       semestre, grupo, correo, telefono, rol, activo,
+                       numero_asiento, fecha_registro, usuario
                 FROM alumnos
                 WHERE numero_control::text = @control
                    OR usuario = @control
@@ -59,6 +60,7 @@ internal static class PerfilUsuarioStore
 
                 return new PerfilUsuario
                 {
+                    IdAlumno = reader.IsDBNull(0) ? "" : reader.GetString(0),
                     ControlNumber = reader.IsDBNull(1) ? control : reader.GetInt64(1).ToString(),
                     NombreCompleto = nombreCompleto,
                     Correo = reader.IsDBNull(7) ? "" : reader.GetString(7),
@@ -66,6 +68,9 @@ internal static class PerfilUsuarioStore
                     Rol = reader.IsDBNull(9) ? "Estudiante" : reader.GetString(9),
                     Semestre = reader.IsDBNull(5) ? "" : reader.GetString(5),
                     Grupo = reader.IsDBNull(6) ? "" : reader.GetString(6),
+                    NumeroAsiento = reader.IsDBNull(11) ? "" : reader.GetInt32(11).ToString(),
+                    FechaRegistro = reader.IsDBNull(12) ? "" : reader.GetDateTime(12).ToString("dd/MM/yyyy HH:mm"),
+                    Usuario = reader.IsDBNull(13) ? "" : reader.GetString(13),
                     // Campos no presentes en la BD original → vacíos
                     Curp = "",
                     FechaNacimiento = "",
@@ -89,6 +94,7 @@ internal static class PerfilUsuarioStore
         return new PerfilUsuario
         {
             ControlNumber = control,
+            IdAlumno = _perfilMemoria.IdAlumno,
             NombreCompleto = string.IsNullOrWhiteSpace(_perfilMemoria.NombreCompleto) ||
                              _perfilMemoria.NombreCompleto == "Nombre del usuario"
                                 ? control : _perfilMemoria.NombreCompleto,
@@ -97,6 +103,10 @@ internal static class PerfilUsuarioStore
             Semestre = _perfilMemoria.Semestre,
             Grupo = _perfilMemoria.Grupo,
             Telefono = _perfilMemoria.Telefono,
+            Usuario = _perfilMemoria.Usuario,
+            NumeroAsiento = _perfilMemoria.NumeroAsiento,
+            Estado = _perfilMemoria.Estado,
+            FechaRegistro = _perfilMemoria.FechaRegistro,
             RutaFotoPerfil = _perfilMemoria.RutaFotoPerfil
         };
     }

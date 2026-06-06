@@ -2,6 +2,7 @@ namespace Proyecto_GALAB.Models;
 
 public class PerfilUsuario
 {
+    public string IdAlumno { get; set; } = string.Empty;
     public string NombreCompleto { get; set; } = "Nombre del usuario";
     public string Correo { get; set; } = "correo@institucion.edu.mx";
     public string Rol { get; set; } = "Rol del usuario";
@@ -14,8 +15,11 @@ public class PerfilUsuario
     public string Genero { get; set; } = string.Empty;
     public string Telefono { get; set; } = string.Empty;
     public string ControlNumber { get; set; } = string.Empty;
+    public string Usuario { get; set; } = string.Empty;
+    public string NumeroAsiento { get; set; } = string.Empty;
     public string Semestre { get; set; } = string.Empty;
     public string Grupo { get; set; } = string.Empty;
+    public string FechaRegistro { get; set; } = string.Empty;
     public string Calle { get; set; } = string.Empty;
     public string Colonia { get; set; } = string.Empty;
     public string CodigoPostal { get; set; } = string.Empty;

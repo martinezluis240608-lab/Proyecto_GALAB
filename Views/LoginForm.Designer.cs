@@ -331,7 +331,7 @@ partial class LoginForm
 
         try
         {
-            var img = Properties.Resources.logo_GALAB_1;
+            var img = Properties.Resources.g88;
             if (!TienePixelesTransparentes(img))
             {
                 img = Properties.Resources.g88;
