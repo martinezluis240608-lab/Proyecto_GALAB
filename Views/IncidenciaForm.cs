@@ -13,7 +13,9 @@ public partial class IncidenciaForm : Form, IIncidenciaView
         get
         {
             if (Services.SesionActual.EsAdministrador)
+            {
                 return Services.PerfilAdministradorStore.Obtener().NombreCompleto;
+            }
             return Services.PerfilUsuarioStore.Obtener().NombreCompleto;
         }
     }
@@ -34,12 +36,19 @@ public partial class IncidenciaForm : Form, IIncidenciaView
         get => lblEvidencia.Text;
         set => lblEvidencia.Text = value;
     }
+    public string NumeroSerie    => txtEtiquetas.Text;
 
     public event EventHandler? OnEnviarReporte;
     public event EventHandler? OnAdjuntar;
 
+    public void MostrarExito(string mensaje) =>
+        NotificacionExitoForm.Mostrar(this, "¡Éxito!", mensaje);
+
+    public void MostrarError(string mensaje) =>
+        NotificacionForm.Mostrar(this, "Atención", mensaje, "Verifique los datos");
+
     public void MostrarMensaje(string mensaje) =>
-        MessageBox.Show(mensaje, "GALAB", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        NotificacionExitoForm.Mostrar(this, "Información", mensaje);
 
     public void LimpiarFormulario()
     {

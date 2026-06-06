@@ -13,4 +13,12 @@ public class IncidenciaListadoItem
     public DateTime Fecha { get; set; } = DateTime.Now;
     public string Descripcion { get; set; } = string.Empty;
     public string Equipo { get; set; } = string.Empty;
+    public string DescripcionSolucion { get; set; } = string.Empty;
+    public string IdReal { get; set; } = string.Empty;
+    public string NumeroControl { get; set; } = "N/A";
+    public string Semestre { get; set; } = "N/A";
+    public string Grupo { get; set; } = "N/A";
+    public string Correo { get; set; } = "N/A";
+    public string Telefono { get; set; } = "N/A";
+    public string IdAlumno { get; set; } = string.Empty;
 }

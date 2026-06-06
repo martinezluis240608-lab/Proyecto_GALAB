@@ -26,6 +26,11 @@ internal static class UiAssets
         return CargarImagen("logo-institucion.jpg") ?? CargarImagenDesdeViews("descargar.jpg");
     }
 
+    public static Image? CargarLogoGalab()
+    {
+        return CargarImagen("logo-galab.png");
+    }
+
     public static Image? CargarImagen(string nombreArchivo)
     {
         string[] rutas =
@@ -65,16 +70,25 @@ internal static class UiAssets
     public static void CerrarSesion(Form actual)
     {
         Services.SesionActual.Cerrar();
-        var login = Application.OpenForms.OfType<LoginForm>().FirstOrDefault() ?? new LoginForm();
+        var login = Application.OpenForms.OfType<LoginForm>().FirstOrDefault();
+        if (login == null || login.IsDisposed)
+        {
+            login = new LoginForm();
+        }
         PrepararPantallaCompleta(login);
         login.Show();
         login.BringToFront();
 
-        foreach (Form form in Application.OpenForms.Cast<Form>().ToList())
+        login.BeginInvoke(new Action(() =>
         {
-            if (form != login)
-                form.Close();
-        }
+            foreach (Form form in Application.OpenForms.Cast<Form>().ToList())
+            {
+                if (form != login && !form.IsDisposed)
+                {
+                    try { form.Close(); } catch { }
+                }
+            }
+        }));
     }
 
     public static void PrepararPantallaCompleta(Form form)
@@ -159,6 +173,141 @@ internal static class UiAssets
             string rutaCompleta = Path.GetFullPath(ruta);
             if (File.Exists(rutaCompleta))
                 return Image.FromFile(rutaCompleta);
+        }
+
+        return null;
+    }
+
+    public static Image? CargarFotoPerfil(string control)
+    {
+        if (string.IsNullOrWhiteSpace(control))
+            return null;
+
+        string nombreArchivo = $"perfil_{control}.png";
+        string[] rutas =
+        {
+            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "imagenes", nombreArchivo),
+            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "imagenes", nombreArchivo)
+        };
+
+        return CargarPrimeraExistenteSinBloqueo(rutas);
+    }
+
+    public static Image CrearAvatarConIniciales(string nombreCompleto, int ancho, int alto)
+    {
+        var bmp = new Bitmap(ancho, alto);
+        using (var g = Graphics.FromImage(bmp))
+        {
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.Clear(Color.Transparent);
+
+            string iniciales = "U";
+            if (!string.IsNullOrWhiteSpace(nombreCompleto))
+            {
+                var partes = nombreCompleto.Trim().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                if (partes.Length == 1 && partes[0].Length > 0)
+                {
+                    iniciales = partes[0].Substring(0, 1).ToUpper();
+                }
+                else if (partes.Length >= 2)
+                {
+                    string p1 = partes[0].Length > 0 ? partes[0].Substring(0, 1) : "";
+                    string p2 = partes[partes.Length - 1].Length > 0 ? partes[partes.Length - 1].Substring(0, 1) : "";
+                    iniciales = (p1 + p2).ToUpper();
+                    if (string.IsNullOrEmpty(iniciales)) iniciales = "U";
+                }
+            }
+
+            int hash = Math.Abs(nombreCompleto.GetHashCode());
+            Color[] colores = {
+                Color.FromArgb(0, 82, 170),   // AzulPrincipal
+                Color.FromArgb(8, 32, 82),    // AzulOscuro
+                Color.FromArgb(34, 166, 88),   // Green
+                Color.FromArgb(227, 115, 0),   // Orange
+                Color.FromArgb(161, 25, 209),  // Purple
+                Color.FromArgb(217, 48, 37)    // Red
+            };
+            Color colorFondo = colores[hash % colores.Length];
+
+            using (var brush = new SolidBrush(colorFondo))
+            {
+                g.FillEllipse(brush, 0, 0, ancho - 1, alto - 1);
+            }
+
+            float fontSize = (float)(ancho * 0.35);
+            using (var font = new Font("Segoe UI", fontSize, FontStyle.Bold))
+            using (var brushText = new SolidBrush(Color.White))
+            {
+                var sf = new StringFormat
+                {
+                    Alignment = StringAlignment.Center,
+                    LineAlignment = StringAlignment.Center
+                };
+                g.DrawString(iniciales, font, brushText, new RectangleF(0, 0, ancho, alto), sf);
+            }
+        }
+        return bmp;
+    }
+
+    public static void GuardarFotoPerfil(string control, string rutaTemporal)
+    {
+        if (string.IsNullOrWhiteSpace(control) || string.IsNullOrWhiteSpace(rutaTemporal) || !File.Exists(rutaTemporal))
+            return;
+
+        string nombreArchivo = $"perfil_{control}.png";
+        
+        string dirBin = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "imagenes");
+        if (!Directory.Exists(dirBin))
+        {
+            try { Directory.CreateDirectory(dirBin); } catch { }
+        }
+
+        string rutaDestinoBin = Path.Combine(dirBin, nombreArchivo);
+
+        try
+        {
+            File.Copy(rutaTemporal, rutaDestinoBin, true);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine("Error copying profile photo to bin: " + ex.Message);
+        }
+
+        string dirSource = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "imagenes");
+        if (Directory.Exists(dirSource))
+        {
+            string rutaDestinoSrc = Path.Combine(dirSource, nombreArchivo);
+            try
+            {
+                File.Copy(rutaTemporal, rutaDestinoSrc, true);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Error copying profile photo to source: " + ex.Message);
+            }
+        }
+    }
+
+    private static Image? CargarPrimeraExistenteSinBloqueo(IEnumerable<string> rutas)
+    {
+        foreach (string ruta in rutas)
+        {
+            string rutaCompleta = Path.GetFullPath(ruta);
+            if (File.Exists(rutaCompleta))
+            {
+                try
+                {
+                    using var stream = new FileStream(rutaCompleta, FileMode.Open, FileAccess.Read);
+                    var ms = new MemoryStream();
+                    stream.CopyTo(ms);
+                    ms.Position = 0;
+                    return Image.FromStream(ms);
+                }
+                catch
+                {
+                    // Ignorar y probar la siguiente ruta
+                }
+            }
         }
 
         return null;

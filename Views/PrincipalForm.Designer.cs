@@ -68,18 +68,11 @@ partial class PrincipalForm
         picLogoGalab = new PictureBox
         {
             Left      = 10, Top = 8,
-            Width     = 100, Height = 75,
+            Width     = 150, Height = 75,
             SizeMode  = PictureBoxSizeMode.Zoom,
             BackColor = Color.Transparent,
-            Anchor    = AnchorStyles.Top | AnchorStyles.Left
-        };
-        picLogoGalab.Paint += (s, e) =>
-        {
-            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-            // Fondo azul claro del logo
-            e.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(200, 230, 245)), 0, 0, picLogoGalab.Width, picLogoGalab.Height);
-            using var f = new Font("Segoe UI", 9F, FontStyle.Bold);
-            e.Graphics.DrawString("⚙ GALAB", f, new SolidBrush(Color.FromArgb(30,30,80)), 10, 28);
+            Anchor    = AnchorStyles.Top | AnchorStyles.Left,
+            Image     = UiAssets.CargarLogoGalab()
         };
 
         picLogoInstituto = new PictureBox
@@ -109,7 +102,7 @@ partial class PrincipalForm
             Top       = 20,
             Font      = new Font("Segoe UI", 9F, FontStyle.Bold),
             ForeColor = Color.FromArgb(30, 30, 80),
-            AutoSize  = false, Width = 200, Height = 50,
+            AutoSize  = true,
             TextAlign = ContentAlignment.MiddleLeft,
             Anchor    = AnchorStyles.Top | AnchorStyles.Right
         };
@@ -171,6 +164,7 @@ partial class PrincipalForm
 
     private void AjustarLayout()
     {
+        if (WindowState == FormWindowState.Minimized) return;
         int cw = ClientSize.Width - 20;
         int ch = ClientSize.Height - 28;
 
@@ -181,7 +175,7 @@ partial class PrincipalForm
         // Header
         panelHeader.Width = cw - 2;
         picLogoInstituto.Left = cw - 90;
-        lblInstituto.Left     = cw - 300;
+        lblInstituto.Left     = picLogoInstituto.Left - lblInstituto.Width - 10;
 
         // Escalado dinámico de botones de menú: tres arriba y uno abajo.
         int bw = Math.Min(370, Math.Max(250, cw / 3));
@@ -212,7 +206,7 @@ partial class PrincipalForm
         lblBienvenido.Left  = 0;
         lblBienvenido.Top   = 108;
         lblBienvenido.Width = cw - 2;
-        lblBienvenido.Height = 58;
+        lblBienvenido.Height = 80;
         lblBienvenido.Font = new Font("Segoe UI", 36F, FontStyle.Bold);
 
         lblDescripcion.Left = 20;

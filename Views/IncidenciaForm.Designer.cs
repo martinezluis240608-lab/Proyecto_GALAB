@@ -10,8 +10,7 @@ partial class IncidenciaForm
     private Panel contenido;
     private Label lblInstituto;
     private PictureBox picLogoInstituto;
-    private Button btnMenu;
-    private TextBox txtTitulo;
+    private Label txtTitulo;
     private TextBox txtQuienReporta;
     private ComboBox cmbTipo;
     private TextBox txtNombreEquipo;
@@ -58,21 +57,14 @@ partial class IncidenciaForm
             BackColor = UiAssets.AzulClaro
         };
 
-        btnMenu = new Button
+        var picLogoGalab = new PictureBox
         {
-            Text = "☰",
-            Font = new Font("Segoe UI", 22F, FontStyle.Bold),
-            ForeColor = Color.Black,
-            BackColor = Color.White,
-            FlatStyle = FlatStyle.Flat,
-            Cursor = Cursors.Hand,
-            Location = new Point(320, 32),
-            Size = new Size(54, 50),
-            TextAlign = ContentAlignment.MiddleCenter
+            Image = UiAssets.CargarLogoGalab(),
+            SizeMode = PictureBoxSizeMode.Zoom,
+            Location = new Point(24, 20),
+            Size = new Size(180, 76),
+            BackColor = Color.Transparent
         };
-        btnMenu.FlatAppearance.BorderColor = Color.FromArgb(220, 226, 235);
-        btnMenu.FlatAppearance.BorderSize = 1;
-        UiAssets.RedondearControl(btnMenu, 8);
 
         picLogoInstituto = new PictureBox
         {
@@ -90,53 +82,7 @@ partial class IncidenciaForm
             ForeColor = UiAssets.AzulOscuro,
             TextAlign = ContentAlignment.MiddleLeft,
             Anchor = AnchorStyles.Top | AnchorStyles.Right,
-            Size = new Size(285, 76)
-        };
-
-        var campana = new Button
-        {
-            Text = "♢",
-            Font = new Font("Segoe UI Symbol", 24F, FontStyle.Bold),
-            BackColor = Color.White,
-            FlatStyle = FlatStyle.Flat,
-            Location = new Point(0, 24),
-            Size = new Size(64, 64),
-            Anchor = AnchorStyles.Top | AnchorStyles.Right
-        };
-        campana.FlatAppearance.BorderColor = Color.FromArgb(230, 235, 244);
-        UiAssets.RedondearControl(campana, 18);
-
-        var notificacion = new Label
-        {
-            Text = "3",
-            Font = new Font("Segoe UI", 9F, FontStyle.Bold),
-            ForeColor = Color.White,
-            BackColor = UiAssets.AzulPrincipal,
-            TextAlign = ContentAlignment.MiddleCenter,
-            Size = new Size(24, 24),
-            Anchor = AnchorStyles.Top | AnchorStyles.Right
-        };
-        UiAssets.RedondearControl(notificacion, 12);
-
-        var usuarioIcono = new Label
-        {
-            Text = "○",
-            Font = new Font("Segoe UI Symbol", 38F, FontStyle.Regular),
-            ForeColor = Color.Black,
-            BackColor = Color.Transparent,
-            TextAlign = ContentAlignment.MiddleCenter,
-            Size = new Size(56, 64),
-            Anchor = AnchorStyles.Top | AnchorStyles.Right
-        };
-
-        var usuario = new Label
-        {
-            Text = "Usuario",
-            Font = new Font("Segoe UI", 12F, FontStyle.Bold),
-            ForeColor = Color.Black,
-            Size = new Size(105, 34),
-            TextAlign = ContentAlignment.MiddleLeft,
-            Anchor = AnchorStyles.Top | AnchorStyles.Right
+            AutoSize = true
         };
 
         panel.Resize += (s, e) =>
@@ -145,18 +91,11 @@ partial class IncidenciaForm
             picLogoInstituto.Top = 22;
             lblInstituto.Left = picLogoInstituto.Right + 18;
             lblInstituto.Top = 28;
-            campana.Left = panel.Width - 248;
-            notificacion.Left = campana.Right - 22;
-            notificacion.Top = campana.Top + 4;
-            usuarioIcono.Left = panel.Width - 138;
-            usuarioIcono.Top = 28;
-            usuario.Left = panel.Width - 82;
-            usuario.Top = 48;
         };
 
         panel.Controls.AddRange(new Control[]
         {
-            btnMenu, picLogoInstituto, lblInstituto, campana, notificacion, usuarioIcono, usuario
+            picLogoGalab, picLogoInstituto, lblInstituto
         });
         return panel;
     }
@@ -170,13 +109,14 @@ partial class IncidenciaForm
             AutoScroll = true
         };
 
-        txtTitulo = new TextBox
+        txtTitulo = new Label
         {
             Text = "REGISTRAR INCIDENCIA",
             Font = new Font("Segoe UI", 19F, FontStyle.Bold),
             ForeColor = UiAssets.AzulPrincipal,
             Location = new Point(340, 24),
-            Size = new Size(430, 42)
+            Size = new Size(430, 42),
+            TextAlign = ContentAlignment.MiddleLeft
         };
 
         var subrayado = new Panel
@@ -187,10 +127,10 @@ partial class IncidenciaForm
         };
         UiAssets.RedondearControl(subrayado, 3);
 
-        var cardGeneral = CrearTarjeta(340, 96, 690, 356);
+        var cardGeneral = CrearTarjeta(340, 96, 690, 480);
         CrearInfoGeneral(cardGeneral);
 
-        var cardAdicional = CrearTarjeta(340, 470, 690, 282);
+        var cardAdicional = CrearTarjeta(340, 594, 690, 282);
         CrearInfoAdicional(cardAdicional);
 
         btnCancelar = new Button
@@ -282,11 +222,15 @@ partial class IncidenciaForm
         txtQuienReporta = CrearCaja("Ingresa un título breve y descriptivo", 24, 104, 642, 42);
         card.Controls.Add(txtQuienReporta);
 
-        card.Controls.Add(CrearEtiqueta("Tipo de incidencia *", 24, 168));
-        cmbTipo = CrearCombo(24, 196, 642, new[] { "Selecciona un tipo de incidencia", "Hardware y software", "Infraestructura" });
+        card.Controls.Add(CrearEtiqueta("Nombre del equipo / Área afectada *", 24, 168));
+        txtNombreEquipo = CrearCaja("Ej: PC-LAB1-05 o Mesa 3", 24, 196, 642, 42);
+        card.Controls.Add(txtNombreEquipo);
+
+        card.Controls.Add(CrearEtiqueta("Tipo de incidencia *", 24, 252));
+        cmbTipo = CrearCombo(24, 280, 642, new[] { "Selecciona un tipo de incidencia", "Hardware y software", "Infraestructura" });
         card.Controls.Add(cmbTipo);
 
-        card.Controls.Add(CrearEtiqueta("Descripción *", 24, 248));
+        card.Controls.Add(CrearEtiqueta("Descripción *", 24, 336));
         txtDescripcion = new TextBox
         {
             PlaceholderText = "Describe la incidencia con el mayor detalle posible...",
@@ -294,7 +238,7 @@ partial class IncidenciaForm
             ScrollBars = ScrollBars.Vertical,
             BorderStyle = BorderStyle.FixedSingle,
             Font = new Font("Segoe UI", 10.5F),
-            Location = new Point(24, 276),
+            Location = new Point(24, 364),
             Size = new Size(642, 78)
         };
         card.Controls.Add(txtDescripcion);
@@ -304,15 +248,14 @@ partial class IncidenciaForm
             Text = "Mínimo 20 caracteres",
             Font = new Font("Segoe UI", 9F),
             ForeColor = Color.FromArgb(82, 91, 112),
-            Location = new Point(24, 356),
+            Location = new Point(24, 444),
             Size = new Size(180, 22)
         });
 
-        txtNombreEquipo = new TextBox { Text = "Pendiente", Visible = false };
         dtpFecha = new DateTimePicker { Value = DateTime.Now, Visible = false };
         nudHora = new NumericUpDown { Value = DateTime.Now.Hour, Maximum = 23, Visible = false };
         nudMinuto = new NumericUpDown { Value = DateTime.Now.Minute, Maximum = 59, Visible = false };
-        card.Controls.AddRange(new Control[] { txtNombreEquipo, dtpFecha, nudHora, nudMinuto });
+        card.Controls.AddRange(new Control[] { dtpFecha, nudHora, nudMinuto });
     }
 
     private void CrearInfoAdicional(Panel card)
@@ -354,17 +297,17 @@ partial class IncidenciaForm
         };
         card.Controls.Add(lblEvidencia);
 
-        card.Controls.Add(CrearEtiqueta("Etiquetas (opcional)", 24, 210));
-        txtEtiquetas = CrearCaja("Ej: red, pantalla, hardware, etc.", 24, 238, 642, 42);
+        card.Controls.Add(CrearEtiqueta("Número de serie", 24, 210));
+        txtEtiquetas = CrearCaja("Ej: SN-123456789", 24, 238, 642, 42);
         card.Controls.Add(txtEtiquetas);
 
         card.Controls.Add(new Label
         {
-            Text = "Separa las etiquetas con comas",
+            Text = "Ingresa el número de serie del equipo afectado si lo conoces",
             Font = new Font("Segoe UI", 9F),
             ForeColor = Color.FromArgb(82, 91, 112),
             Location = new Point(24, 284),
-            Size = new Size(230, 22)
+            Size = new Size(350, 22)
         });
     }
 
@@ -372,6 +315,7 @@ partial class IncidenciaForm
     {
         int innerW = card.Width - 48;
         txtQuienReporta.Width = innerW;
+        txtNombreEquipo.Width = innerW;
         cmbTipo.Width = innerW;
         txtDescripcion.Width = innerW;
     }

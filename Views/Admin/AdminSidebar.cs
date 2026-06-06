@@ -49,7 +49,11 @@ internal static class AdminSidebar
             SesionActual.Cerrar();
             UiAssets.CerrarSesion(dueño);
         };
-        panel.Resize += (_, _) => cerrar.Top = panel.Height - 78;
+        panel.Resize += (_, _) =>
+        {
+            if (panel.FindForm()?.WindowState == FormWindowState.Minimized) return;
+            cerrar.Top = panel.Height - 78;
+        };
         panel.Controls.Add(cerrar);
         UiAssets.RedondearControl(cerrar, 8);
 
@@ -65,30 +69,25 @@ internal static class AdminSidebar
             BackColor = UiAssets.AzulClaro
         };
 
+        var picLogoGalab = new PictureBox
+        {
+            Image = UiAssets.CargarLogoGalab(),
+            SizeMode = PictureBoxSizeMode.Zoom,
+            Location = new Point(24, 16),
+            Size = new Size(220, 92),
+            BackColor = Color.Transparent
+        };
+
         var titulo = new Label
         {
-            Text = "GALAB — Administración",
-            Font = new Font("Segoe UI", 24F, FontStyle.Bold),
+            Text = "— Administración",
+            Font = new Font("Segoe UI", 20F, FontStyle.Bold),
             ForeColor = UiAssets.AzulOscuro,
-            Location = new Point(30, 34),
+            Location = new Point(254, 46),
             AutoSize = true
         };
 
-        var usuario = new Label
-        {
-            Text = $"Usuario: {SesionActual.NombreUsuario}",
-            Font = new Font("Segoe UI", 11F, FontStyle.Bold),
-            ForeColor = UiAssets.AzulPrincipal,
-            Anchor = AnchorStyles.Top | AnchorStyles.Right,
-            AutoSize = true
-        };
-        panel.Resize += (_, _) =>
-        {
-            usuario.Left = panel.Width - usuario.Width - 30;
-            usuario.Top = 48;
-        };
-
-        panel.Controls.AddRange(new Control[] { titulo, usuario });
+        panel.Controls.AddRange(new Control[] { picLogoGalab, titulo });
         return panel;
     }
 

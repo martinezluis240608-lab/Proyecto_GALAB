@@ -6,68 +6,94 @@ namespace Proyecto_GALAB.Views.Admin;
 public class AdminIncidenciaEditorForm : Form
 {
     private readonly IncidenciaListadoItem _item;
-    private TextBox txtTitulo = null!;
-    private ComboBox cmbTipo = null!;
+    private TextBox txtSolucion = null!;
     private ComboBox cmbEstado = null!;
 
     public AdminIncidenciaEditorForm(IncidenciaListadoItem item)
     {
         _item = item;
-        Text = "Editar incidencia";
+        Text = "Editar solución de incidencia";
         FormBorderStyle = FormBorderStyle.FixedDialog;
         StartPosition = FormStartPosition.CenterParent;
         MaximizeBox = false;
         MinimizeBox = false;
-        ClientSize = new Size(520, 280);
+        ClientSize = new Size(550, 480);
         BackColor = UiAssets.Fondo;
         Font = new Font("Segoe UI", 10F);
 
         Controls.Add(new Label
         {
-            Text = $"Editar {item.Folio}",
+            Text = $"Editar Incidencia: {item.Folio}",
             Font = new Font("Segoe UI", 14F, FontStyle.Bold),
             ForeColor = UiAssets.AzulPrincipal,
             Location = new Point(24, 16),
             AutoSize = true
         });
 
-        txtTitulo = new TextBox { Text = item.Titulo, Location = new Point(24, 72), Size = new Size(460, 32), BorderStyle = BorderStyle.FixedSingle };
-        cmbTipo = new ComboBox
+        // Título original (solo lectura)
+        var txtTituloOriginal = new TextBox
         {
-            DropDownStyle = ComboBoxStyle.DropDownList,
-            Location = new Point(24, 132),
-            Size = new Size(460, 32)
+            Text = item.Titulo,
+            Location = new Point(24, 75),
+            Size = new Size(500, 26),
+            BorderStyle = BorderStyle.FixedSingle,
+            ReadOnly = true,
+            BackColor = Color.FromArgb(240, 240, 240)
         };
-        cmbTipo.Items.AddRange(new[] { "Hardware y software", "Infraestructura" });
-        cmbTipo.SelectedItem = item.TipoIncidencia;
 
+        // Descripción original (solo lectura, multilínea)
+        var txtDescOriginal = new TextBox
+        {
+            Text = item.Descripcion,
+            Location = new Point(24, 135),
+            Size = new Size(500, 80),
+            BorderStyle = BorderStyle.FixedSingle,
+            Multiline = true,
+            ScrollBars = ScrollBars.Vertical,
+            ReadOnly = true,
+            BackColor = Color.FromArgb(240, 240, 240)
+        };
+
+        // Estado (editable)
         cmbEstado = new ComboBox
         {
             DropDownStyle = ComboBoxStyle.DropDownList,
-            Location = new Point(24, 192),
-            Size = new Size(460, 32)
+            Location = new Point(24, 250),
+            Size = new Size(500, 28)
         };
         cmbEstado.Items.AddRange(new[] { "Pendiente", "En proceso", "Resuelta" });
         cmbEstado.SelectedItem = item.Estado;
 
+        // Descripción de la solución (editable, multilínea)
+        txtSolucion = new TextBox
+        {
+            Text = item.DescripcionSolucion,
+            Location = new Point(24, 310),
+            Size = new Size(500, 100),
+            BorderStyle = BorderStyle.FixedSingle,
+            Multiline = true,
+            ScrollBars = ScrollBars.Vertical
+        };
+
         Controls.AddRange(new Control[]
         {
-            Etiqueta("Título", 48), txtTitulo,
-            Etiqueta("Tipo de incidencia", 108), cmbTipo,
-            Etiqueta("Estado", 168), cmbEstado
+            Etiqueta("Título del reporte", 55), txtTituloOriginal,
+            Etiqueta("Descripción del reporte", 115), txtDescOriginal,
+            Etiqueta("Estado", 230), cmbEstado,
+            Etiqueta("Descripción de solución (mensaje para el alumno)", 290), txtSolucion
         });
 
         var btnCancelar = new Button
         {
             Text = "Cancelar",
             DialogResult = DialogResult.Cancel,
-            Location = new Point(24, 232),
+            Location = new Point(24, 430),
             Size = new Size(120, 36)
         };
         var btnGuardar = new Button
         {
             Text = "Guardar",
-            Location = new Point(364, 232),
+            Location = new Point(404, 430),
             Size = new Size(120, 36),
             BackColor = UiAssets.AzulPrincipal,
             ForeColor = Color.White,
@@ -76,9 +102,8 @@ public class AdminIncidenciaEditorForm : Form
         btnGuardar.FlatAppearance.BorderSize = 0;
         btnGuardar.Click += (_, _) =>
         {
-            _item.Titulo = txtTitulo.Text.Trim();
-            _item.TipoIncidencia = cmbTipo.SelectedItem?.ToString() ?? _item.TipoIncidencia;
             _item.Estado = cmbEstado.SelectedItem?.ToString() ?? _item.Estado;
+            _item.DescripcionSolucion = txtSolucion.Text.Trim();
             IncidenciaListadoStore.Actualizar(_item);
             DialogResult = DialogResult.OK;
             Close();
