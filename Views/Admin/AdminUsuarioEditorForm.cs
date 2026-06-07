@@ -88,7 +88,7 @@ public class AdminUsuarioEditorForm : Form
 
         // Column 2 (Right - Account Info)
         var lblRol = Titulo("Rol *", 376, 56);
-        var pnlRol = CrearCampoCombo(new[] { "Administrador", "Usuario" }, existente?.Rol ?? "Usuario", out cmbRol, 376, 80, 320);
+        var pnlRol = CrearCampoCombo(new[] { "Administrador", "Alumno" }, existente?.Rol ?? "Alumno", out cmbRol, 376, 80, 320);
 
         var lblEstado = Titulo("Estado *", 376, 130);
         var pnlEstado = CrearCampoCombo(new[] { "Activo", "Inactivo" }, existente?.Estado ?? "Activo", out cmbEstado, 376, 154, 320);
@@ -220,7 +220,7 @@ public class AdminUsuarioEditorForm : Form
         // Evento de cambio de rol para mostrar/ocultar campos académicos
         cmbRol.SelectedIndexChanged += (s, e) =>
         {
-            bool esEstudiante = cmbRol.SelectedItem?.ToString() == "Usuario";
+            bool esEstudiante = cmbRol.SelectedItem?.ToString() == "Alumno";
             pnlAlumnos.Visible = esEstudiante;
             if (esEstudiante)
             {
@@ -231,15 +231,15 @@ public class AdminUsuarioEditorForm : Form
                 txtUsuario.Text = txtCorreo.Text.Trim();
             }
         };
-        pnlAlumnos.Visible = (cmbRol.SelectedItem?.ToString() == "Usuario");
+        pnlAlumnos.Visible = (cmbRol.SelectedItem?.ToString() == "Alumno");
 
-        txtNombre.TextChanged += (s, e) => { if (cmbRol.SelectedItem?.ToString() == "Usuario") ActualizarUsuarioAutocompletado(); };
-        txtPrimerApellido.TextChanged += (s, e) => { if (cmbRol.SelectedItem?.ToString() == "Usuario") ActualizarUsuarioAutocompletado(); };
-        txtSegundoApellido.TextChanged += (s, e) => { if (cmbRol.SelectedItem?.ToString() == "Usuario") ActualizarUsuarioAutocompletado(); };
+        txtNombre.TextChanged += (s, e) => { if (cmbRol.SelectedItem?.ToString() == "Alumno") ActualizarUsuarioAutocompletado(); };
+        txtPrimerApellido.TextChanged += (s, e) => { if (cmbRol.SelectedItem?.ToString() == "Alumno") ActualizarUsuarioAutocompletado(); };
+        txtSegundoApellido.TextChanged += (s, e) => { if (cmbRol.SelectedItem?.ToString() == "Alumno") ActualizarUsuarioAutocompletado(); };
 
         txtCorreo.TextChanged += (s, e) =>
         {
-            if (cmbRol.SelectedItem?.ToString() != "Usuario")
+            if (cmbRol.SelectedItem?.ToString() != "Alumno")
             {
                 txtUsuario.Text = txtCorreo.Text.Trim();
             }
@@ -348,7 +348,7 @@ public class AdminUsuarioEditorForm : Form
                 return;
             }
 
-            bool esEstudiante = cmbRol.SelectedItem?.ToString() == "Usuario";
+            bool esEstudiante = cmbRol.SelectedItem?.ToString() == "Alumno";
             if (esEstudiante)
             {
                 if (string.IsNullOrWhiteSpace(txtNumeroControl.Text))
@@ -382,7 +382,7 @@ public class AdminUsuarioEditorForm : Form
             u.SegundoApellido = txtSegundoApellido.Text.Trim();
             u.NombreCompleto = $"{u.Nombre} {u.PrimerApellido} {u.SegundoApellido}".Trim();
             u.Correo = email;
-            u.Rol = cmbRol.SelectedItem?.ToString() ?? "Usuario";
+            u.Rol = cmbRol.SelectedItem?.ToString() ?? "Alumno";
             u.Estado = cmbEstado.SelectedItem?.ToString() ?? "Activo";
             u.Telefono = txtTelefono.Text.Trim();
             

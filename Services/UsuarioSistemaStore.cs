@@ -160,7 +160,7 @@ internal static class UsuarioSistemaStore
                         NumeroAsiento   = asiento,
                         Contrasena      = pass,
                         Usuario         = usr,
-                        Rol             = "Usuario",
+                        Rol             = "Alumno",
                         Estado          = activo ? "Activo" : "Inactivo"
                     });
                 }
@@ -254,7 +254,7 @@ internal static class UsuarioSistemaStore
 
             bool isActivo = usuario.Estado == "Activo";
 
-            if (usuario.Rol == "Usuario") // Alumno
+            if (usuario.Rol?.Equals("Alumno", StringComparison.OrdinalIgnoreCase) == true) // Alumno
             {
                 if (esNuevo || string.IsNullOrWhiteSpace(usuario.Id) ||
                     usuario.Id.Equals("Autogenerado", StringComparison.OrdinalIgnoreCase))
