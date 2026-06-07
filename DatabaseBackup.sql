@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict nGhROax3lnWBAVrFxRDwlaLcTHfj5Bbwtl80WgLNHh6LVM1Au5H1UT3q1AeJdoO
+\restrict ybpDv2J8uNPN7KVjUgACzJbBtj8OIeGxD2AIn7Wkb5UxFsijhVF3I3WNB4GZTbB
 
 -- Dumped from database version 18.1
 -- Dumped by pg_dump version 18.1
@@ -148,7 +148,7 @@ ALTER TABLE public.incidencias OWNER TO postgres;
 --
 
 COPY public.administradores (id_administrador, nombre, primer_apellido, segundo_apellido, correo, telefono, usuario, contrasena, rol, activo, fecha_registro) FROM stdin;
-4	jose	vargas	quera	admiwhehen@itsmg.edu.mx	6517739893	jose vargas		Administrador	t	2026-06-06 14:02:56.417085
+4	jose	vargas	quera	admiwhehen@itsmg.edu.mx	6517739893	admin	admin	Administrador	t	2026-06-06 14:02:56.417085
 \.
 
 
@@ -157,12 +157,12 @@ COPY public.administradores (id_administrador, nombre, primer_apellido, segundo_
 --
 
 COPY public.alumnos (id_alumno, numero_control, nombre, primer_apellido, segundo_apellido, semestre, grupo, correo, numero_asiento, telefono, rol, contrasena, activo, fecha_registro) FROM stdin;
-1	7738548954	rosabel	lopez	sarabi	6	B	correonxsdk@institucion.edu.mx	7	8662494930	Estudiante		t	2026-06-06 13:34:44.335936
-2	87283827	flor	lopez	bautista	4	H	dummynjdnjf@test.com	6	7829430430	Estudiante		t	2026-06-06 13:39:36.75713
-3	763457467	rosa	cruz	vargas	4	J	dummhdhay@test.com	9	8628390445	Estudiante		t	2026-06-06 13:39:36.75713
-4	3747847	rosendo	ros	quiro	6	J	correojnaan@institucion.edu.mx	3	7577889009	Estudiante		t	2026-06-06 14:16:33.606208
-admin	999999999	Usuario	Generico	\N	N/A	N/A	dummy@test.com	\N	\N	Estudiante		t	2026-06-06 19:05:49.185764
-5	773674734	fernando	lopez	lopez	4	A	dummyfer@test.com	7	7163723623	Estudiante		t	2026-06-06 22:44:32.165556
+1	7738548954	rosabel	lopez	sarabi	6	B	correonxsdk@institucion.edu.mx	7	8662494930	Estudiante	admin	t	2026-06-06 13:34:44.335936
+2	87283827	flor	lopez	bautista	4	H	dummynjdnjf@test.com	6	7829430430	Estudiante	admin	t	2026-06-06 13:39:36.75713
+3	763457467	rosa	cruz	vargas	4	J	dummhdhay@test.com	9	8628390445	Estudiante	admin	t	2026-06-06 13:39:36.75713
+4	3747847	rosendo	ros	quiro	6	J	correojnaan@institucion.edu.mx	3	7577889009	Estudiante	admin	t	2026-06-06 14:16:33.606208
+admin	999999999	Usuario	Generico	\N	N/A	N/A	dummy@test.com	\N	\N	Estudiante	admin	t	2026-06-06 19:05:49.185764
+5	773674734	fernando	lopez	lopez	4	A	dummyfer@test.com	7	7163723623	Estudiante	admin	t	2026-06-06 22:44:32.165556
 \.
 
 
@@ -293,5 +293,5 @@ ALTER TABLE ONLY public.incidencias
 -- PostgreSQL database dump complete
 --
 
-\unrestrict nGhROax3lnWBAVrFxRDwlaLcTHfj5Bbwtl80WgLNHh6LVM1Au5H1UT3q1AeJdoO
+\unrestrict ybpDv2J8uNPN7KVjUgACzJbBtj8OIeGxD2AIn7Wkb5UxFsijhVF3I3WNB4GZTbB
 
