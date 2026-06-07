@@ -1,4 +1,4 @@
-﻿using Proyecto_GALAB.Models;
+using Proyecto_GALAB.Models;
 using Proyecto_GALAB.Services;
 
 namespace Proyecto_GALAB.Views.Admin;
@@ -123,8 +123,8 @@ public class AdminGestionUsuariosForm : Form
         grid.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(245, 247, 252);
         grid.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
         grid.Columns.Add("Id", "ID");
-        grid.Columns.Add("Nombre", "Nombre completo");
-        grid.Columns.Add("Correo", "Correo electrónico");
+        grid.Columns.Add("Usuario", "Usuario");
+        grid.Columns.Add("Contrasena", "Contraseña");
         grid.Columns.Add("Rol", "Rol");
         grid.Columns.Add("Estado", "Estado");
         grid.Columns.Add(new DataGridViewButtonColumn { Name = "Ver", Text = "👁", UseColumnTextForButtonValue = true });
@@ -187,7 +187,7 @@ public class AdminGestionUsuariosForm : Form
         grid.Rows.Clear();
         foreach (var u in pagina)
         {
-            int idx = grid.Rows.Add(u.Id, u.NombreCompleto, u.Correo, u.Rol, u.Estado, "👁", "✎", "🗑");
+            int idx = grid.Rows.Add(u.Id, u.Usuario, "********", u.Rol, u.Estado, "👁", "✎", "🗑");
             grid.Rows[idx].Tag = u;
         }
 
