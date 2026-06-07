@@ -1,4 +1,4 @@
-﻿using Proyecto_GALAB.Interfaces;
+using Proyecto_GALAB.Interfaces;
 using Proyecto_GALAB.Models;
 using Proyecto_GALAB.Presenters;
 using Proyecto_GALAB.Views.Admin;
@@ -28,7 +28,7 @@ public partial class LoginForm : Form, ILoginView
 
     public void NavegarComoAdministrador()
     {
-        var admin = new AdminGestionIncidenciasForm();
+        var admin = new AdminInicioForm();
         UiAssets.PrepararPantallaCompleta(admin);
         admin.Show();
         Hide();
