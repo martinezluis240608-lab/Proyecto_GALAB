@@ -72,7 +72,7 @@ internal static class PerfilUsuarioStore
                     Rol             = reader.IsDBNull(10) ? "Estudiante" : reader.GetString(10),
                     Activo          = !reader.IsDBNull(11) && reader.GetBoolean(11),
                     FechaRegistro   = reader.IsDBNull(12) ? DateTime.Now : reader.GetDateTime(12),
-                    Usuario         = idAlumno // el id_alumno sirve como usuario
+                    Usuario         = $"{ (reader.IsDBNull(2) ? "" : reader.GetString(2)) } { (reader.IsDBNull(3) ? "" : reader.GetString(3)) } { (reader.IsDBNull(4) ? "" : reader.GetString(4)) }".Trim().ToLower()
                 };
             }
         }

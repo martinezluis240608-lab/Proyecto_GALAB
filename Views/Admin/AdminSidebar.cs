@@ -4,6 +4,7 @@ namespace Proyecto_GALAB.Views.Admin;
 
 internal enum AdminModulo
 {
+    Inicio,
     Perfil,
     Incidencias,
     Usuarios
@@ -21,6 +22,9 @@ internal static class AdminSidebar
         };
 
         int y = 56;
+        panel.Controls.Add(UiAssets.CrearBotonSidebar("⌂", "Inicio", y, activo == AdminModulo.Inicio,
+            () => Navegar(dueño, new AdminInicioForm())));
+        y += 72;
         panel.Controls.Add(UiAssets.CrearBotonSidebar("●", "Perfil", y, activo == AdminModulo.Perfil,
             () => Navegar(dueño, new AdminPerfilForm())));
         y += 72;

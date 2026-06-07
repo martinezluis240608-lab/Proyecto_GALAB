@@ -1,4 +1,4 @@
-using Proyecto_GALAB.Models;
+﻿using Proyecto_GALAB.Models;
 using Proyecto_GALAB.Services;
 
 namespace Proyecto_GALAB.Views.Admin;
@@ -228,17 +228,17 @@ public class AdminGestionUsuariosForm : Form
         }
         else if (col == "Eliminar")
         {
-            if (MessageBox.Show($"¿Eliminar usuario {u.Id}?", "Confirmar",
+            if (Proyecto_GALAB.Views.CustomMessageBox.Show($"¿Eliminar usuario {u.Id}?", "Confirmar",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
             {
                 if (UsuarioSistemaStore.Eliminar(u.Id, u.Rol))
                 {
                     CargarGrid();
-                    MessageBox.Show("Usuario eliminado exitosamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    Proyecto_GALAB.Views.CustomMessageBox.Show("Usuario eliminado exitosamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 else
                 {
-                    MessageBox.Show("No se pudo eliminar el usuario debido a un error en la base de datos.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Proyecto_GALAB.Views.CustomMessageBox.Show("No se pudo eliminar el usuario debido a un error en la base de datos.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }

@@ -16,6 +16,7 @@ partial class PrincipalForm
     private Button     btnGestion;
     private Button     btnAyuda;
     private Button     btnContacto;
+    private Button     btnCerrarSesion;
 
     protected override void Dispose(bool disposing)
     {
@@ -140,6 +141,19 @@ partial class PrincipalForm
         btnAyuda   = MkMenuBtn("🌐  AYUDA");
         btnContacto= MkMenuBtn("📞  CONTACTO");
 
+        btnCerrarSesion = new Button
+        {
+            Text = "↪  CERRAR SESIÓN",
+            Font = new Font("Segoe UI", 11F, FontStyle.Bold),
+            ForeColor = Color.FromArgb(0, 82, 170),
+            BackColor = Color.White,
+            FlatStyle = FlatStyle.Flat,
+            Cursor = Cursors.Hand
+        };
+        btnCerrarSesion.FlatAppearance.BorderColor = Color.FromArgb(0, 82, 170);
+        btnCerrarSesion.FlatAppearance.BorderSize = 2;
+        UiAssets.RedondearControl(btnCerrarSesion, 10);
+
         UiAssets.RedondearControl(btnPerfil, 10);
         UiAssets.RedondearControl(btnGestion, 10);
         UiAssets.RedondearControl(btnAyuda, 10);
@@ -149,11 +163,12 @@ partial class PrincipalForm
         btnGestion.Click  += btnGestion_Click;
         btnAyuda.Click    += btnAyuda_Click;
         btnContacto.Click += btnContacto_Click;
+        btnCerrarSesion.Click += (_, _) => UiAssets.CerrarSesion(this);
 
         panelContenido.Controls.AddRange(new Control[]
         {
             panelHeader, lblBienvenido, lblDescripcion,
-            btnPerfil, btnGestion, btnAyuda, btnContacto
+            btnPerfil, btnGestion, btnAyuda, btnContacto, btnCerrarSesion
         });
 
         Controls.AddRange(new Control[] { lblApartado, panelContenido });
@@ -225,6 +240,10 @@ partial class PrincipalForm
         btnGestion.SetBounds(startX + bw + gap, row1Y, bw, bh);
         btnAyuda.SetBounds(startX + (bw + gap) * 2, row1Y, bw, bh);
         btnContacto.SetBounds((cw - bw) / 2, row2Y, bw, bh);
+
+        int btnLogoutW = Math.Max(220, bw - 40);
+        int btnLogoutH = 50;
+        btnCerrarSesion.SetBounds((cw - btnLogoutW) / 2, row2Y + bh + 40, btnLogoutW, btnLogoutH);
     }
 
     private static Button MkMenuBtn(string text) => new Button

@@ -1,4 +1,4 @@
-using Proyecto_GALAB.Interfaces;
+﻿using Proyecto_GALAB.Interfaces;
 using Proyecto_GALAB.Models;
 using Proyecto_GALAB.Presenters;
 using Proyecto_GALAB.Views.Admin;
@@ -16,7 +16,7 @@ public partial class LoginForm : Form, ILoginView
     public event EventHandler? OnIniciarSesion;
 
     public void MostrarError(string mensaje) =>
-        MessageBox.Show(mensaje, "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        Proyecto_GALAB.Views.CustomMessageBox.Show(mensaje, "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
 
     public void NavegarComoEstudiante()
     {

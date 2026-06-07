@@ -1,4 +1,4 @@
-using Proyecto_GALAB.Models;
+﻿using Proyecto_GALAB.Models;
 using System.Drawing.Drawing2D;
 
 namespace Proyecto_GALAB.Views;
@@ -269,7 +269,7 @@ public class IncidenciaDetalleForm : Form
             {
                 if (string.IsNullOrWhiteSpace(txtSol.Text))
                 {
-                    MessageBox.Show("Escribe una solución o mensaje antes de guardar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    Proyecto_GALAB.Views.CustomMessageBox.Show("Escribe una solución o mensaje antes de guardar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
                 try 
@@ -281,14 +281,14 @@ public class IncidenciaDetalleForm : Form
                     cmd.Parameters.AddWithValue("id", long.Parse(item.IdReal));
                     cmd.ExecuteNonQuery();
                     
-                    MessageBox.Show("Mensaje guardado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    Proyecto_GALAB.Views.CustomMessageBox.Show("Mensaje guardado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     item.DescripcionSolucion = txtSol.Text;
                     this.DialogResult = DialogResult.OK;
                     this.Close();
                 } 
                 catch(Exception ex) 
                 {
-                    MessageBox.Show("Error al guardar: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Proyecto_GALAB.Views.CustomMessageBox.Show("Error al guardar: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             };
             bottom.Controls.Add(btnGuardar);

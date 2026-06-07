@@ -158,7 +158,7 @@ internal static class UsuarioSistemaStore
                         Grupo           = grp,
                         NumeroAsiento   = asiento,
                         Contrasena      = pass,
-                        Usuario         = id, // id_alumno como usuario
+                        Usuario         = $"{nom} {ape1} {ape2}".Trim().ToLower(),
                         Rol             = "Usuario",
                         Estado          = activo ? "Activo" : "Inactivo"
                     });

@@ -1,4 +1,4 @@
-using Proyecto_GALAB.Models;
+﻿using Proyecto_GALAB.Models;
 using Proyecto_GALAB.Services;
 
 namespace Proyecto_GALAB.Views.Admin;
@@ -256,30 +256,30 @@ public class AdminPerfilForm : Form
         string email = txtCorreo.Text.Trim();
         if (!System.Text.RegularExpressions.Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
         {
-            MessageBox.Show("El correo electrónico no tiene un formato válido (ejemplo: usuario@dominio.com).", "Error de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            Proyecto_GALAB.Views.CustomMessageBox.Show("El correo electrónico no tiene un formato válido (ejemplo: usuario@dominio.com).", "Error de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }
 
         string tel = txtTelefono.Text.Trim();
         if (tel.Length != 10)
         {
-            MessageBox.Show("El número de teléfono debe tener exactamente 10 dígitos.", "Error de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            Proyecto_GALAB.Views.CustomMessageBox.Show("El número de teléfono debe tener exactamente 10 dígitos.", "Error de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }
 
         if (string.IsNullOrWhiteSpace(txtUsuario.Text.Trim()))
         {
-            MessageBox.Show("El nombre de usuario es obligatorio.", "Error de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            Proyecto_GALAB.Views.CustomMessageBox.Show("El nombre de usuario es obligatorio.", "Error de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }
         if (string.IsNullOrWhiteSpace(txtNombre.Text.Trim()))
         {
-            MessageBox.Show("El nombre es obligatorio.", "Error de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            Proyecto_GALAB.Views.CustomMessageBox.Show("El nombre es obligatorio.", "Error de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }
         if (string.IsNullOrWhiteSpace(txtPrimerApellido.Text.Trim()))
         {
-            MessageBox.Show("El primer apellido es obligatorio.", "Error de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            Proyecto_GALAB.Views.CustomMessageBox.Show("El primer apellido es obligatorio.", "Error de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }
 

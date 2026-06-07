@@ -115,8 +115,23 @@ public class AdminGestionIncidenciasForm : Form
             Font = new Font("Segoe UI", 10.5F),
             Location = new Point(20, 52),
             Size = new Size(280, 34),
-            BorderStyle = BorderStyle.FixedSingle
+            BorderStyle = BorderStyle.FixedSingle,
+            AutoCompleteMode = AutoCompleteMode.Suggest,
+            AutoCompleteSource = AutoCompleteSource.CustomSource
         };
+        try
+        {
+            var sourceBusqueda = new AutoCompleteStringCollection();
+            foreach (var inc in IncidenciaListadoStore.ObtenerTodas())
+            {
+                if (!string.IsNullOrWhiteSpace(inc.Titulo) && !sourceBusqueda.Contains(inc.Titulo))
+                    sourceBusqueda.Add(inc.Titulo);
+                if (!string.IsNullOrWhiteSpace(inc.QuienReporta) && !sourceBusqueda.Contains(inc.QuienReporta))
+                    sourceBusqueda.Add(inc.QuienReporta);
+            }
+            txtBuscar.AutoCompleteCustomSource = sourceBusqueda;
+        }
+        catch { }
         txtBuscar.TextChanged += (_, _) => { paginaActual = 1; CargarGrid(); };
 
         cmbEstado = new ComboBox
@@ -411,7 +426,7 @@ public class AdminGestionIncidenciasForm : Form
         }
         else if (col == "Eliminar")
         {
-            if (MessageBox.Show($"¿Eliminar la incidencia {item.Folio}?", "Confirmar",
+            if (Proyecto_GALAB.Views.CustomMessageBox.Show($"¿Eliminar la incidencia {item.Folio}?", "Confirmar",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
             {
                 IncidenciaListadoStore.Eliminar(item.Folio);

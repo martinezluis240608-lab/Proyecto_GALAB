@@ -1,4 +1,4 @@
-using Proyecto_GALAB.Models;
+﻿using Proyecto_GALAB.Models;
 using Npgsql;
 using System;
 
@@ -135,7 +135,7 @@ internal static class PerfilAdministradorStore
         }
         catch (Exception ex)
         {
-            System.Windows.Forms.MessageBox.Show(
+            Proyecto_GALAB.Views.CustomMessageBox.Show(
                 "Error al guardar administrador en la base de datos:\n\n" + ex.Message,
                 "Error de Base de Datos",
                 System.Windows.Forms.MessageBoxButtons.OK,

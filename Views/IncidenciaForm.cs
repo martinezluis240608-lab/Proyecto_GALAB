@@ -68,6 +68,66 @@ public partial class IncidenciaForm : Form, IIncidenciaView
         UiAssets.PrepararPantallaCompleta(this);
         AgregarBarraLateral();
         _presenter = new IncidenciaPresenter(this);
+        ConfigurarAutocompletado();
+    }
+
+    private void ConfigurarAutocompletado()
+    {
+        txtQuienReporta.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+        txtQuienReporta.AutoCompleteSource = AutoCompleteSource.CustomSource;
+
+        txtNombreEquipo.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+        txtNombreEquipo.AutoCompleteSource = AutoCompleteSource.CustomSource;
+
+        var sourceTitulos = new AutoCompleteStringCollection();
+        var sourceEquipos = new AutoCompleteStringCollection();
+
+        // Sugerencias masivas por defecto (Catálogo de palabras de TI e incidencias)
+        sourceTitulos.AddRange(new[] { 
+            "Actualización requerida", "Aire acondicionado averiado", "Antivirus caducado", "Apagones constantes", 
+            "Aplicación no responde", "Audio no se escucha", "Bloqueo de cuenta", "Cable HDMI dañado", 
+            "Cable de red desconectado", "Cable VGA defectuoso", "Cámara no funciona", "Conector de corriente roto", 
+            "Contraseña olvidada", "Computadora lenta", "Computadora no enciende", "Computadora se congela", 
+            "Cortocircuito en contacto", "CPU sobrecalentado", "Disco duro lleno", "Error de base de datos", 
+            "Error de red", "Error de sistema operativo", "Error de software", "Falla en proyector", 
+            "Falta cable de video", "Falta extensión eléctrica", "Falta limpieza de equipo", "Falta mouse", 
+            "Falta teclado", "Impresora atascada", "Impresora sin tinta/tóner", "Lámpara fundida", 
+            "Licencia expirada", "Mantenimiento preventivo", "Micrófono no sirve", "Monitor apagado", 
+            "Monitor con rayas", "Monitor no da video", "Mouse no funciona", "No hay acceso a internet", 
+            "No hay conexión WiFi", "No hay red LAN", "Pantalla azul (BSOD)", "Pantalla rota", 
+            "Pérdida de datos", "Proyector con imagen borrosa", "Proyector no enciende", "Proyector sin señal", 
+            "Puerto USB dañado", "Puerto de red dañado", "Recuperación de archivo", "Ruido extraño en CPU", 
+            "Silla rota", "Sistema inestable", "Teclado desconfigurado", "Teclado roto", "Teclas faltantes", 
+            "Ventilador ruidoso", "Virus/Malware detectado"
+        });
+
+        sourceEquipos.AddRange(new[] { 
+            "Aire Acondicionado Sala A", "Aire Acondicionado Sala B", "Bocinas", "Cableado Estructurado", 
+            "Cámara de Seguridad", "Computadora de Docente", "Contacto Eléctrico", "Impresora Principal", 
+            "Mesa de Trabajo 1", "Mesa de Trabajo 2", "Mesa de Trabajo 3", "Mesa de Trabajo 4", "Mesa de Trabajo 5", 
+            "Monitor", "Mouse", "PC-LAB1-01", "PC-LAB1-02", "PC-LAB1-03", "PC-LAB1-04", "PC-LAB1-05", 
+            "PC-LAB1-06", "PC-LAB1-07", "PC-LAB1-08", "PC-LAB1-09", "PC-LAB1-10", "PC-LAB2-01", "PC-LAB2-02", 
+            "PC-LAB2-03", "PC-LAB2-04", "PC-LAB2-05", "Proyector Aula 1", "Proyector Aula 2", "Proyector Aula 3", 
+            "Rack Principal", "Regulador de Voltaje", "Router Principal", "Servidor Local", "Switch Laboratorio", 
+            "Teclado", "Teléfono IP"
+        });
+
+        try
+        {
+            var incidencias = Services.IncidenciaListadoStore.ObtenerTodas();
+            foreach (var inc in incidencias)
+            {
+                if (!string.IsNullOrWhiteSpace(inc.Titulo) && !sourceTitulos.Contains(inc.Titulo))
+                    sourceTitulos.Add(inc.Titulo);
+                
+                if (!string.IsNullOrWhiteSpace(inc.Equipo) && !sourceEquipos.Contains(inc.Equipo))
+                    sourceEquipos.Add(inc.Equipo);
+            }
+        }
+        catch { /* Ignorar si no hay conexión */ }
+
+        txtQuienReporta.AutoCompleteCustomSource = sourceTitulos;
+        txtNombreEquipo.AutoCompleteCustomSource = sourceEquipos;
     }
 
     private void btnEnviar_Click(object sender, EventArgs e)   => OnEnviarReporte?.Invoke(this, EventArgs.Empty);

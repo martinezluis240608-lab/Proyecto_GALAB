@@ -1,4 +1,4 @@
-using Proyecto_GALAB.Interfaces;
+﻿using Proyecto_GALAB.Interfaces;
 using Proyecto_GALAB.Presenters;
 
 namespace Proyecto_GALAB.Views;
@@ -31,7 +31,7 @@ public partial class DashboardForm : Form, IDashboardView
 
     public void NavegarALista()
     {
-        MessageBox.Show("Lista completa de incidencias (próximamente).",
+        Proyecto_GALAB.Views.CustomMessageBox.Show("Lista completa de incidencias (próximamente).",
                         "GALAB", MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
 

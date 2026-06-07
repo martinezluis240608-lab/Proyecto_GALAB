@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Drawing.Drawing2D;
 
 namespace Proyecto_GALAB.Views;
@@ -345,7 +345,7 @@ public partial class ContactoForm : Form
     private void CopiarAlPortapapeles(string valor, string mensaje)
     {
         Clipboard.SetText(valor);
-        MessageBox.Show(mensaje, "Contacto", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        Proyecto_GALAB.Views.CustomMessageBox.Show(mensaje, "Contacto", MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
 
     private void AbrirCorreo()

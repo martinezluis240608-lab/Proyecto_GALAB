@@ -22,6 +22,8 @@ public class AdminUsuarioEditorForm : Form
     private ComboBox cmbRol = null!;
     private ComboBox cmbEstado = null!;
     private TextBox txtUsuario = null!;
+    private TextBox txtContrasena = null!;
+    private TextBox txtConfirmarContrasena = null!;
     
     private Panel pnlAlumnos = null!;
     private TextBox txtNumeroControl = null!;
@@ -37,50 +39,160 @@ public class AdminUsuarioEditorForm : Form
         StartPosition = FormStartPosition.CenterParent;
         MaximizeBox = false;
         MinimizeBox = false;
-        ClientSize = new Size(720, 560);
+        ClientSize = new Size(720, 810);
         BackColor = UiAssets.Fondo;
         Font = new Font("Segoe UI", 10F);
 
+        
+        var lblHeaderPersonal = new Label
+        {
+            Text = "👤  Información Personal",
+            Font = new Font("Segoe UI", 11F, FontStyle.Bold),
+            ForeColor = UiAssets.AzulPrincipal,
+            Location = new Point(24, 16),
+            AutoSize = true
+        };
+
+        var lblHeaderAcceso = new Label
+        {
+            Text = "🔒  Información de Acceso",
+            Font = new Font("Segoe UI", 11F, FontStyle.Bold),
+            ForeColor = UiAssets.AzulPrincipal,
+            Location = new Point(376, 16),
+            AutoSize = true
+        };
+
         // Column 1 (Left - Personal Info)
-        var lblId = Titulo("ID (Asignado por el sistema)", 24, 20);
-        var pnlId = CrearCampoTexto(existente?.Id ?? "Autogenerado", out txtId, 24, 44, 320);
+        var lblId = Titulo("ID (Asignado por el sistema)", 24, 56);
+        string idVal = existente?.Id ?? "Autogenerado";
+        var pnlId = CrearCampoTexto(idVal, out txtId, 24, 80, 320);
         txtId.ReadOnly = true;
         pnlId.BackColor = Color.FromArgb(240, 243, 248);
         txtId.BackColor = Color.FromArgb(240, 243, 248);
 
-        var lblNombre = Titulo("Nombre(s) *", 24, 94);
-        var pnlNombre = CrearCampoTexto(existente?.Nombre ?? "", out txtNombre, 24, 118, 320);
+        var lblNombre = Titulo("Nombre(s) *", 24, 130);
+        var pnlNombre = CrearCampoTexto(existente?.Nombre ?? "", out txtNombre, 24, 154, 320);
 
-        var lblPrimerApellido = Titulo("Primer apellido *", 24, 168);
-        var pnlPrimerApellido = CrearCampoTexto(existente?.PrimerApellido ?? "", out txtPrimerApellido, 24, 192, 320);
+        var lblPrimerApellido = Titulo("Primer apellido *", 24, 204);
+        var pnlPrimerApellido = CrearCampoTexto(existente?.PrimerApellido ?? "", out txtPrimerApellido, 24, 228, 320);
 
-        var lblSegundoApellido = Titulo("Segundo apellido", 24, 242);
-        var pnlSegundoApellido = CrearCampoTexto(existente?.SegundoApellido ?? "", out txtSegundoApellido, 24, 266, 320);
+        var lblSegundoApellido = Titulo("Segundo apellido", 24, 278);
+        var pnlSegundoApellido = CrearCampoTexto(existente?.SegundoApellido ?? "", out txtSegundoApellido, 24, 302, 320);
 
-        var lblCorreo = Titulo("Correo electrónico *", 24, 316);
-        var pnlCorreo = CrearCampoTexto(existente?.Correo ?? "", out txtCorreo, 24, 340, 320);
+        var lblCorreo = Titulo("Correo electrónico *", 24, 352);
+        var pnlCorreo = CrearCampoTexto(existente?.Correo ?? "", out txtCorreo, 24, 376, 320);
 
-        var lblTelefono = Titulo("Teléfono *", 24, 390);
-        var pnlTelefono = CrearCampoTexto(existente?.Telefono ?? "", out txtTelefono, 24, 414, 320);
+        var lblTelefono = Titulo("Teléfono *", 24, 426);
+        var pnlTelefono = CrearCampoTexto(existente?.Telefono ?? "", out txtTelefono, 24, 450, 320);
         txtTelefono.MaxLength = 10;
 
         // Column 2 (Right - Account Info)
-        var lblRol = Titulo("Rol *", 376, 20);
-        var pnlRol = CrearCampoCombo(new[] { "Administrador", "Soporte", "Técnico", "Usuario" }, existente?.Rol ?? "Usuario", out cmbRol, 376, 44, 320);
+        var lblRol = Titulo("Rol *", 376, 56);
+        var pnlRol = CrearCampoCombo(new[] { "Administrador", "Usuario" }, existente?.Rol ?? "Usuario", out cmbRol, 376, 80, 320);
 
-        var lblEstado = Titulo("Estado *", 376, 94);
-        var pnlEstado = CrearCampoCombo(new[] { "Activo", "Inactivo" }, existente?.Estado ?? "Activo", out cmbEstado, 376, 118, 320);
+        var lblEstado = Titulo("Estado *", 376, 130);
+        var pnlEstado = CrearCampoCombo(new[] { "Activo", "Inactivo" }, existente?.Estado ?? "Activo", out cmbEstado, 376, 154, 320);
 
-        var lblUsuarioField = Titulo("Nombre de Usuario (Autogenerado)", 376, 168);
-        var pnlUsuarioField = CrearCampoTexto(existente?.Usuario ?? "", out txtUsuario, 376, 192, 320);
-        txtUsuario.ReadOnly = true;
-        pnlUsuarioField.BackColor = Color.FromArgb(240, 243, 248);
-        txtUsuario.BackColor = Color.FromArgb(240, 243, 248);
+        var lblUsuarioField = Titulo("Nombre de usuario *", 376, 204);
+        var pnlUsuarioField = CrearCampoTexto(existente?.Usuario ?? "", out txtUsuario, 376, 228, 320);
+        txtUsuario.ReadOnly = false;
+
+        var lblContrasenaField = Titulo("Contraseña" + (existente == null ? " *" : ""), 376, 278);
+        var pnlContrasenaField = CrearCampoTexto("", out txtContrasena, 376, 302, 320);
+        txtContrasena.UseSystemPasswordChar = true;
+        txtContrasena.Width = 320 - 50;
+        var btnVerPassword = new Button
+        {
+            Text = "◉",
+            Font = new Font("Segoe UI Symbol", 12F, FontStyle.Bold),
+            ForeColor = UiAssets.AzulPrincipal,
+            BackColor = Color.White,
+            FlatStyle = FlatStyle.Flat,
+            Cursor = Cursors.Hand,
+            Size = new Size(30, 30),
+            Location = new Point(320 - 36, 4)
+        };
+        btnVerPassword.FlatAppearance.BorderSize = 0;
+        bool passwordVisible = false;
+        btnVerPassword.Click += (s, e) =>
+        {
+            passwordVisible = !passwordVisible;
+            txtContrasena.UseSystemPasswordChar = !passwordVisible;
+            btnVerPassword.Text = passwordVisible ? "●" : "◉";
+        };
+        pnlContrasenaField.Controls.Add(btnVerPassword);
+
+        var lblConfirmarContrasenaField = Titulo("Confirmar contraseña" + (existente == null ? " *" : ""), 376, 352);
+        var pnlConfirmarContrasenaField = CrearCampoTexto("", out txtConfirmarContrasena, 376, 376, 320);
+        txtConfirmarContrasena.UseSystemPasswordChar = true;
+        txtConfirmarContrasena.Width = 320 - 50;
+        var btnVerConfirmar = new Button
+        {
+            Text = "◉",
+            Font = new Font("Segoe UI Symbol", 12F, FontStyle.Bold),
+            ForeColor = UiAssets.AzulPrincipal,
+            BackColor = Color.White,
+            FlatStyle = FlatStyle.Flat,
+            Cursor = Cursors.Hand,
+            Size = new Size(30, 30),
+            Location = new Point(320 - 36, 4)
+        };
+        btnVerConfirmar.FlatAppearance.BorderSize = 0;
+        bool confirmVisible = false;
+        btnVerConfirmar.Click += (s, e) =>
+        {
+            confirmVisible = !confirmVisible;
+            txtConfirmarContrasena.UseSystemPasswordChar = !confirmVisible;
+            btnVerConfirmar.Text = confirmVisible ? "●" : "◉";
+        };
+        pnlConfirmarContrasenaField.Controls.Add(btnVerConfirmar);
+
+        
+        var pnlRecomendacion = new Panel
+        {
+            Location = new Point(376, 426),
+            Size = new Size(320, 70),
+            BackColor = Color.FromArgb(240, 248, 255)
+        };
+        pnlRecomendacion.Paint += (s, e) =>
+        {
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            using var pen = new Pen(Color.FromArgb(180, 210, 245), 1);
+            using var path = UiAssets.CrearRectanguloRedondo(new Rectangle(0, 0, pnlRecomendacion.Width - 1, pnlRecomendacion.Height - 1), 6);
+            e.Graphics.DrawPath(pen, path);
+        };
+        UiAssets.RedondearControl(pnlRecomendacion, 6);
+
+        var lblRecIcon = new Label
+        {
+            Text = "ℹ",
+            Font = new Font("Segoe UI Symbol", 12F, FontStyle.Bold),
+            ForeColor = UiAssets.AzulPrincipal,
+            Location = new Point(10, 10),
+            AutoSize = true
+        };
+        var lblRecTitulo = new Label
+        {
+            Text = "Recomendación",
+            Font = new Font("Segoe UI", 9.5F, FontStyle.Bold),
+            ForeColor = UiAssets.AzulPrincipal,
+            Location = new Point(34, 12),
+            AutoSize = true
+        };
+        var lblRecTexto = new Label
+        {
+            Text = "Usa una contraseña segura con al menos 8 caracteres, combinando letras, números y símbolos.",
+            Font = new Font("Segoe UI", 8.5F),
+            ForeColor = UiAssets.AzulOscuro,
+            Location = new Point(10, 34),
+            Size = new Size(300, 30)
+        };
+        pnlRecomendacion.Controls.AddRange(new Control[] { lblRecIcon, lblRecTitulo, lblRecTexto });
 
         // Panel de Alumnos (Dinámico)
         pnlAlumnos = new Panel
         {
-            Location = new Point(376, 242),
+            Location = new Point(376, 506),
             Size = new Size(320, 220),
             BackColor = Color.Transparent
         };
@@ -154,7 +266,10 @@ public class AdminUsuarioEditorForm : Form
             lblRol, pnlRol,
             lblEstado, pnlEstado,
             lblUsuarioField, pnlUsuarioField,
-            pnlAlumnos
+            lblContrasenaField, pnlContrasenaField,
+            lblConfirmarContrasenaField, pnlConfirmarContrasenaField,
+            pnlAlumnos,
+            lblHeaderPersonal, lblHeaderAcceso, pnlRecomendacion
         });
 
         // Bottom panel for action buttons
@@ -215,21 +330,21 @@ public class AdminUsuarioEditorForm : Form
                 string.IsNullOrWhiteSpace(txtUsuario.Text) ||
                 string.IsNullOrWhiteSpace(txtTelefono.Text))
             {
-                MessageBox.Show("Los campos con asterisco (*) son obligatorios.", "GALAB", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                Proyecto_GALAB.Views.CustomMessageBox.Show("Los campos con asterisco (*) son obligatorios.", "GALAB", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             string email = txtCorreo.Text.Trim();
             if (!System.Text.RegularExpressions.Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
             {
-                MessageBox.Show("El correo electrónico no tiene un formato válido (ejemplo: usuario@dominio.com).", "Error de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                Proyecto_GALAB.Views.CustomMessageBox.Show("El correo electrónico no tiene un formato válido (ejemplo: usuario@dominio.com).", "Error de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             string tel = txtTelefono.Text.Trim();
             if (tel.Length != 10)
             {
-                MessageBox.Show("El número de teléfono debe tener exactamente 10 dígitos.", "Error de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                Proyecto_GALAB.Views.CustomMessageBox.Show("El número de teléfono debe tener exactamente 10 dígitos.", "Error de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -238,17 +353,17 @@ public class AdminUsuarioEditorForm : Form
             {
                 if (string.IsNullOrWhiteSpace(txtNumeroControl.Text))
                 {
-                    MessageBox.Show("El Número de Control es obligatorio para los estudiantes.", "GALAB", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    Proyecto_GALAB.Views.CustomMessageBox.Show("El Número de Control es obligatorio para los estudiantes.", "GALAB", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
                 if (!long.TryParse(txtNumeroControl.Text.Trim(), out _))
                 {
-                    MessageBox.Show("El Número de Control debe ser un número válido.", "GALAB", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    Proyecto_GALAB.Views.CustomMessageBox.Show("El Número de Control debe ser un número válido.", "GALAB", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
                 if (string.IsNullOrWhiteSpace(txtSemestre.Text) || string.IsNullOrWhiteSpace(txtGrupo.Text))
                 {
-                    MessageBox.Show("Semestre y Grupo son requeridos para los estudiantes.", "GALAB", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    Proyecto_GALAB.Views.CustomMessageBox.Show("Semestre y Grupo son requeridos para los estudiantes.", "GALAB", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
             }
@@ -274,9 +389,24 @@ public class AdminUsuarioEditorForm : Form
             string username = txtUsuario.Text.Trim();
             u.Usuario = username;
             
-            if (_existente == null)
+            if (_existente == null && string.IsNullOrWhiteSpace(txtContrasena.Text))
             {
-                // Assign a default password for new users
+                Proyecto_GALAB.Views.CustomMessageBox.Show("La contraseña es obligatoria para nuevos usuarios.", "GALAB", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(txtContrasena.Text) || !string.IsNullOrEmpty(txtConfirmarContrasena.Text))
+            {
+                if (txtContrasena.Text != txtConfirmarContrasena.Text)
+                {
+                    Proyecto_GALAB.Views.CustomMessageBox.Show("Las contraseñas no coinciden.", "Error de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                u.Contrasena = txtContrasena.Text;
+            }
+            else if (_existente == null)
+            {
+                // Fallback (though validation above prevents this)
                 u.Contrasena = esEstudiante ? txtNumeroControl.Text.Trim() : "12345";
             }
             
@@ -308,6 +438,55 @@ public class AdminUsuarioEditorForm : Form
         bottomPanel.Controls.AddRange(new Control[] { btnCancelar, btnGuardar });
         Controls.Add(bottomPanel);
         CancelButton = btnCancelar;
+        
+        ConfigurarAutocompletado();
+    }
+
+    private void ConfigurarAutocompletado()
+    {
+        txtNombre.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+        txtNombre.AutoCompleteSource = AutoCompleteSource.CustomSource;
+
+        txtPrimerApellido.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+        txtPrimerApellido.AutoCompleteSource = AutoCompleteSource.CustomSource;
+
+        txtSegundoApellido.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+        txtSegundoApellido.AutoCompleteSource = AutoCompleteSource.CustomSource;
+
+        txtCorreo.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+        txtCorreo.AutoCompleteSource = AutoCompleteSource.CustomSource;
+
+        var sourceNombres = new AutoCompleteStringCollection();
+        var sourceApellidos1 = new AutoCompleteStringCollection();
+        var sourceApellidos2 = new AutoCompleteStringCollection();
+        var sourceCorreos = new AutoCompleteStringCollection();
+
+        sourceCorreos.AddRange(new[] { "gmail.com", "hotmail.com", "yahoo.com", "outlook.com", "instituto.edu.mx" });
+
+        try
+        {
+            var todos = UsuarioSistemaStore.ObtenerTodos();
+            foreach (var u in todos)
+            {
+                if (!string.IsNullOrWhiteSpace(u.Nombre) && !sourceNombres.Contains(u.Nombre))
+                    sourceNombres.Add(u.Nombre);
+                
+                if (!string.IsNullOrWhiteSpace(u.PrimerApellido) && !sourceApellidos1.Contains(u.PrimerApellido))
+                    sourceApellidos1.Add(u.PrimerApellido);
+                
+                if (!string.IsNullOrWhiteSpace(u.SegundoApellido) && !sourceApellidos2.Contains(u.SegundoApellido))
+                    sourceApellidos2.Add(u.SegundoApellido);
+
+                if (!string.IsNullOrWhiteSpace(u.Correo) && !sourceCorreos.Contains(u.Correo))
+                    sourceCorreos.Add(u.Correo);
+            }
+        }
+        catch { /* Ignorar si no hay conexión en tiempo de diseño o falla */ }
+
+        txtNombre.AutoCompleteCustomSource = sourceNombres;
+        txtPrimerApellido.AutoCompleteCustomSource = sourceApellidos1;
+        txtSegundoApellido.AutoCompleteCustomSource = sourceApellidos2;
+        txtCorreo.AutoCompleteCustomSource = sourceCorreos;
     }
 
     private void ActualizarUsuarioAutocompletado()

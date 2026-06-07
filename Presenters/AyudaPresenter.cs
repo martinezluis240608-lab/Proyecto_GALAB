@@ -32,7 +32,7 @@ namespace Proyecto_GALAB.Presenters
             if (File.Exists(ruta))
                 _view.AbrirPdf(ruta);
             else
-                MessageBox.Show("El manual no está disponible.", "Ayuda");
+                Proyecto_GALAB.Views.CustomMessageBox.Show("El manual no está disponible.", "Ayuda");
         }
 
         private void OnAbrirGuiaRapida(object? sender, EventArgs e)
@@ -53,13 +53,13 @@ namespace Proyecto_GALAB.Presenters
             if (Directory.Exists(carpeta))
                 Process.Start("explorer.exe", carpeta);
             else
-                MessageBox.Show("Carpeta de plantillas no encontrada.", "Ayuda");
+                Proyecto_GALAB.Views.CustomMessageBox.Show("Carpeta de plantillas no encontrada.", "Ayuda");
         }
 
         private void OnContactarSoporte(object? sender, EventArgs e)
         {
             // Aquí puedes mostrar tu formulario de contacto
-            MessageBox.Show("Abrir formulario de contacto (próximamente)", "Contacto");
+            Proyecto_GALAB.Views.CustomMessageBox.Show("Abrir formulario de contacto (próximamente)", "Contacto");
         }
     }
 }

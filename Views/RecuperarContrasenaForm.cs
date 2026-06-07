@@ -1,4 +1,4 @@
-using System.Drawing;
+﻿using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using Proyecto_GALAB.Services;
@@ -90,7 +90,7 @@ public class RecuperarContrasenaForm : Form
             _username = txtUsuario.Text.Trim();
             if (string.IsNullOrWhiteSpace(_username))
             {
-                MessageBox.Show("Por favor, ingrese su usuario.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                Proyecto_GALAB.Views.CustomMessageBox.Show("Por favor, ingrese su usuario.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -102,7 +102,7 @@ public class RecuperarContrasenaForm : Form
             }
             else
             {
-                MessageBox.Show("El usuario ingresado no existe en el sistema.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                Proyecto_GALAB.Views.CustomMessageBox.Show("El usuario ingresado no existe en el sistema.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         };
 
@@ -155,7 +155,7 @@ public class RecuperarContrasenaForm : Form
             string respuesta = txtDatoVerificacion.Text.Trim();
             if (string.IsNullOrWhiteSpace(respuesta))
             {
-                MessageBox.Show("Por favor, ingrese la respuesta de verificación.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                Proyecto_GALAB.Views.CustomMessageBox.Show("Por favor, ingrese la respuesta de verificación.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -166,7 +166,7 @@ public class RecuperarContrasenaForm : Form
             }
             else
             {
-                MessageBox.Show("El dato ingresado no coincide con nuestros registros de seguridad.", "Verificación fallida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                Proyecto_GALAB.Views.CustomMessageBox.Show("El dato ingresado no coincide con nuestros registros de seguridad.", "Verificación fallida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         };
 
@@ -228,31 +228,31 @@ public class RecuperarContrasenaForm : Form
 
             if (string.IsNullOrWhiteSpace(clave) || string.IsNullOrWhiteSpace(confirmar))
             {
-                MessageBox.Show("Por favor, rellene ambos campos de contraseña.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                Proyecto_GALAB.Views.CustomMessageBox.Show("Por favor, rellene ambos campos de contraseña.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             if (clave != confirmar)
             {
-                MessageBox.Show("Las contraseñas no coinciden.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                Proyecto_GALAB.Views.CustomMessageBox.Show("Las contraseñas no coinciden.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             if (clave.Length < 4)
             {
-                MessageBox.Show("La contraseña debe tener al menos 4 caracteres.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                Proyecto_GALAB.Views.CustomMessageBox.Show("La contraseña debe tener al menos 4 caracteres.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             if (UsuarioSistemaStore.ActualizarContrasena(_username, clave, _rol))
             {
-                MessageBox.Show("Contraseña restablecida con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                Proyecto_GALAB.Views.CustomMessageBox.Show("Contraseña restablecida con éxito.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 DialogResult = DialogResult.OK;
                 Close();
             }
             else
             {
-                MessageBox.Show("No se pudo actualizar la contraseña. Ocurrió un problema.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Proyecto_GALAB.Views.CustomMessageBox.Show("No se pudo actualizar la contraseña. Ocurrió un problema.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         };
 

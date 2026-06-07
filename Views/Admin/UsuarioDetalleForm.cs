@@ -115,9 +115,10 @@ public class UsuarioDetalleForm : Form
             Text = nombreCompleto.ToUpper(),
             Font = new Font("Segoe UI", 13.5F, FontStyle.Bold),
             ForeColor = Color.White,
-            Location = new Point(120, 32),
-            Size = new Size(380, 24),
-            UseMnemonic = false
+            Location = new Point(120, 24),
+            AutoSize = true,
+            UseMnemonic = false,
+            BackColor = Color.Transparent
         };
         header.Controls.Add(lblNombre);
 
@@ -127,16 +128,17 @@ public class UsuarioDetalleForm : Form
             Text = subtitulo,
             Font = new Font("Segoe UI", 9.5F),
             ForeColor = Color.FromArgb(215, 232, 255),
-            Location = new Point(120, 58),
-            Size = new Size(380, 20),
-            UseMnemonic = false
+            Location = new Point(120, lblNombre.Bottom + 2),
+            AutoSize = true,
+            UseMnemonic = false,
+            BackColor = Color.Transparent
         };
         header.Controls.Add(lblSub);
 
         // Badge de Rol (Creativo y de color según tipo)
         var pnlBadge = new Panel
         {
-            Location = new Point(120, 84),
+            Location = new Point(120, lblSub.Bottom + 8),
             Size = new Size(130, 24),
             BackColor = esAdmin ? Color.FromArgb(254, 243, 199) : Color.FromArgb(220, 252, 231) // Naranja/Amarillo vs Verde
         };
