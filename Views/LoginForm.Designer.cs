@@ -126,7 +126,7 @@ partial class LoginForm
 
         btnVerPassword = new Button
         {
-            Text = "👁",
+            Text = "🙈",
             Font = new Font("Segoe UI Emoji", 12F, FontStyle.Regular),
             ForeColor = azulPrincipal,
             BackColor = Color.White,
@@ -138,7 +138,7 @@ partial class LoginForm
         {
             passwordVisible = !passwordVisible;
             txtContrasena.PasswordChar = passwordVisible ? '\0' : '●';
-            btnVerPassword.Text = passwordVisible ? "🙈" : "👁";
+            btnVerPassword.Text = passwordVisible ? "👁" : "🙈";
         };
         
         pnlContrasena.Controls.AddRange(new Control[] { txtContrasena, btnVerPassword });
