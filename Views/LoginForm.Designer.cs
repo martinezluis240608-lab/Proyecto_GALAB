@@ -22,6 +22,7 @@ partial class LoginForm
     private Button btnEstudiante;
     private Button btnAdministrador;
     private Button btnVerPassword;
+    private Panel pnlContrasena;
     private Label lblFooter;
 
     private readonly Color azulPrincipal = Color.FromArgb(0, 96, 210);
@@ -101,12 +102,32 @@ partial class LoginForm
         txtUsuario = CrearTextBox("Ingrese su numero de control", false);
 
         lblContrasena = CrearLabelCampo("Contraseña");
+        
+        pnlContrasena = new Panel
+        {
+            BackColor = Color.White,
+            Cursor = Cursors.IBeam
+        };
+        pnlContrasena.Paint += (s, e) =>
+        {
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            var colorBorde = txtContrasena.Focused ? azulPrincipal : bordeCampo;
+            int grosor = txtContrasena.Focused ? 2 : 1;
+            using var pen = new Pen(colorBorde, grosor);
+            using var path = UiAssets.CrearRectanguloRedondo(new Rectangle(0, 0, pnlContrasena.Width - 1, pnlContrasena.Height - 1), 4);
+            e.Graphics.DrawPath(pen, path);
+        };
+        pnlContrasena.Click += (s, e) => txtContrasena.Focus();
+
         txtContrasena = CrearTextBox("Ingrese su contraseña", true);
+        txtContrasena.BorderStyle = BorderStyle.None;
+        txtContrasena.GotFocus += (s, e) => pnlContrasena.Invalidate();
+        txtContrasena.LostFocus += (s, e) => pnlContrasena.Invalidate();
 
         btnVerPassword = new Button
         {
-            Text = "◉",
-            Font = new Font("Segoe UI Symbol", 12F, FontStyle.Bold),
+            Text = "👁",
+            Font = new Font("Segoe UI Emoji", 12F, FontStyle.Regular),
             ForeColor = azulPrincipal,
             BackColor = Color.White,
             FlatStyle = FlatStyle.Flat,
@@ -117,8 +138,10 @@ partial class LoginForm
         {
             passwordVisible = !passwordVisible;
             txtContrasena.PasswordChar = passwordVisible ? '\0' : '●';
-            btnVerPassword.Text = passwordVisible ? "●" : "◉";
+            btnVerPassword.Text = passwordVisible ? "🙈" : "👁";
         };
+        
+        pnlContrasena.Controls.AddRange(new Control[] { txtContrasena, btnVerPassword });
 
         btnIniciarSesion = new Button
         {
@@ -165,7 +188,7 @@ partial class LoginForm
             panelTopAzul, picLogo, lblGalab, lblSubtitulo,
             btnEstudiante, btnAdministrador,
             lblUsuario, txtUsuario,
-            lblContrasena, txtContrasena, btnVerPassword,
+            lblContrasena, pnlContrasena,
             btnIniciarSesion, lblForgot, panelFooter
         });
 
@@ -276,10 +299,12 @@ partial class LoginForm
         int lblPwdY = txtUsrY + txtH + 20;
         lblContrasena.SetBounds(left, lblPwdY, formWidth, lblH);
         int txtPwdY = lblPwdY + lblH + 4;
-        txtContrasena.SetBounds(left, txtPwdY, formWidth - 40, txtH);
-        btnVerPassword.SetBounds(left + formWidth - 36, txtPwdY + (txtH - 34) / 2, 36, 34);
+        
+        pnlContrasena.SetBounds(left, txtPwdY, formWidth, txtH + 8);
+        txtContrasena.SetBounds(10, 4, formWidth - 50, txtH);
+        btnVerPassword.SetBounds(formWidth - 40, 2, 36, txtH + 4);
 
-        int btnY = txtPwdY + txtH + 28;
+        int btnY = txtPwdY + txtH + 36;
         btnIniciarSesion.SetBounds(left, btnY, formWidth, btnH);
 
         lblForgot.Left = left + (formWidth - lblForgot.Width) / 2;

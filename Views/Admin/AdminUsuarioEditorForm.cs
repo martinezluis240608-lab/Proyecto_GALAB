@@ -103,8 +103,8 @@ public class AdminUsuarioEditorForm : Form
         txtContrasena.Width = 320 - 50;
         var btnVerPassword = new Button
         {
-            Text = "◉",
-            Font = new Font("Segoe UI Symbol", 12F, FontStyle.Bold),
+            Text = "👁",
+            Font = new Font("Segoe UI Emoji", 12F, FontStyle.Regular),
             ForeColor = UiAssets.AzulPrincipal,
             BackColor = Color.White,
             FlatStyle = FlatStyle.Flat,
@@ -118,7 +118,7 @@ public class AdminUsuarioEditorForm : Form
         {
             passwordVisible = !passwordVisible;
             txtContrasena.UseSystemPasswordChar = !passwordVisible;
-            btnVerPassword.Text = passwordVisible ? "●" : "◉";
+            btnVerPassword.Text = passwordVisible ? "🙈" : "👁";
         };
         pnlContrasenaField.Controls.Add(btnVerPassword);
 
@@ -128,8 +128,8 @@ public class AdminUsuarioEditorForm : Form
         txtConfirmarContrasena.Width = 320 - 50;
         var btnVerConfirmar = new Button
         {
-            Text = "◉",
-            Font = new Font("Segoe UI Symbol", 12F, FontStyle.Bold),
+            Text = "👁",
+            Font = new Font("Segoe UI Emoji", 12F, FontStyle.Regular),
             ForeColor = UiAssets.AzulPrincipal,
             BackColor = Color.White,
             FlatStyle = FlatStyle.Flat,
@@ -143,7 +143,7 @@ public class AdminUsuarioEditorForm : Form
         {
             confirmVisible = !confirmVisible;
             txtConfirmarContrasena.UseSystemPasswordChar = !confirmVisible;
-            btnVerConfirmar.Text = confirmVisible ? "●" : "◉";
+            btnVerConfirmar.Text = confirmVisible ? "🙈" : "👁";
         };
         pnlConfirmarContrasenaField.Controls.Add(btnVerConfirmar);
 
