@@ -172,7 +172,10 @@ partial class LoginForm
         Controls.AddRange(new Control[] { panelImagen, panelLogin });
 
         Resize += (s, e) => AjustarLayout();
-        Load += (s, e) => AjustarLayout();
+        Load += (s, e) => {
+            AjustarLayout();
+            btnVerPassword.BringToFront();
+        };
     }
 
     private Image ObtenImagenPortada()
@@ -273,8 +276,8 @@ partial class LoginForm
         int lblPwdY = txtUsrY + txtH + 20;
         lblContrasena.SetBounds(left, lblPwdY, formWidth, lblH);
         int txtPwdY = lblPwdY + lblH + 4;
-        txtContrasena.SetBounds(left, txtPwdY, formWidth, txtH);
-        btnVerPassword.SetBounds(left + formWidth - 44, txtPwdY + (txtH - 34) / 2, 36, 34);
+        txtContrasena.SetBounds(left, txtPwdY, formWidth - 40, txtH);
+        btnVerPassword.SetBounds(left + formWidth - 36, txtPwdY + (txtH - 34) / 2, 36, 34);
 
         int btnY = txtPwdY + txtH + 28;
         btnIniciarSesion.SetBounds(left, btnY, formWidth, btnH);
