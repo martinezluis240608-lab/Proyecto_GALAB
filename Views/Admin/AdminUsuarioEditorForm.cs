@@ -93,7 +93,7 @@ public class AdminUsuarioEditorForm : Form
         var lblEstado = Titulo("Estado *", 376, 130);
         var pnlEstado = CrearCampoCombo(new[] { "Activo", "Inactivo" }, existente?.Estado ?? "Activo", out cmbEstado, 376, 154, 320);
 
-        var lblUsuarioField = Titulo("Nombre de usuario *", 376, 204);
+        var lblUsuarioField = Titulo("Usuario *", 376, 204);
         var pnlUsuarioField = CrearCampoTexto(existente?.Usuario ?? "", out txtUsuario, 376, 228, 320);
         txtUsuario.ReadOnly = false;
 

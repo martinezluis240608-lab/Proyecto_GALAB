@@ -266,13 +266,13 @@ internal static class UsuarioSistemaStore
                         id_alumno, numero_control, nombre,
                         primer_apellido, segundo_apellido,
                         semestre, grupo, correo, numero_asiento, telefono,
-                        rol, contrasena, activo, fecha_registro
+                        rol, contrasena, activo, fecha_registro, usuario
                     )
                     VALUES (
                         @id_alumno, @numero_control, @nombre,
                         @primer_apellido, @segundo_apellido,
                         @semestre, @grupo, @correo, @numero_asiento, @telefono,
-                        'Estudiante', @contrasena, @activo, NOW()
+                        'Estudiante', @contrasena, @activo, NOW(), @usuario
                     )
                     ON CONFLICT (id_alumno) DO UPDATE
                     SET numero_control   = EXCLUDED.numero_control,
@@ -285,7 +285,8 @@ internal static class UsuarioSistemaStore
                         numero_asiento   = EXCLUDED.numero_asiento,
                         telefono         = EXCLUDED.telefono,
                         contrasena       = EXCLUDED.contrasena,
-                        activo           = EXCLUDED.activo;
+                        activo           = EXCLUDED.activo,
+                        usuario          = EXCLUDED.usuario;
                     """;
                 using (var cmd = new NpgsqlCommand(sql, conexion))
                 {
@@ -301,6 +302,7 @@ internal static class UsuarioSistemaStore
                     cmd.Parameters.AddWithValue("telefono",          usuario.Telefono ?? "");
                     cmd.Parameters.AddWithValue("contrasena",        usuario.Contrasena ?? "");
                     cmd.Parameters.AddWithValue("activo",            isActivo);
+                    cmd.Parameters.AddWithValue("usuario",           string.IsNullOrWhiteSpace(usuario.Usuario) ? DBNull.Value : usuario.Usuario);
                     cmd.ExecuteNonQuery();
                 }
                 return true;
