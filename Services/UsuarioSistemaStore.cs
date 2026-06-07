@@ -122,7 +122,7 @@ internal static class UsuarioSistemaStore
             const string sqlAlu = """
                 SELECT id_alumno, numero_control, nombre, primer_apellido, segundo_apellido,
                        correo, telefono, semestre, grupo, numero_asiento,
-                       contrasena, activo
+                       contrasena, activo, usuario
                 FROM alumnos
                 ORDER BY primer_apellido, nombre;
                 """;
@@ -143,6 +143,7 @@ internal static class UsuarioSistemaStore
                     int? asiento   = readerAlu.IsDBNull(9) ? (int?)null : readerAlu.GetInt32(9);
                     string pass    = readerAlu.IsDBNull(10) ? "" : readerAlu.GetString(10);
                     bool activo    = !readerAlu.IsDBNull(11) && readerAlu.GetBoolean(11);
+                    string usr     = readerAlu.IsDBNull(12) ? $"{nom} {ape1} {ape2}".Trim().ToLower() : readerAlu.GetString(12);
 
                     usuarios.Add(new UsuarioSistema
                     {
@@ -158,7 +159,7 @@ internal static class UsuarioSistemaStore
                         Grupo           = grp,
                         NumeroAsiento   = asiento,
                         Contrasena      = pass,
-                        Usuario         = $"{nom} {ape1} {ape2}".Trim().ToLower(),
+                        Usuario         = usr,
                         Rol             = "Usuario",
                         Estado          = activo ? "Activo" : "Inactivo"
                     });
