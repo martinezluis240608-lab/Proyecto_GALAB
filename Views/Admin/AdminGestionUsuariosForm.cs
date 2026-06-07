@@ -187,7 +187,7 @@ public class AdminGestionUsuariosForm : Form
         grid.Rows.Clear();
         foreach (var u in pagina)
         {
-            int idx = grid.Rows.Add(u.Id, u.Usuario, "********", u.Rol, u.Estado, "👁", "✎", "🗑");
+            int idx = grid.Rows.Add(u.Id, u.Usuario, u.Contrasena, u.Rol, u.Estado, "👁", "✎", "🗑");
             grid.Rows[idx].Tag = u;
         }
 

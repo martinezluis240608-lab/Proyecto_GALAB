@@ -98,7 +98,7 @@ public class AdminUsuarioEditorForm : Form
         txtUsuario.ReadOnly = false;
 
         var lblContrasenaField = Titulo("Contraseña" + (existente == null ? " *" : ""), 376, 278);
-        var pnlContrasenaField = CrearCampoTexto(existente == null ? "" : "********", out txtContrasena, 376, 302, 320);
+        var pnlContrasenaField = CrearCampoTexto(existente == null ? "" : existente.Contrasena, out txtContrasena, 376, 302, 320);
         txtContrasena.UseSystemPasswordChar = true;
         txtContrasena.Width = 320 - 50;
         var btnVerPassword = new Button
@@ -123,7 +123,7 @@ public class AdminUsuarioEditorForm : Form
         pnlContrasenaField.Controls.Add(btnVerPassword);
 
         var lblConfirmarContrasenaField = Titulo("Confirmar contraseña" + (existente == null ? " *" : ""), 376, 352);
-        var pnlConfirmarContrasenaField = CrearCampoTexto(existente == null ? "" : "********", out txtConfirmarContrasena, 376, 376, 320);
+        var pnlConfirmarContrasenaField = CrearCampoTexto(existente == null ? "" : existente.Contrasena, out txtConfirmarContrasena, 376, 376, 320);
         txtConfirmarContrasena.UseSystemPasswordChar = true;
         txtConfirmarContrasena.Width = 320 - 50;
         var btnVerConfirmar = new Button
@@ -397,11 +397,7 @@ public class AdminUsuarioEditorForm : Form
 
             if (!string.IsNullOrEmpty(txtContrasena.Text) || !string.IsNullOrEmpty(txtConfirmarContrasena.Text))
             {
-                if (txtContrasena.Text == "********" && txtConfirmarContrasena.Text == "********")
-                {
-                    // Dejar intacta la contraseña existente
-                }
-                else if (txtContrasena.Text != txtConfirmarContrasena.Text)
+                if (txtContrasena.Text != txtConfirmarContrasena.Text)
                 {
                     Proyecto_GALAB.Views.CustomMessageBox.Show("Las contraseñas no coinciden.", "Error de Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
