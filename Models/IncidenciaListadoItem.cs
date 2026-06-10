@@ -13,6 +13,7 @@ public class IncidenciaListadoItem
     public DateTime Fecha { get; set; } = DateTime.Now;
     public string Descripcion { get; set; } = string.Empty;
     public string Equipo { get; set; } = string.Empty;
+    public string NumeroSerie { get; set; } = string.Empty;
     public string DescripcionSolucion { get; set; } = string.Empty;
     public string IdReal { get; set; } = string.Empty;
     public string NumeroControl { get; set; } = "N/A";

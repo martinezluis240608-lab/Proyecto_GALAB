@@ -47,6 +47,13 @@ public class IncidenciaPresenter
             return;
         }
 
+        var (serieValida, mensajeSerie) = IncidenciaListadoStore.ValidarNumeroSerieEquipamiento(incidencia.NumeroSerie);
+        if (!serieValida)
+        {
+            _view.MostrarError(mensajeSerie);
+            return;
+        }
+
         var (exito, mensajeDb) = IncidenciaListadoStore.RegistrarDesdeIncidencia(incidencia);
         if (exito)
         {

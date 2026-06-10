@@ -1,4 +1,5 @@
 ﻿using Proyecto_GALAB.Models;
+using Proyecto_GALAB.Services;
 using System.Drawing.Drawing2D;
 
 namespace Proyecto_GALAB.Views;
@@ -64,7 +65,7 @@ public class IncidenciaDetalleForm : Form
         var panelReporte = new Panel
         {
             Location = new Point(12, 16),
-            Size = new Size(490, 290),
+            Size = new Size(490, 320),
             BackColor = Color.White
         };
         panelReporte.Paint += (s, e) =>
@@ -83,8 +84,8 @@ public class IncidenciaDetalleForm : Form
             AutoSize = true
         });
 
-        string[] labels = { "ID Incidencia", "Título", "Tipo", "Equipo afectado", "Fecha de reporte" };
-        string[] values = { item.IdReal, item.Titulo, item.TipoIncidencia, item.Equipo, item.Fecha.ToString("dd/MM/yyyy HH:mm") };
+        string[] labels = { "ID Incidencia", "Título", "Tipo", "Equipo afectado", "Número de serie", "Fecha de reporte" };
+        string[] values = { item.IdReal, item.Titulo, item.TipoIncidencia, item.Equipo, FormatearNumeroSerie(item.NumeroSerie), item.Fecha.ToString("dd/MM/yyyy HH:mm") };
         int y = 40;
         for (int i = 0; i < labels.Length; i++)
         {
@@ -133,10 +134,20 @@ public class IncidenciaDetalleForm : Form
         panelReporte.Controls.Add(txtDesc);
         container.Controls.Add(panelReporte);
 
+        bool esAdmin = SesionActual.EsAdministrador;
+        int topUsuario = esAdmin ? 500 : 350;
+
+        if (esAdmin)
+        {
+            var panelHistorial = CrearPanelHistorialEquipo(item);
+            panelHistorial.Location = new Point(12, 350);
+            container.Controls.Add(panelHistorial);
+        }
+
         // Card 3: Student Details
         var panelUsuario = new Panel
         {
-            Location = new Point(12, 320),
+            Location = new Point(12, topUsuario),
             Size = new Size(490, 190),
             BackColor = Color.White
         };
@@ -191,7 +202,7 @@ public class IncidenciaDetalleForm : Form
         // Card 2: Solution details
         var panelSolucion = new Panel
         {
-            Location = new Point(12, 526),
+            Location = new Point(12, topUsuario + 206),
             Size = new Size(490, 160),
             BackColor = Color.White
         };
@@ -210,8 +221,6 @@ public class IncidenciaDetalleForm : Form
             Location = new Point(16, 8),
             AutoSize = true
         });
-
-        bool esAdmin = Proyecto_GALAB.Services.SesionActual.EsAdministrador;
 
         bool resuelta = !string.IsNullOrWhiteSpace(item.DescripcionSolucion);
         var txtSol = new TextBox
@@ -300,5 +309,106 @@ public class IncidenciaDetalleForm : Form
         bottom.SendToBack();
         header.SendToBack();
         container.BringToFront();
+    }
+
+    private static Panel CrearPanelHistorialEquipo(IncidenciaListadoItem item)
+    {
+        var panel = new Panel
+        {
+            Size = new Size(490, 134),
+            BackColor = Color.White
+        };
+        panel.Paint += (s, e) =>
+        {
+            using var pen = new Pen(Color.FromArgb(220, 227, 238));
+            e.Graphics.DrawRectangle(pen, 0, 0, panel.Width - 1, panel.Height - 1);
+        };
+        UiAssets.RedondearControl(panel, 8);
+
+        panel.Controls.Add(new Label
+        {
+            Text = "HISTORIAL DEL EQUIPO AFECTADO",
+            Font = new Font("Segoe UI", 9.5F, FontStyle.Bold),
+            ForeColor = UiAssets.AzulPrincipal,
+            Location = new Point(16, 8),
+            AutoSize = true
+        });
+
+        panel.Controls.Add(new Label
+        {
+            Text = $"Serie: {FormatearNumeroSerie(item.NumeroSerie)}",
+            Font = new Font("Segoe UI", 9F),
+            ForeColor = Color.FromArgb(80, 90, 110),
+            Location = new Point(292, 9),
+            AutoSize = true
+        });
+
+        if (string.IsNullOrWhiteSpace(item.NumeroSerie))
+        {
+            panel.Controls.Add(CrearMensajeHistorial("Esta incidencia no tiene número de serie registrado."));
+            return panel;
+        }
+
+        var historial = IncidenciaListadoStore.ObtenerHistorialPorNumeroSerie(item.NumeroSerie, item.IdReal);
+        if (historial.Count == 0)
+        {
+            panel.Controls.Add(CrearMensajeHistorial("No hay incidencias anteriores para este equipo."));
+            return panel;
+        }
+
+        var grid = new DataGridView
+        {
+            Location = new Point(20, 36),
+            Size = new Size(450, 82),
+            BackgroundColor = Color.White,
+            BorderStyle = BorderStyle.None,
+            AllowUserToAddRows = false,
+            AllowUserToDeleteRows = false,
+            ReadOnly = true,
+            RowHeadersVisible = false,
+            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+            ColumnHeadersHeight = 24,
+            RowTemplate = { Height = 24 },
+            SelectionMode = DataGridViewSelectionMode.FullRowSelect
+        };
+        grid.EnableHeadersVisualStyles = false;
+        grid.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(245, 247, 252);
+        grid.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 8.5F, FontStyle.Bold);
+        grid.DefaultCellStyle.Font = new Font("Segoe UI", 8.5F);
+        grid.GridColor = Color.FromArgb(230, 235, 242);
+        grid.Columns.Add("Folio", "Folio");
+        grid.Columns.Add("Titulo", "Título");
+        grid.Columns.Add("Estado", "Estado");
+        grid.Columns.Add("Fecha", "Fecha");
+        grid.Columns["Folio"]!.FillWeight = 72;
+        grid.Columns["Titulo"]!.FillWeight = 150;
+        grid.Columns["Estado"]!.FillWeight = 82;
+        grid.Columns["Fecha"]!.FillWeight = 72;
+
+        foreach (var incidencia in historial.Take(3))
+        {
+            grid.Rows.Add(incidencia.Folio, incidencia.Titulo, incidencia.Estado, incidencia.Fecha.ToString("dd/MM/yyyy"));
+        }
+
+        panel.Controls.Add(grid);
+        return panel;
+    }
+
+    private static Label CrearMensajeHistorial(string texto)
+    {
+        return new Label
+        {
+            Text = texto,
+            Font = new Font("Segoe UI", 9.5F),
+            ForeColor = Color.FromArgb(80, 90, 110),
+            Location = new Point(20, 56),
+            Size = new Size(450, 44),
+            TextAlign = ContentAlignment.MiddleCenter
+        };
+    }
+
+    private static string FormatearNumeroSerie(string? numeroSerie)
+    {
+        return string.IsNullOrWhiteSpace(numeroSerie) ? "No registrado" : numeroSerie.Trim();
     }
 }

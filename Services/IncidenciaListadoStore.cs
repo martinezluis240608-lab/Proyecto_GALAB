@@ -13,6 +13,12 @@ internal static class IncidenciaListadoStore
 {
     private static readonly List<IncidenciaListadoItem> Items = new();
     private static long _contadorMemoria = 0;
+    private enum ResultadoGuardado
+    {
+        Guardado,
+        ErrorBaseDatos,
+        ErrorValidacion
+    }
 
     public static IReadOnlyList<IncidenciaListadoItem> ObtenerTodas()
     {
@@ -43,7 +49,8 @@ internal static class IncidenciaListadoStore
                     COALESCE(a.grupo, 'N/A'),
                     COALESCE(a.correo, 'N/A'),
                     COALESCE(a.telefono, 'N/A'),
-                    i.id_alumno
+                    i.id_alumno,
+                    i.id_serie::text
                 FROM incidencias i
                 LEFT JOIN alumnos a ON i.id_alumno = a.id_alumno
                 LEFT JOIN equipamientos e ON i.id_serie = e.id_serie
@@ -76,7 +83,8 @@ internal static class IncidenciaListadoStore
                     Grupo               = reader.GetString(12),
                     Correo              = reader.GetString(13),
                     Telefono            = reader.GetString(14),
-                    IdAlumno            = reader.IsDBNull(15) ? "" : reader.GetString(15)
+                    IdAlumno            = reader.IsDBNull(15) ? "" : reader.GetString(15),
+                    NumeroSerie         = reader.IsDBNull(16) ? "" : reader.GetString(16)
                 });
             }
 
@@ -99,10 +107,17 @@ internal static class IncidenciaListadoStore
             Estado         = "Activa",
             Fecha          = incidencia.FechaHora == default ? DateTime.Now : incidencia.FechaHora,
             Descripcion    = incidencia.Descripcion,
-            Equipo         = incidencia.NombreEquipo
+            Equipo         = incidencia.NombreEquipo,
+            NumeroSerie    = NormalizarNumeroSerie(incidencia.NumeroSerie)
         };
 
-        if (!GuardarEnBaseDeDatos(item, incidencia, out string error))
+        var resultado = GuardarEnBaseDeDatos(item, incidencia, out string error);
+        if (resultado == ResultadoGuardado.ErrorValidacion)
+        {
+            return (false, error);
+        }
+
+        if (resultado == ResultadoGuardado.ErrorBaseDatos)
         {
             _contadorMemoria++;
             item.Folio = $"MEM-{DateTime.Now.Year}-{_contadorMemoria:D4}";
@@ -111,6 +126,35 @@ internal static class IncidenciaListadoStore
         }
 
         return (true, "Incidencia reportada exitosamente, espere su respuesta ✨");
+    }
+
+    public static (bool valido, string mensaje) ValidarNumeroSerieEquipamiento(string numeroSerie)
+    {
+        string serieNormalizada = NormalizarNumeroSerie(numeroSerie);
+        if (string.IsNullOrWhiteSpace(serieNormalizada))
+            return (false, "El numero de serie es obligatorio para registrar la incidencia.");
+
+        if (!long.TryParse(serieNormalizada, out long idSerie))
+            return (false, "El numero de serie debe contener solo numeros. Puede escribirlo como 123456789 o SN-123456789.");
+
+        try
+        {
+            using var conexion = DatabaseService.GetConnection();
+            conexion.Open();
+
+            using var cmd = new NpgsqlCommand("SELECT COUNT(*) FROM equipamientos WHERE id_serie = @id", conexion);
+            cmd.Parameters.AddWithValue("id", idSerie);
+            long total = Convert.ToInt64(cmd.ExecuteScalar());
+
+            return total > 0
+                ? (true, "OK")
+                : (false, "El numero de serie ingresado no corresponde a ningun equipamiento registrado.");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[IncidenciaListadoStore] Error al validar equipamiento: {ex.Message}");
+            return (false, "No se pudo validar el numero de serie contra la base de datos. Verifique la conexion e intente nuevamente.");
+        }
     }
 
     public static bool Eliminar(string folio)
@@ -196,7 +240,21 @@ internal static class IncidenciaListadoStore
         };
     }
 
-    private static bool GuardarEnBaseDeDatos(IncidenciaListadoItem item, Incidencia incidencia, out string error)
+    public static IReadOnlyList<IncidenciaListadoItem> ObtenerHistorialPorNumeroSerie(string numeroSerie, string? idActual = null)
+    {
+        string serieNormalizada = NormalizarNumeroSerie(numeroSerie);
+        if (string.IsNullOrWhiteSpace(serieNormalizada))
+            return Array.Empty<IncidenciaListadoItem>();
+
+        return ObtenerTodas()
+            .Where(i =>
+                NormalizarNumeroSerie(i.NumeroSerie).Equals(serieNormalizada, StringComparison.OrdinalIgnoreCase) &&
+                (string.IsNullOrWhiteSpace(idActual) || !i.IdReal.Equals(idActual, StringComparison.OrdinalIgnoreCase)))
+            .OrderByDescending(i => i.Fecha)
+            .ToList();
+    }
+
+    private static ResultadoGuardado GuardarEnBaseDeDatos(IncidenciaListadoItem item, Incidencia incidencia, out string error)
     {
         error = string.Empty;
         try
@@ -205,11 +263,28 @@ internal static class IncidenciaListadoStore
             conexion.Open();
 
             // 1. Extraer o crear id_serie
-            long idSerie = 0;
+            long idSerie;
             string numSerieRaw = (incidencia.NumeroSerie ?? "").Replace("SN-", "").Replace("SN", "").Trim();
             if (!long.TryParse(numSerieRaw, out idSerie))
             {
                 idSerie = 0; // fallback genérico si no pone número válido
+            }
+
+            if (!long.TryParse(numSerieRaw, out _))
+            {
+                error = "El numero de serie debe contener solo numeros. Puede escribirlo como 123456789 o SN-123456789.";
+                return ResultadoGuardado.ErrorValidacion;
+            }
+
+            using (var cmdExisteEquipo = new NpgsqlCommand("SELECT COUNT(*) FROM equipamientos WHERE id_serie = @id", conexion))
+            {
+                cmdExisteEquipo.Parameters.AddWithValue("id", idSerie);
+                long totalEquipamientos = Convert.ToInt64(cmdExisteEquipo.ExecuteScalar());
+                if (totalEquipamientos == 0)
+                {
+                    error = "El numero de serie ingresado no corresponde a ningun equipamiento registrado.";
+                    return ResultadoGuardado.ErrorValidacion;
+                }
             }
 
             // Insertamos un equipo por defecto si no existe para evitar error de FK
@@ -260,14 +335,25 @@ internal static class IncidenciaListadoStore
             long newId = Convert.ToInt64(cmd.ExecuteScalar());
             item.Folio = $"INC-{item.Fecha.Year}-{newId:D4}";
 
-            return true;
+            return ResultadoGuardado.Guardado;
         }
         catch (Exception ex)
         {
             error = ex.Message;
             System.Diagnostics.Debug.WriteLine($"[IncidenciaListadoStore] Error al guardar: {ex.Message}");
-            return false;
+            return ResultadoGuardado.ErrorBaseDatos;
         }
+    }
+
+    private static string NormalizarNumeroSerie(string? numeroSerie)
+    {
+        string valor = (numeroSerie ?? string.Empty).Trim();
+        if (valor.StartsWith("SN-", StringComparison.OrdinalIgnoreCase))
+            valor = valor[3..];
+        else if (valor.StartsWith("SN", StringComparison.OrdinalIgnoreCase))
+            valor = valor[2..];
+
+        return valor.Trim();
     }
 
     private static string? ObtenerIdAlumnoActual(NpgsqlConnection conexion)
