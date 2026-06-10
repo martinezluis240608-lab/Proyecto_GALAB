@@ -48,7 +48,6 @@ public partial class LoginForm : Form, ILoginView
 
     private void lblForgot_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
     {
-        using var dlg = new RecuperarContrasenaForm();
-        dlg.ShowDialog(this);
+        Proyecto_GALAB.Views.CustomMessageBox.Show("Por favor, póngase en contacto con el administrador del laboratorio para solicitar el restablecimiento de su contraseña.", "Recuperación de Contraseña", MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
 }
